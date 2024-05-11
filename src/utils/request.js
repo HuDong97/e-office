@@ -1,18 +1,10 @@
-//定制请求的实例
-
 //导入axios  npm install axios
 import axios from 'axios';
 //导入 Element Plus 组件库中的消息提示组件
 import { ElMessage } from 'element-plus'
 
-//定义一个变量,记录公共的前缀  ,  baseURL
-//const baseURL = 'http://localhost:8080';
-
-// 设置基本请求地址
-const baseURL = '/api';
-
 // 创建 Axios 实例
-const instance = axios.create({ baseURL })
+const instance = axios.create({ baseURL: '/api' }) // 将 baseURL 设置为 /api
 
 import { useTokenStore } from '@/stores/token.js'
 //添加请求拦截器
@@ -29,12 +21,9 @@ instance.interceptors.request.use(
     },
     (err) => {
         //请求错误的回调
-        Promise.reject(err)
+        return Promise.reject(err)
     }
 )
-
-
-
 
 import router from '@/router'
 
