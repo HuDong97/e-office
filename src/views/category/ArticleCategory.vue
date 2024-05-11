@@ -15,7 +15,7 @@ const categorys = ref([
 
 ])
 //声明一个异步的函数
-import { articleCategoryListService, articleCategoryAddService, articleCategoryUpdateService, articleCategoryDeleteService } from '@/api/article.js'
+import { articleCategoryListService, articleCategoryAddService, articleCategoryUpdateService, articleCategoryDeleteService } from '@/api/category.js'
 const articleCategoryList = async () => {
     let result = await articleCategoryListService();
     categorys.value = result.data;

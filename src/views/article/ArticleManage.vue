@@ -58,8 +58,13 @@ const onCurrentChange = (num) => {
 }
 
 
+//回显文章
+import { articleListService, articleAddService, articleDeleteService, articleUpdateService, articleDetailService } from '@/api/article.js'
 //回显文章分类
-import { articleCategoryListService, articleListService, articleAddService, articleDeleteService, articleUpdateService, articleDetailService } from '@/api/article.js'
+import { articleCategoryListService } from '@/api/category.js'
+
+
+
 const articleCategoryList = async () => {
     let result = await articleCategoryListService();
 
@@ -359,12 +364,12 @@ const getArticleDetail = async (row) => {
                             <!-- 工具栏选项essential、minimal、full -->
                             <QuillEditor theme="snow" v-model:content="articleModel.content" contentType="html"
                                 name="quillEditor" :toolbar="[
-                                [{ header: [1, 2, 3, 4, 5, 6, false] }],
-                                ['bold', 'italic', 'underline', 'strike'],
-                                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                                [{ 'script': 'sub' }, { 'script': 'super' }],
-                                [{ 'color': [] }, { 'background': [] }],
-                                ['clean'],]">
+                                    [{ header: [1, 2, 3, 4, 5, 6, false] }],
+                                    ['bold', 'italic', 'underline', 'strike'],
+                                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                    [{ 'script': 'sub' }, { 'script': 'super' }],
+                                    [{ 'color': [] }, { 'background': [] }],
+                                    ['clean'],]">
                             </QuillEditor>
                         </div>
                     </el-form-item>
