@@ -87,7 +87,7 @@ const handleCommand = (command) => {
             <!-- element-plus的菜单标签 -->
             <el-menu active-text-color="#ffd04b" background-color="#232323" text-color="#fff" router>
 
-                <el-menu-item index="/article/category">
+                <el-menu-item index="/category">
                     <el-icon>
                         <Management />
                     </el-icon>
