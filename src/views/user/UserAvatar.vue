@@ -58,10 +58,10 @@ const updateAvatar = async () => {
         <el-row>
             <el-col :span="12">
                 <el-upload ref="uploadRef" class="avatar-uploader" :show-file-list="false" :auto-upload="true"
-                    action="/api/upload" name="file" :headers="{ 'Authorization': tokenStore.token }"
+                    action="/api/uploadFile/uploadPicture" name="file" :headers="{ 'Authorization': tokenStore.token }"
                     :on-success="uploadSuccess">
                     <img v-if="imgUrl" :src="imgUrl" class="avatar" />
-                    <img v-else="defaultImgUrl" :src="defaultImgUrl" width="278" />
+                    <img v-else :src="defaultImgUrl" width="278" />
                 </el-upload>
                 <br />
                 <el-button type="primary" :icon="Plus" size="large"
