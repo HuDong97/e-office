@@ -19,16 +19,17 @@ const imgUrl = ref(userInfoStore.info.userPic)
 const defaultImgUrl = avatar
 
 
-//头像上传阿里云成功的回调函数
+//头像上传服务器成功的回调函数
 const uploadSuccess = (result) => {
     if (result.code === 0) {
         imgUrl.value = result.data;
         console.log(result.data);
-        ElMessage.success('选择成功,请确认头像上传')
+        // 上传成功后调用更新数据库头像的函数
+        updateAvatar();
     } else {
         // 上传失败，检查错误信息并显示相应提示
         if (result.message && result.message.includes('Maximum upload size exceeded')) {
-            ElMessage.error('上传失败,文件大小超过限制,最大允许为100KB');
+            ElMessage.error('上传失败,文件大小超过限制,最大允许为500KB');
         } else {
             ElMessage.error(result.message ? result.message : '上传失败');
         }
@@ -37,6 +38,7 @@ const uploadSuccess = (result) => {
 
 import { userAvatarUpdateService } from '@/api/user.js'
 //获取数据库头像链接进行头像修改
+
 const updateAvatar = async () => {
     //调用接口
     let result = await userAvatarUpdateService(imgUrl.value);
@@ -46,6 +48,27 @@ const updateAvatar = async () => {
 
 }
 
+const handleChange = (file, fileList) => {
+    // 预览图片
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        imgUrl.value = e.target.result;
+    };
+    reader.readAsDataURL(file.raw);
+    // 清空上传队列
+    uploadRef.value.clearFiles();
+    // 手动将当前文件添加到队列
+    uploadRef.value.handleStart(file.raw);
+}
+
+const selectImage = () => {
+    uploadRef.value.$el.querySelector('input').click();
+}
+
+const submitUpload = () => {
+    // 提交上传
+    uploadRef.value.submit();
+}
 </script>
 
 <template>
@@ -57,17 +80,15 @@ const updateAvatar = async () => {
         </template>
         <el-row>
             <el-col :span="12">
-                <el-upload ref="uploadRef" class="avatar-uploader" :show-file-list="false" :auto-upload="true"
+                <el-upload ref="uploadRef" class="avatar-uploader" :show-file-list="false" :auto-upload="false"
                     action="/api/uploadFile/uploadPicture" name="file" :headers="{ 'Authorization': tokenStore.token }"
-                    :on-success="uploadSuccess">
+                    :on-change="handleChange" :on-success="uploadSuccess">
                     <img v-if="imgUrl" :src="imgUrl" class="avatar" />
                     <img v-else :src="defaultImgUrl" width="278" />
                 </el-upload>
                 <br />
-                <el-button type="primary" :icon="Plus" size="large"
-                    @click="uploadRef.$el.querySelector('input').click()">选择图片</el-button>
-
-                <el-button type="success" :icon="Upload" size="large" @click="updateAvatar">确认上传</el-button>
+                <el-button type="primary" icon="el-icon-plus" size="large" @click="selectImage">选择图片</el-button>
+                <el-button type="success" icon="el-icon-upload" size="large" @click="submitUpload">确认上传</el-button>
             </el-col>
         </el-row>
     </el-card>
