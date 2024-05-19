@@ -21,12 +21,16 @@ import { userNicknameUpdateService } from '@/api/user.js'
 import { ElMessage } from 'element-plus'
 
 const updateNickname = async () => {
-    //调用接口
-    let result = await userNicknameUpdateService(userInfo.value);
-    ElMessage.success(result.message ? result.message : '修改成功');
 
-    //修改pinia中的个人信息
-    userInfoStore.setInfo(userInfo.value)
+    try {
+        let result = await userNicknameUpdateService(userInfo.value.nickname);
+        ElMessage.success(result.message ? result.message : '修改成功');
+
+        // 修改pinia中的个人信息
+        userInfoStore.setInfo({ ...userInfoStore.info, nickname: userInfo.value.nickname });
+    } catch (error) {
+        ElMessage.error('修改失败，请稍后再试');
+    }
 }
 </script>
 

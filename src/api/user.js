@@ -26,8 +26,10 @@ export const userInfoService = () => {
 }
 
 //修改个人信息
-export const userNicknameUpdateService = (userInfoData) => {
-    return request.put('/user/update', userInfoData)
+export const userNicknameUpdateService = (nickname) => {
+    const params = new URLSearchParams();
+    params.append('nickname', nickname)
+    return request.patch('/user/updateNickname', params)
 }
 
 //修改头像
