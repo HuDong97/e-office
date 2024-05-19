@@ -48,18 +48,31 @@ const updateAvatar = async () => {
 
 }
 
+const isPreviewing = ref(false); // 添加标记
+
 const handleChange = (file, fileList) => {
+    // 如果是预览阶段，直接返回，避免循环调用
+    if (isPreviewing.value) {
+        isPreviewing.value = false;
+        return;
+    }
+
     // 预览图片
     const reader = new FileReader();
     reader.onload = (e) => {
         imgUrl.value = e.target.result;
     };
     reader.readAsDataURL(file.raw);
+
+    // 标记为预览阶段
+    isPreviewing.value = true;
+
     // 清空上传队列
     uploadRef.value.clearFiles();
+
     // 手动将当前文件添加到队列
     uploadRef.value.handleStart(file.raw);
-}
+};
 
 const selectImage = () => {
     uploadRef.value.$el.querySelector('input').click();
@@ -87,8 +100,8 @@ const submitUpload = () => {
                     <img v-else :src="defaultImgUrl" width="278" />
                 </el-upload>
                 <br />
-                <el-button type="primary" icon="el-icon-plus" size="large" @click="selectImage">选择图片</el-button>
-                <el-button type="success" icon="el-icon-upload" size="large" @click="submitUpload">确认上传</el-button>
+                <el-button type="primary" :icon="Plus" size="large" @click="selectImage">选择图片</el-button>
+                <el-button type="success" :icon="Upload" size="large" @click="submitUpload">确认上传</el-button>
             </el-col>
         </el-row>
     </el-card>
