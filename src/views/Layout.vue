@@ -85,7 +85,10 @@ const handleCommand = (command) => {
     <el-container class="layout-container">
         <!-- 左侧菜单 -->
         <el-aside width="200px">
-            <div class="el-aside__logo"></div>
+            <!-- 修改logo2为带链接的图片 -->
+            <router-link to="/home">
+                <img src="@/assets/logo2.png" alt="logo2" width="200px">
+            </router-link>
             <!-- element-plus的菜单标签 -->
             <el-menu active-text-color="#ffd04b" background-color="#232323" text-color="#fff" router>
                 <el-menu-item index="/home">
