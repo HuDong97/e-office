@@ -8,12 +8,15 @@ import UserInfoVue from '@/views/user/UserInfo.vue'
 import UserResetEmailVue from '@/views/user/UserResetEmail.vue'
 import UserResetPasswordVue from '@/views/user/UserResetPassword.vue'
 
+
+
 // 定义路由关系
 const routes = [
     { path: '/login', component: LoginVue },
-    { path: '/login', component: UserResetPasswordVue },
+
     {
         path: '/', component: LayoutVue, redirect: '/article/manage', children: [
+
             { path: '/category', component: ArticleCategoryVue },
             { path: '/article/manage', component: ArticleManageVue },
             { path: '/user/info', component: UserInfoVue },
