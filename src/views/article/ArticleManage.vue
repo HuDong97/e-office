@@ -258,6 +258,18 @@ const getArticleDetail = async (row) => {
 };
 
 
+// 设置时间格式为日月年时分秒格式
+const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
+
 
 
 
@@ -300,7 +312,10 @@ const getArticleDetail = async (row) => {
             <el-table :data="articles" style="width: 100%">
                 <el-table-column label="文章标题" width="400" prop="title"></el-table-column>
                 <el-table-column label="分类" prop="categoryName"></el-table-column>
-                <el-table-column label="发表时间" prop="createTime"> </el-table-column>
+                <el-table-column label="发表时间" prop="createTime">
+                    <template #default="{ row }">
+                        <span>{{ formatDate(row.createTime) }}</span>
+                    </template></el-table-column>
                 <el-table-column label="状态" prop="state"></el-table-column>
                 <el-table-column label="操作" width="150">
                     <template #default="{ row }">
@@ -393,7 +408,7 @@ const getArticleDetail = async (row) => {
                 <div class="article-header" style="display: flex; justify-content: space-between; align-items: center;">
                     <h1 class="el-title">{{ articleModel1.title ? articleModel1.title : 'No Title' }}</h1>
                     <div class="create-time" style="font-size: 14px;">
-                        发布时间: {{ articleModel1.createTime }}
+                        发布时间: {{ formatDate(articleModel1.createTime) }}
                     </div>
                 </div>
 
