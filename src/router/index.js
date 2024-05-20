@@ -7,16 +7,17 @@ import UserAvatarVue from '@/views/user/UserAvatar.vue'
 import UserInfoVue from '@/views/user/UserInfo.vue'
 import UserResetEmailVue from '@/views/user/UserResetEmail.vue'
 import UserResetPasswordVue from '@/views/user/UserResetPassword.vue'
-
+import HomeVue from '@/views/home/Home.vue'
+import ToolsVue from '@/views/tools/Tools.vue'
 
 
 // 定义路由关系
 const routes = [
     { path: '/login', component: LoginVue },
-
     {
-        path: '/', component: LayoutVue, redirect: '/article/manage', children: [
-
+        path: '/', component: LayoutVue, redirect: '/home', children: [
+            { path: '/tools', component: ToolsVue },
+            { path: '/home', component: HomeVue },
             { path: '/category', component: ArticleCategoryVue },
             { path: '/article/manage', component: ArticleManageVue },
             { path: '/user/info', component: UserInfoVue },

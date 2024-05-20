@@ -1,6 +1,8 @@
 <script setup>
 import {
     Management,
+    Tools,
+    House,
     Promotion,
     UserFilled,
     User,
@@ -86,7 +88,13 @@ const handleCommand = (command) => {
             <div class="el-aside__logo"></div>
             <!-- element-plus的菜单标签 -->
             <el-menu active-text-color="#ffd04b" background-color="#232323" text-color="#fff" router>
+                <el-menu-item index="/home">
+                    <el-icon>
+                        <House />
+                    </el-icon>
+                    <span>论坛首页</span>
 
+                </el-menu-item>
                 <el-menu-item index="/category">
                     <el-icon>
                         <Management />
@@ -99,6 +107,13 @@ const handleCommand = (command) => {
                         <Promotion />
                     </el-icon>
                     <span>文章管理</span>
+                </el-menu-item>
+
+                <el-menu-item index="/tools">
+                    <el-icon>
+                        <Tools />
+                    </el-icon>
+                    <span>帮助工具</span>
                 </el-menu-item>
 
                 <el-sub-menu>
