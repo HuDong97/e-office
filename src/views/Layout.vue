@@ -190,7 +190,11 @@ const handleCommand = (command) => {
                 <router-view></router-view>
             </el-main>
             <!-- 底部区域 -->
-            <el-footer>Eoffice ©2024 Created by 行东</el-footer>
+            <el-footer>
+                <img src="@/assets/logodong.png" alt="Eoffice Logo" style="height: 16px; margin-right: 2px;">
+                Eoffice ©2024 Created by 行东
+            </el-footer>
+
         </el-container>
     </el-container>
 </template>
