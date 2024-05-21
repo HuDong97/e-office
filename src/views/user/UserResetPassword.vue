@@ -2,9 +2,15 @@
 import { ref } from 'vue'
 import { userUpdatePassword } from '@/api/user.js';
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useTokenStore } from '@/stores/token.js'
+import useUserInfoStore from '@/stores/userInfo.js'
+import { useRouter } from 'vue-router'
 const oldPwd = ref('');
 const newPwd = ref('');
 const rePwd = ref('');
+const router = useRouter();
+const tokenStore = useTokenStore();
+const userInfoStore = useUserInfoStore();
 
 const updatePassword = async () => {
     try {
@@ -57,12 +63,8 @@ const rules = {
     ]
 }
 
-import { useRouter } from 'vue-router'
-const router = useRouter();
-import { useTokenStore } from '@/stores/token.js'
-import useUserInfoStore from '@/stores/userInfo.js'
-const tokenStore = useTokenStore();
-const userInfoStore = useUserInfoStore();
+
+
 const handleCommand = () => {
     //退出登录
     ElMessageBox.confirm(

@@ -7,6 +7,11 @@ export const articleCategoryListService = () => {
     return request.get('/category')
 }
 
+//查询所有文章分类
+export const getAllCategory = () => {
+    return request.get('/category/getAllCategoryNames')
+}
+
 //文章分类添加
 export const articleCategoryAddService = (categoryData) => {
     return request.post('/category', categoryData)
