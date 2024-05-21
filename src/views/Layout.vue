@@ -26,6 +26,10 @@ const getUserInfo = async () => {
     let result = await userInfoService();
     //数据存储到pinia中
     userInfoStore.setInfo(result.data);
+    // 检查用户权限，如果不是admin则跳转到首页
+    if (userInfoStore.info.permissions !== 'admin') {
+        router.push('/home');
+    }
 }
 getUserInfo();
 
@@ -96,14 +100,17 @@ const handleCommand = (command) => {
                         <House />
                     </el-icon>
                     <span>论坛首页</span>
+                </el-menu-item>
 
-                </el-menu-item>
-                <el-menu-item index="/category">
-                    <el-icon>
-                        <Management />
-                    </el-icon>
-                    <span>文章分类</span>
-                </el-menu-item>
+                <!-- 根据用户权限条件渲染 -->
+                <template v-if="userInfoStore.info.permissions === 'admin'">
+                    <el-menu-item index="/category">
+                        <el-icon>
+                            <Management />
+                        </el-icon>
+                        <span>文章分类</span>
+                    </el-menu-item>
+                </template>
 
                 <el-menu-item index="/article/manage">
                     <el-icon>
