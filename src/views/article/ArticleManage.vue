@@ -25,7 +25,6 @@ const pageNum = ref(1)
 const total = ref(20)
 const pageSize = ref(10)
 const visibleDrawer = ref(false)
-const visibleArticleDrawer = ref(false)
 const drewerTitle = ref('')
 const articleModel = ref({
     title: '',
@@ -36,15 +35,7 @@ const articleModel = ref({
     state: '',
     createTime: '',
 })
-const articleModel1 = ref({
-    title: '',
-    id: '',
-    categoryId: '',
-    coverImg: '',
-    content: '',
-    state: '',
-    createTime: '',
-})
+
 
 // 分页处理函数
 const onSizeChange = (size) => {
@@ -130,22 +121,18 @@ const showDrewer = (row) => {
 
 // 清空模型的数据
 const clearData = () => {
-    Object.keys(articleModel.value).forEach(key => articleModel.value[key] = '');
+    Object.keys(articleModel.value).forEach(key => {
+        if (key !== 'content') {
+            articleModel.value[key] = '';
+        } else {
+            articleModel.value[key] = '\n'; // 清空 content 属性
+        }
+    });
 }
 
+
 // 查看文章详细信息
-const getArticleDetail = async (row) => {
-    try {
-        const result = await articleDetailService(row.id);
-        if (result && result.data) {
-            articleModel1.value = result.data;
-        } else {
-            ElMessage.error(result.message || '获取文章详情失败：数据不完整');
-        }
-    } catch (error) {
-        ElMessage.error('获取文章详情失败');
-    }
-}
+
 
 // 设置时间格式
 const formatDate = (timestamp) => {
@@ -207,8 +194,7 @@ articleList();
                 <el-table-column label="状态" prop="state"></el-table-column>
                 <el-table-column label="操作" width="150">
                     <template #default="{ row }">
-                        <el-button :icon="Reading" circle plain type="success"
-                            @click="visibleArticleDrawer = true; getArticleDetail(row)" title="查看文章"></el-button>
+                        <el-button :icon="Reading" circle plain type="success" @click="" title="查看文章"></el-button>
                         <el-button :icon="Edit" circle plain type="primary" @click="showDrewer(row)"
                             title="修改文章"></el-button>
                         <el-button :icon="Delete" circle plain type="danger" @click="deleteArticle(row)"
