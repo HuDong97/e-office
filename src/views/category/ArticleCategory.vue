@@ -31,8 +31,12 @@ const title = ref('')
 
 // 获取文章分类列表
 const articleCategoryList = async () => {
-    let result = await articleCategoryListService();
-    categorys.value = result.data;
+    try {
+        let result = await articleCategoryListService();
+        categorys.value = result.data;
+    } catch (error) {
+        console.error('获取文章分类列表失败：', error);
+    }
 }
 
 // 调用获取所有分类的函数

@@ -28,7 +28,7 @@ const getUserInfo = async () => {
     userInfoStore.setInfo(result.data);
     // 检查用户权限，如果不是admin则跳转到首页
     if (userInfoStore.info.permissions !== 'admin') {
-        router.push('/home');
+        router.push('/404');
     }
 }
 getUserInfo();

@@ -9,6 +9,7 @@ import UserResetEmailVue from '@/views/user/UserResetEmail.vue'
 import UserResetPasswordVue from '@/views/user/UserResetPassword.vue'
 import HomeVue from '@/views/home/Home.vue'
 import ToolsVue from '@/views/tools/Tools.vue'
+import NotFound from '@/views/404/NotFound.vue'
 
 
 // 定义路由关系
@@ -23,9 +24,12 @@ const routes = [
             { path: '/user/info', component: UserInfoVue },
             { path: '/user/avatar', component: UserAvatarVue },
             { path: '/user/resetEmail', component: UserResetEmailVue },
-            { path: '/user/resetPassword', component: UserResetPasswordVue }
+            { path: '/user/resetPassword', component: UserResetPasswordVue },
+            { path: '/404', component: NotFound },
         ]
-    }
+    },
+
+    { path: '/:pathMatch(.*)*', redirect: '/404' }
 ];
 
 // 创建路由器
@@ -33,6 +37,8 @@ const router = createRouter({
     history: createWebHistory(),
     routes: routes
 });
+
+
 
 // 导出路由
 export default router;
