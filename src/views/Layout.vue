@@ -123,7 +123,7 @@ const handleCommand = (command) => {
                     <el-icon>
                         <Tools />
                     </el-icon>
-                    <span>帮助工具</span>
+                    <span>AI工具</span>
                 </el-menu-item>
 
                 <el-sub-menu>

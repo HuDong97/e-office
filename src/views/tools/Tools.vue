@@ -1,28 +1,22 @@
 <template>
     <div class="tools">
         <el-container>
-            <el-header>
-                <h1>实用工具</h1>
-            </el-header>
             <el-main>
-                <el-row :gutter="20">
-                    <el-col :span="12">
-                        <div class="tool-card">
-                            <h2>工具一</h2>
-                            <p>这里是工具一的描述。</p>
-                            <el-button type="primary" @click="handleToolOneClick">使用工具一</el-button>
-                        </div>
-                    </el-col>
-                    <el-col :span="12">
-                        <div class="tool-card">
-                            <h2>工具二</h2>
-                            <p>这里是工具二的描述。</p>
-                            <el-button type="primary" @click="handleToolTwoClick">使用工具二</el-button>
+                <el-row :gutter="20" class="chat-container">
+                    <el-col :span="24">
+                        <div class="chat-card">
+                            <h2>聊天工具</h2>
+                            <div class="chat-window">
+                                <div v-for="message in chatMessages" :key="message.id" class="chat-message">
+                                    <span class="sender">{{ message.sender }}:</span> {{ message.text }}
+                                </div>
+                            </div>
+                            <el-input v-model="newMessage" placeholder="输入你的消息" @keyup.enter="sendMessage"></el-input>
+                            <el-button type="primary" @click="sendMessage">发送</el-button>
                         </div>
                     </el-col>
                 </el-row>
             </el-main>
-
         </el-container>
     </div>
 </template>
@@ -30,14 +24,30 @@
 <script>
 export default {
     name: 'Tools',
+    data() {
+        return {
+            chatMessages: [],
+            newMessage: '',
+        };
+    },
     methods: {
-        handleToolOneClick() {
-            // 处理工具一的点击事件
-            console.log('点击了工具一');
-        },
-        handleToolTwoClick() {
-            // 处理工具二的点击事件
-            console.log('点击了工具二');
+        sendMessage() {
+            if (this.newMessage.trim() !== '') {
+                this.chatMessages.push({
+                    id: Date.now(),
+                    sender: '用户',
+                    text: this.newMessage,
+                });
+                this.newMessage = '';
+                // 模拟回复
+                setTimeout(() => {
+                    this.chatMessages.push({
+                        id: Date.now() + 1,
+                        sender: 'GPT-4o',
+                        text: '这是一个模拟自动回复。',
+                    });
+                }, 1000);
+            }
         },
     },
 };
@@ -48,17 +58,31 @@ export default {
     padding: 20px;
 }
 
-.tool-card {
-    background-color: #f0f2f5;
+.chat-container {
+    margin-top: 20px;
+}
+
+.chat-card {
+    background-color: #ffffff;
     padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.chat-window {
+    height: 200px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    border: 1px solid #ebeef5;
+    padding: 10px;
     border-radius: 5px;
 }
 
-.tool-card h2 {
+.chat-message {
     margin-bottom: 10px;
 }
 
-.tool-card p {
-    margin-bottom: 20px;
+.sender {
+    font-weight: bold;
 }
 </style>

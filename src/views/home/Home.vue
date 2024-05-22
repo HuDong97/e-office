@@ -79,7 +79,7 @@ const formatDate = (dateStr) => {
                     </div>
                 </div>
                 <div class="sidebar-section">
-                    <h3>最新帖子</h3>
+                    <h3>最新关注</h3>
                     <ul>
                         <li v-for="recentPost in recentPosts" :key="recentPost.id">
                             {{ recentPost.title }}
@@ -112,8 +112,8 @@ const formatDate = (dateStr) => {
     display: flex;
     justify-content: center;
     padding: 1rem;
-    background-color: #e9ecef;
-    border-bottom: 1px solid #ced4da;
+    background-color: #ececec;
+
 }
 
 .search-bar input {
