@@ -8,7 +8,7 @@ import UserInfoVue from '@/views/user/UserInfo.vue'
 import UserResetEmailVue from '@/views/user/UserResetEmail.vue'
 import UserResetPasswordVue from '@/views/user/UserResetPassword.vue'
 import HomeVue from '@/views/home/Home.vue'
-import ToolsVue from '@/views/tools/Tools.vue'
+import ChatVue from '@/views/tools/Chat.vue'
 import NotFound from '@/views/404/NotFound.vue'
 
 
@@ -17,7 +17,7 @@ const routes = [
     { path: '/login', component: LoginVue },
     {
         path: '/', component: LayoutVue, redirect: '/home', children: [
-            { path: '/tools', component: ToolsVue },
+            { path: '/chat', component: ChatVue },
             { path: '/home', component: HomeVue },
             { path: '/category', component: ArticleCategoryVue },
             { path: '/article/manage', component: ArticleManageVue },
