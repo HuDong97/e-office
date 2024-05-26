@@ -1,57 +1,60 @@
-<script>
-export default {
-    name: 'Tools',
-    data() {
-        return {
-            chatMessages: [],
-            newMessage: '',
-            sending: false,
-            error: null, // 用于存储错误信息
+<script setup>
+import { ref } from 'vue';
+import { chatAi } from '@/api/chat.js';
+
+const chatMessages = ref([]);
+const newMessage = ref('');
+const sending = ref(false);
+const error = ref(null);
+
+const sendMessage = () => {
+    if (newMessage.value.trim() !== '' && !sending.value) {
+        if (newMessage.value.length > 200) {
+            error.value = '消息过长，请限制在200字符以内。';
+            return;
+        }
+        sending.value = true;
+        error.value = null;
+
+        const userMessage = {
+            id: Date.now(),
+            sender: '用户',
+            text: newMessage.value,
+            timestamp: new Date().toLocaleTimeString(),
         };
-    },
-    methods: {
-        sendMessage() {
-            if (this.newMessage.trim() !== '' && !this.sending) {
-                if (this.newMessage.length > 200) { // 限制消息长度
-                    this.error = '消息过长，请限制在200字符以内。';
-                    return;
-                }
-                this.sending = true;
-                this.error = null;
-                this.chatMessages.push({
-                    id: Date.now(),
-                    sender: '用户',
-                    text: this.newMessage,
-                    timestamp: new Date().toLocaleTimeString(),
-                });
-                this.newMessage = '';
-                this.scrollToBottom();
-                // 模拟回复
-                setTimeout(() => {
-                    // 模拟网络错误
-                    if (Math.random() < 0.1) {
-                        this.error = '消息发送失败，请重试。';
-                        this.sending = false;
-                        return;
-                    }
-                    this.chatMessages.push({
+
+        chatMessages.value.push(userMessage);
+        newMessage.value = '';
+        scrollToBottom();
+
+        chatAi(userMessage.text)
+            .then(response => {
+                if (response.data) {
+                    const gptMessage = {
                         id: Date.now() + 1,
-                        sender: 'GPT-4o',
-                        text: '这是一个模拟自动回复。',
+                        sender: 'GPT-3.5',
+                        text: response.data,
                         timestamp: new Date().toLocaleTimeString(),
-                    });
-                    this.sending = false;
-                    this.scrollToBottom();
-                }, 1000);
-            }
-        },
-        scrollToBottom() {
-            this.$nextTick(() => {
-                const chatWindow = this.$el.querySelector('.chat-window');
-                chatWindow.scrollTop = chatWindow.scrollHeight;
+                    };
+                    chatMessages.value.push(gptMessage);
+                } else {
+                    error.value = '未收到预期的响应数据。';
+                }
+                sending.value = false;
+                scrollToBottom();
+            })
+            .catch(() => {
+                error.value = '消息发送失败，请重试。';
+                sending.value = false;
             });
-        },
-    },
+    }
+};
+
+const scrollToBottom = () => {
+    nextTick(() => {
+        const chatWindow = document.querySelector('.chat-window');
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    });
 };
 </script>
 
@@ -85,6 +88,8 @@ export default {
     </div>
 </template>
 
+
+
 <style scoped>
 .tools {
     padding: 20px;
@@ -103,7 +108,6 @@ export default {
 
 .chat-window {
     height: 46vh;
-    /* 修改高度为页面的46% */
     overflow-y: auto;
     margin-bottom: 20px;
     border: 1px solid #ebeef5;
