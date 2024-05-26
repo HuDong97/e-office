@@ -1,38 +1,11 @@
-<template>
-    <div class="tools">
-        <el-container>
-            <el-main>
-                <el-row :gutter="20" class="chat-container">
-                    <el-col :span="24">
-                        <div class="chat-card">
-                            <h2>聊天工具</h2>
-                            <div class="chat-window">
-                                <transition-group name="message-fade" tag="div">
-                                    <div v-for="message in chatMessages" :key="message.id"
-                                        :class="['chat-message', message.sender === '用户' ? 'user-message' : 'system-message']">
-                                        <span class="sender">{{ message.sender }}:</span>
-                                        <span class="message-text">{{ message.text }}</span>
-                                        <span class="timestamp">{{ message.timestamp }}</span>
-                                    </div>
-                                </transition-group>
-                            </div>
-                            <el-input v-model="newMessage" placeholder="输入你的消息" @keyup.enter="sendMessage"
-                                :disabled="sending"></el-input>
-                            <el-button type="primary" @click="sendMessage" :disabled="sending">发送</el-button>
-                            <div v-if="error" class="error-message">{{ error }}</div>
-                        </div>
-                    </el-col>
-                </el-row>
-            </el-main>
-        </el-container>
-    </div>
-</template>
-
 <script setup>
 import { ref, nextTick } from 'vue';
 import { useTokenStore } from '@/stores/token.js';
+import useUserInfoStore from '@/stores/userInfo.js';
 
 const tokenStore = useTokenStore();
+const userInfoStore = useUserInfoStore();
+
 const chatMessages = ref([]);
 const newMessage = ref('');
 const sending = ref(false);
@@ -49,7 +22,7 @@ const sendMessage = async () => {
 
         const userMessage = {
             id: Date.now(),
-            sender: '用户',
+            sender: userInfoStore.info.userPic,
             text: newMessage.value,
             timestamp: new Date().toLocaleTimeString(),
         };
@@ -94,6 +67,40 @@ const scrollToBottom = () => {
 };
 </script>
 
+<template>
+    <div class="tools">
+        <el-container>
+            <el-main>
+                <el-row :gutter="20" class="chat-container">
+                    <el-col :span="24">
+                        <div class="chat-card">
+                            <h2>Ai聊天工具</h2>
+                            <div class="chat-window">
+                                <transition-group name="message-fade" tag="div">
+                                    <div v-for="message in chatMessages" :key="message.id"
+                                        :class="['chat-message', message.sender === userInfoStore.info.userPic ? 'user-message' : 'system-message']">
+                                        <div class="message-content">
+                                            <span class="message-text">{{ message.text }}</span>
+                                            <span class="timestamp">{{ message.timestamp }}</span>
+                                        </div>
+                                        <img :src="message.sender" v-if="message.sender === userInfoStore.info.userPic"
+                                            class="avatar" alt="Avatar">
+                                        <span class="sender" v-else>{{ message.sender }}</span>
+                                    </div>
+                                </transition-group>
+                            </div>
+                            <el-input v-model="newMessage" placeholder="输入你的消息" @keyup.enter="sendMessage"
+                                :disabled="sending"></el-input>
+                            <el-button type="primary" @click="sendMessage" :disabled="sending">发送</el-button>
+                            <div v-if="error" class="error-message">{{ error }}</div>
+                        </div>
+                    </el-col>
+                </el-row>
+            </el-main>
+        </el-container>
+    </div>
+</template>
+
 <style scoped>
 .tools {
     padding: 20px;
@@ -137,33 +144,39 @@ const scrollToBottom = () => {
 }
 
 .chat-message {
-    margin-bottom: 10px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
+    margin-bottom: 10px;
+}
+
+.message-content {
+    display: flex;
+    flex-direction: column;
+    max-width: 70%;
 }
 
 .sender {
-    font-weight: bold;
-    margin-right: 5px;
+    font-size: 0.9em;
+    color: #555;
+    margin-left: 10px;
 }
 
 .message-text {
     word-wrap: break-word;
-    max-width: 70%;
 }
 
 .timestamp {
-    font-size: 0.8em;
+    font-size: 0.7em;
     color: #999;
-    margin-left: 10px;
+    margin-top: 2px;
 }
 
 .user-message {
     justify-content: flex-end;
 }
 
-.user-message .sender,
-.user-message .message-text {
+.user-message .message-content {
     background-color: #e6f7ff;
     padding: 5px 10px;
     border-radius: 10px;
@@ -173,8 +186,7 @@ const scrollToBottom = () => {
     justify-content: flex-start;
 }
 
-.system-message .sender,
-.system-message .message-text {
+.system-message .message-content {
     background-color: #f5f5f5;
     padding: 5px 10px;
     border-radius: 10px;
@@ -193,5 +205,14 @@ const scrollToBottom = () => {
 .error-message {
     color: red;
     margin-top: 10px;
+}
+
+.avatar {
+    width: 40px;
+    /* 设置头像的宽度 */
+    height: 40px;
+    /* 设置头像的高度 */
+    border-radius: 50%;
+    /* 将头像的边框半径设置为50%，使其呈圆形 */
 }
 </style>
