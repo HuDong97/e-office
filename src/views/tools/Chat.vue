@@ -1,63 +1,3 @@
-<script setup>
-import { ref } from 'vue';
-import { chatAi } from '@/api/chat.js';
-
-const chatMessages = ref([]);
-const newMessage = ref('');
-const sending = ref(false);
-const error = ref(null);
-
-const sendMessage = () => {
-    if (newMessage.value.trim() !== '' && !sending.value) {
-        if (newMessage.value.length > 200) {
-            error.value = '消息过长，请限制在200字符以内。';
-            return;
-        }
-        sending.value = true;
-        error.value = null;
-
-        const userMessage = {
-            id: Date.now(),
-            sender: '用户',
-            text: newMessage.value,
-            timestamp: new Date().toLocaleTimeString(),
-        };
-
-        chatMessages.value.push(userMessage);
-        newMessage.value = '';
-        scrollToBottom();
-
-        chatAi(userMessage.text)
-            .then(response => {
-                if (response.data) {
-                    const gptMessage = {
-                        id: Date.now() + 1,
-                        sender: 'GPT-3.5',
-                        text: response.data,
-                        timestamp: new Date().toLocaleTimeString(),
-                    };
-                    chatMessages.value.push(gptMessage);
-                } else {
-                    error.value = '未收到预期的响应数据。';
-                }
-                sending.value = false;
-                scrollToBottom();
-            })
-            .catch(() => {
-                error.value = '消息发送失败，请重试。';
-                sending.value = false;
-            });
-    }
-};
-
-const scrollToBottom = () => {
-    nextTick(() => {
-        const chatWindow = document.querySelector('.chat-window');
-        chatWindow.scrollTop = chatWindow.scrollHeight;
-    });
-};
-</script>
-
 <template>
     <div class="tools">
         <el-container>
@@ -88,7 +28,71 @@ const scrollToBottom = () => {
     </div>
 </template>
 
+<script setup>
+import { ref, nextTick } from 'vue';
+import { useTokenStore } from '@/stores/token.js';
 
+const tokenStore = useTokenStore();
+const chatMessages = ref([]);
+const newMessage = ref('');
+const sending = ref(false);
+const error = ref(null);
+
+const sendMessage = async () => {
+    if (newMessage.value.trim() !== '' && !sending.value) {
+        if (newMessage.value.length > 200) {
+            error.value = '消息过长，请限制在200字符以内。';
+            return;
+        }
+        sending.value = true;
+        error.value = null;
+
+        const userMessage = {
+            id: Date.now(),
+            sender: '用户',
+            text: newMessage.value,
+            timestamp: new Date().toLocaleTimeString(),
+        };
+
+        chatMessages.value.push(userMessage);
+        newMessage.value = '';
+        scrollToBottom();
+
+        try {
+            const response = await fetch(`/api/chat/invokeChat3?msg=${encodeURIComponent(userMessage.text)}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': tokenStore.token,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.text();
+            const gptMessage = {
+                id: Date.now() + 1,
+                sender: 'GPT-3.5',
+                text: data,
+                timestamp: new Date().toLocaleTimeString(),
+            };
+            chatMessages.value.push(gptMessage);
+        } catch (err) {
+            error.value = '消息发送失败，请重试。';
+        }
+        sending.value = false;
+        scrollToBottom();
+    }
+};
+
+const scrollToBottom = () => {
+    nextTick(() => {
+        const chatWindow = document.querySelector('.chat-window');
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    });
+};
+</script>
 
 <style scoped>
 .tools {
