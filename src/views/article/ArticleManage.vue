@@ -238,14 +238,20 @@ articleList();
                         <div class="editor">
                             <QuillEditor theme="snow" v-model:content="articleModel.content" contentType="html"
                                 name="quillEditor" :toolbar="[
-                                    [{ header: [1, 2, 3, 4, 5, 6, false] }],
+                                    [{ 'header': 1 }, { 'header': 2 }],
                                     ['bold', 'italic', 'underline', 'strike'],
                                     [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                                     [{ 'script': 'sub' }, { 'script': 'super' }],
                                     [{ 'color': [] }, { 'background': [] }],
-                                    ['clean'],
+                                    [{ 'align': [] }, { 'direction': 'rtl' }],
+                                    ['blockquote', 'code-block'],
+                                    [{ 'indent': '-1' }, { 'indent': '+1' }],
+                                    [{ 'size': ['small', false, 'large', 'huge'] }],
+                                    ['link', 'image', 'formula'],
+
                                 ]">
                             </QuillEditor>
+
                         </div>
                     </el-form-item>
                     <el-form-item>

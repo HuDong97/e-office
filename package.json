@@ -12,12 +12,14 @@
     "@element-plus/icons-vue": "^2.3.1",
     "@vueup/vue-quill": "^1.2.0",
     "axios": "^1.6.7",
+    "dompurify": "^3.1.4",
     "element-plus": "^2.6.0",
     "pinia": "^2.1.7",
     "pinia-persistedstate-plugin": "^0.1.0",
     "quill-blot-formatter": "^1.0.5",
     "quill-emoji": "^0.2.0",
     "vue": "^3.4.15",
+    "vue-markdown-editor": "^0.2.0",
     "vue-router": "^4.3.0"
   },
   "devDependencies": {

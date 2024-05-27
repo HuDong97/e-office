@@ -3,6 +3,7 @@ import LoginVue from '@/views/Login.vue'
 import LayoutVue from '@/views/Layout.vue'
 import ArticleCategoryVue from '@/views/category/ArticleCategory.vue'
 import ArticleManageVue from '@/views/article/ArticleManage.vue'
+import ArticleDetail from '@/views/article/ArticleDetail.vue'
 import UserAvatarVue from '@/views/user/UserAvatar.vue'
 import UserInfoVue from '@/views/user/UserInfo.vue'
 import UserResetEmailVue from '@/views/user/UserResetEmail.vue'
@@ -21,6 +22,7 @@ const routes = [
             { path: '/home', component: HomeVue },
             { path: '/category', component: ArticleCategoryVue },
             { path: '/article/manage', component: ArticleManageVue },
+            { path: '/article/detail', component: ArticleDetail },
             { path: '/user/info', component: UserInfoVue },
             { path: '/user/avatar', component: UserAvatarVue },
             { path: '/user/resetEmail', component: UserResetEmailVue },
