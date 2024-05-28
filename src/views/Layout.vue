@@ -118,12 +118,6 @@ const handleCommand = (command) => {
                     </el-icon>
                     <span>文章管理</span>
                 </el-menu-item>
-                <el-menu-item index="/article/detail">
-                    <el-icon>
-                        <Promotion />
-                    </el-icon>
-                    <span>文章详情测试</span>
-                </el-menu-item>
 
                 <el-menu-item index="/chat">
                     <el-icon>

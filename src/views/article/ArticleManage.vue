@@ -4,16 +4,17 @@ import {
     Edit,
     Delete,
     Reading,
-    Back,
     Plus
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import { useTokenStore } from '@/stores/token.js';
-import { articleListService, articleAddService, articleDeleteService, articleUpdateService, articleDetailService } from '@/api/article.js'
+import { articleListService, articleAddService, articleDeleteService, articleUpdateService } from '@/api/article.js'
 import { articleCategoryListService } from '@/api/category.js'
-
+//条目被点击后,调用的函数
+import { useRouter } from 'vue-router'
+const router = useRouter();
 const tokenStore = useTokenStore();
 
 // 数据模型
@@ -84,6 +85,14 @@ const addArticle = async (clickState) => {
     ElMessage.success(result.message || '添加成功');
     visibleDrawer.value = false;
     articleList()
+}
+//查看文章详情
+const viewArticleDetails = (clickState) => {
+    // 获取要查看的文章ID
+    const articleId = clickState.id;
+
+    // 使用路由器导航到目标页面
+    router.push({ path: '/article/detail', query: { id: articleId } });
 }
 
 // 修改文章
@@ -194,7 +203,8 @@ articleList();
                 <el-table-column label="状态" prop="state"></el-table-column>
                 <el-table-column label="操作" width="150">
                     <template #default="{ row }">
-                        <el-button :icon="Reading" circle plain type="success" @click="" title="查看文章"></el-button>
+                        <el-button :icon="Reading" circle plain type="success" @click="viewArticleDetails(row)"
+                            title="查看文章"></el-button>
                         <el-button :icon="Edit" circle plain type="primary" @click="showDrewer(row)"
                             title="修改文章"></el-button>
                         <el-button :icon="Delete" circle plain type="danger" @click="deleteArticle(row)"

@@ -1,16 +1,19 @@
 <script setup>
 import {
     Star,
-    Share,
     View,
     Sugar,
     ChatDotRound,
 } from '@element-plus/icons-vue';
 
 import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import DOMPurify from 'dompurify';
 import { ElDrawer, ElButton, ElInput } from 'element-plus';
+import { articleDetailService } from '@/api/article.js';
 
+const route = useRoute();
+const router = useRouter();
 const article = ref(null);
 const sanitizedContent = ref('');
 const commentsVisible = ref(false);
@@ -51,26 +54,21 @@ const submitComment = () => {
     }
 };
 
-const shareArticle = () => {
-    // Your share functionality here
-};
-
-onMounted(() => {
-    const mockArticle = {
-        title: '示例文章标题',
-        author: '某某某',
-        creationDate: '2024-05-27T10:00:00Z',
-        content: '<p>这是文章内容的示例。</p><p>这是另一段内容。</p>',
-        views: 1000,
-        likes: 10,
-        favorites: 99,
-        comments: 909,
-        liked: false,
-        bookmarked: false
-    };
-
-    article.value = mockArticle;
-    sanitizedContent.value = DOMPurify.sanitize(mockArticle.content);
+onMounted(async () => {
+    const id = route.query.id;
+    if (id) {
+        try {
+            const response = await articleDetailService(id);
+            article.value = response.data;
+            sanitizedContent.value = DOMPurify.sanitize(article.value.content);
+        } catch (error) {
+            console.error('查看文章失败', error);
+            router.push('/404');
+        }
+    } else {
+        console.error('查看文章失败');
+        router.push('/404');
+    }
 });
 </script>
 
@@ -132,12 +130,6 @@ onMounted(() => {
             </div>
         </div>
     </el-drawer>
-
-
-
-
-
-
 </template>
 
 <style scoped>
@@ -167,22 +159,11 @@ onMounted(() => {
     font-size: 0.6em;
 }
 
-.article-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.article-icons {
-    display: flex;
-    align-items: center;
-}
-
 .article-container {
     max-width: 65%;
-    height: 60vh;
+    height: 55vh;
     margin: 10vh auto;
-    padding: 30px;
+    padding: 25px;
     font-family: 'Arial', sans-serif;
     background-color: #fff;
     border-radius: 8px;
@@ -230,7 +211,6 @@ onMounted(() => {
 .input {
     flex: 1;
     margin-right: 10px;
-    /* 调整输入框与发送按钮的间距 */
 }
 
 .send-button {
