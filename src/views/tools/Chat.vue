@@ -72,7 +72,7 @@ const scrollToBottom = () => {
         <el-container>
             <el-main>
                 <el-row :gutter="20" class="chat-container">
-                    <el-col :span="24">
+                    <el-col :span="17">
                         <div class="chat-card">
                             <h2>Ai聊天工具</h2>
                             <div class="chat-window">
@@ -90,8 +90,9 @@ const scrollToBottom = () => {
                                 </transition-group>
                             </div>
                             <el-input v-model="newMessage" placeholder="输入你的消息" @keyup.enter="sendMessage"
-                                :disabled="sending"></el-input>
-                            <el-button type="primary" @click="sendMessage" :disabled="sending">发送</el-button>
+                                :disabled="sending" class="input-box"></el-input>
+                            <el-button type="primary" @click="sendMessage" :disabled="sending"
+                                class="send-button">发送</el-button>
                             <div v-if="error" class="error-message">{{ error }}</div>
                         </div>
                     </el-col>
@@ -108,6 +109,7 @@ const scrollToBottom = () => {
 
 .chat-container {
     margin-top: 20px;
+    justify-content: center;
 }
 
 .chat-card {
@@ -115,6 +117,7 @@ const scrollToBottom = () => {
     padding: 20px;
     border-radius: 25px;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    width: 100%;
 }
 
 .chat-window {
@@ -209,10 +212,15 @@ const scrollToBottom = () => {
 
 .avatar {
     width: 40px;
-    /* 设置头像的宽度 */
     height: 40px;
-    /* 设置头像的高度 */
     border-radius: 50%;
-    /* 将头像的边框半径设置为50%，使其呈圆形 */
+}
+
+.input-box {
+    margin-top: 5px;
+}
+
+.send-button {
+    margin-top: 10px;
 }
 </style>
