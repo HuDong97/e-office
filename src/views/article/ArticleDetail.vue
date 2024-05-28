@@ -5,14 +5,16 @@ import {
     View,
     Sugar,
     ChatDotRound,
-
-} from '@element-plus/icons-vue'
+} from '@element-plus/icons-vue';
 
 import { ref, onMounted } from 'vue';
 import DOMPurify from 'dompurify';
+import { ElDrawer, ElButton, ElInput } from 'element-plus';
 
 const article = ref(null);
 const sanitizedContent = ref('');
+const commentsVisible = ref(false);
+const newComment = ref(''); // 新增评论内容
 
 const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -20,15 +22,33 @@ const formatDate = (dateString) => {
 };
 
 const likeArticle = () => {
-    article.value.likes++;
-};
-
-const viewArticle = () => {
-    article.value.views++;
+    if (article.value.liked) {
+        article.value.likes--;
+    } else {
+        article.value.likes++;
+    }
+    article.value.liked = !article.value.liked;
 };
 
 const toggleBookmark = () => {
+    if (article.value.bookmarked) {
+        article.value.favorites--;
+    } else {
+        article.value.favorites++;
+    }
     article.value.bookmarked = !article.value.bookmarked;
+};
+
+const toggleComments = () => {
+    commentsVisible.value = !commentsVisible.value;
+};
+
+const submitComment = () => {
+    if (newComment.value.trim()) {
+        article.value.comments++;
+        // 在此处添加提交评论的逻辑，例如发送到后端服务器
+        newComment.value = ''; // 提交后清空输入框
+    }
 };
 
 const shareArticle = () => {
@@ -44,8 +64,8 @@ onMounted(() => {
         views: 1000,
         likes: 10,
         favorites: 99,
-        shares: 199,
         comments: 909,
+        liked: false,
         bookmarked: false
     };
 
@@ -53,7 +73,6 @@ onMounted(() => {
     sanitizedContent.value = DOMPurify.sanitize(mockArticle.content);
 });
 </script>
-
 
 <template>
     <div v-if="article" class="article-container">
@@ -69,19 +88,18 @@ onMounted(() => {
                         <View style="width: 1em; height: 1em; margin-right: 2px" />
                         <span>{{ article.views }}</span>
                     </div>
-                    <div style="font-size: 20px" title="点赞">
-                        <Sugar style="width: 1em; height: 1em; margin-right: 2px" />
+                    <div style="font-size: 20px" title="点赞" @click="likeArticle">
+                        <Sugar
+                            :style="{ width: '1em', height: '1em', marginRight: '2px', color: article.liked ? 'red' : '' }" />
                         <span>{{ article.likes }}</span>
                     </div>
-                    <div style="font-size: 20px" title="收藏">
-                        <Star style="width: 1em; height: 1em; margin-right: 2px" />
+                    <div style="font-size: 20px" title="收藏" @click="toggleBookmark">
+                        <Star
+                            :style="{ width: '1em', height: '1em', marginRight: '2px', color: article.bookmarked ? 'yellow' : '' }" />
                         <span>{{ article.favorites }}</span>
                     </div>
-                    <div style="font-size: 20px" title="分享">
-                        <Share style="width: 1em; height: 1em; margin-right: 2px" />
-                        <span>{{ article.shares }}</span>
-                    </div>
-                    <div style="font-size: 20px" title="评论">
+
+                    <div style="font-size: 20px" title="评论" @click="toggleComments">
                         <ChatDotRound style="width: 1em; height: 1em; margin-right: 2px" />
                         <span>{{ article.comments }}</span>
                     </div>
@@ -93,8 +111,34 @@ onMounted(() => {
     <div v-else class="loading-container">
         <el-loading-spinner size="120px"></el-loading-spinner>
     </div>
-</template>
 
+    <el-drawer v-model="commentsVisible" :title="'评论区'" direction="rtl" size="30%">
+        <div class="comments-container">
+            <!-- 评论内容，可以根据实际需求替换 -->
+            <div class="comments-section">
+                <p>这是评论内容的示例。</p>
+                <p>评论1：这是一条评论。</p>
+                <p>评论2：这是另一条评论。</p>
+                <p>评论3：这是第三条评论。</p>
+            </div>
+
+            <!-- 评论输入框 -->
+            <div class="comment-input">
+                <div class="input-container">
+                    <el-input type="textarea" v-model="newComment" placeholder="请输入你的评论" rows="3"
+                        class="input"></el-input>
+                    <el-button type="primary" @click="submitComment" class="send-button">发送</el-button>
+                </div>
+            </div>
+        </div>
+    </el-drawer>
+
+
+
+
+
+
+</template>
 
 <style scoped>
 .article-date {
@@ -121,7 +165,6 @@ onMounted(() => {
 .article-icons span {
     margin-left: 0px;
     font-size: 0.6em;
-
 }
 
 .article-meta {
@@ -137,11 +180,8 @@ onMounted(() => {
 
 .article-container {
     max-width: 65%;
-    /* 设置宽度为屏幕宽度的 60% */
     height: 60vh;
-    /* 设置高度为屏幕高度的 80% */
     margin: 10vh auto;
-    /* 垂直居中 */
     padding: 30px;
     font-family: 'Arial', sans-serif;
     background-color: #fff;
@@ -165,18 +205,35 @@ onMounted(() => {
     color: #666;
 }
 
-.article-content {
-    margin-top: 20px;
-    line-height: 1.6;
-    color: #444;
+.comments-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
-.loading-container {
+.comments-section {
+    padding: 20px;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+}
+
+.comment-input {
+    margin-top: auto;
+}
+
+.input-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 300px;
-    font-size: 18px;
-    color: #999;
+    align-items: flex-end;
+}
+
+.input {
+    flex: 1;
+    margin-right: 10px;
+    /* 调整输入框与发送按钮的间距 */
+}
+
+.send-button {
+    height: auto;
 }
 </style>
