@@ -15,6 +15,12 @@ import { articleDetailService } from '@/api/article.js';
 const route = useRoute();
 const router = useRouter();
 const article = ref(null);
+const userBehavior = ref({
+    comments: null,
+    favorites: null,
+    likes: null,
+    views: null
+});
 const sanitizedContent = ref('');
 const commentsVisible = ref(false);
 const newComment = ref(''); // 新增评论内容
@@ -24,22 +30,22 @@ const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
-const likeArticle = () => {
-    if (article.value.liked) {
-        article.value.likes--;
+const likeUserBehavior = () => {
+    if (userBehavior.value.liked) {
+        userBehavior.value.likes--;
     } else {
-        article.value.likes++;
+        userBehavior.value.likes++;
     }
-    article.value.liked = !article.value.liked;
+    userBehavior.value.liked = !userBehavior.value.liked;
 };
 
 const toggleBookmark = () => {
-    if (article.value.bookmarked) {
-        article.value.favorites--;
+    if (userBehavior.value.bookmarked) {
+        userBehavior.value.favorites--;
     } else {
-        article.value.favorites++;
+        userBehavior.value.favorites++;
     }
-    article.value.bookmarked = !article.value.bookmarked;
+    userBehavior.value.bookmarked = !userBehavior.value.bookmarked;
 };
 
 const toggleComments = () => {
@@ -86,22 +92,22 @@ onMounted(async () => {
                 <span class="article-icons">
                     <div style="font-size: 20px" title="浏览量">
                         <View style="width: 1em; height: 1em; margin-right: 2px" />
-                        <span>{{ article.views }}</span>
+                        <span>{{ userBehavior.views }}</span>
                     </div>
-                    <div style="font-size: 20px" title="点赞" @click="likeArticle">
+                    <div style="font-size: 20px" title="点赞" @click="likeUserBehavior">
                         <Sugar
-                            :style="{ width: '1em', height: '1em', marginRight: '2px', color: article.liked ? 'red' : '' }" />
-                        <span>{{ article.likes }}</span>
+                            :style="{ width: '1em', height: '1em', marginRight: '2px', color: userBehavior.liked ? 'red' : '' }" />
+                        <span>{{ userBehavior.likes }}</span>
                     </div>
                     <div style="font-size: 20px" title="收藏" @click="toggleBookmark">
                         <Star
-                            :style="{ width: '1em', height: '1em', marginRight: '2px', color: article.bookmarked ? 'yellow' : '' }" />
-                        <span>{{ article.favorites }}</span>
+                            :style="{ width: '1em', height: '1em', marginRight: '2px', color: userBehavior.bookmarked ? 'yellow' : '' }" />
+                        <span>{{ userBehavior.favorites }}</span>
                     </div>
 
                     <div style="font-size: 20px" title="评论" @click="toggleComments">
                         <ChatDotRound style="width: 1em; height: 1em; margin-right: 2px" />
-                        <span>{{ article.comments }}</span>
+                        <span>{{ userBehavior.comments }}</span>
                     </div>
                 </span>
             </p>
