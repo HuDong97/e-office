@@ -11,19 +11,22 @@ import { useRoute, useRouter } from 'vue-router';
 import DOMPurify from 'dompurify';
 import { ElDrawer, ElButton, ElInput } from 'element-plus';
 import { articleDetailService } from '@/api/article.js';
+import { userBehaviorService } from '@/api/userBehavior.js';
 
 const route = useRoute();
 const router = useRouter();
 const article = ref(null);
 const userBehavior = ref({
-    comments: null,
-    favorites: null,
-    likes: null,
-    views: null
+    commentsCount: 0,
+    favoritesCount: 0,
+    likesCount: 0,
+    viewsCount: 0,
+    liked: false,
+    bookmarked: false
 });
 const sanitizedContent = ref('');
 const commentsVisible = ref(false);
-const newComment = ref(''); // 新增评论内容
+const newComment = ref('');
 
 const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -32,18 +35,18 @@ const formatDate = (dateString) => {
 
 const likeUserBehavior = () => {
     if (userBehavior.value.liked) {
-        userBehavior.value.likes--;
+        userBehavior.value.likesCount--;
     } else {
-        userBehavior.value.likes++;
+        userBehavior.value.likesCount++;
     }
     userBehavior.value.liked = !userBehavior.value.liked;
 };
 
 const toggleBookmark = () => {
     if (userBehavior.value.bookmarked) {
-        userBehavior.value.favorites--;
+        userBehavior.value.favoritesCount--;
     } else {
-        userBehavior.value.favorites++;
+        userBehavior.value.favoritesCount++;
     }
     userBehavior.value.bookmarked = !userBehavior.value.bookmarked;
 };
@@ -54,8 +57,8 @@ const toggleComments = () => {
 
 const submitComment = () => {
     if (newComment.value.trim()) {
-        article.value.comments++;
-        // 在此处添加提交评论的逻辑，例如发送到后端服务器
+        article.commentsCount++;
+        // 这里可以添加提交评论的逻辑，例如将评论发送到后端服务器
         newComment.value = ''; // 提交后清空输入框
     }
 };
@@ -64,12 +67,28 @@ onMounted(async () => {
     const id = route.query.id;
     if (id) {
         try {
-            const response = await articleDetailService(id);
-            article.value = response.data;
+            const articleResponse = await articleDetailService(id);
+            article.value = articleResponse.data;
             sanitizedContent.value = DOMPurify.sanitize(article.value.content);
 
+            // const behaviorResponse = await userBehaviorService(id);
+            // const behaviorData = behaviorResponse.data;
+
+            // // 对含有冒号的属性名进行转换
+            // const transformedData = {};
+            // for (const key in behaviorData) {
+            //     if (Object.prototype.hasOwnProperty.call(behaviorData, key)) {
+            //         const newKey = key.replace(':', ''); // 将冒号替换为空格或其他字符
+            //         transformedData[newKey] = behaviorData[key];
+            //     }
+            // }
+
+            // userBehavior.value = transformedData;
+
+
+
         } catch (error) {
-            console.error('查看文章失败', error);
+            console.error('查看文章或获取用户行为数据失败', error);
             router.push('/404');
         }
     } else {
@@ -77,7 +96,6 @@ onMounted(async () => {
         router.push('/404');
     }
 });
-
 </script>
 
 <template>
@@ -92,22 +110,22 @@ onMounted(async () => {
                 <span class="article-icons">
                     <div style="font-size: 20px" title="浏览量">
                         <View style="width: 1em; height: 1em; margin-right: 2px" />
-                        <span>{{ userBehavior.views }}</span>
+                        <span>{{ userBehavior.viewsCount }}</span>
                     </div>
                     <div style="font-size: 20px" title="点赞" @click="likeUserBehavior">
                         <Sugar
                             :style="{ width: '1em', height: '1em', marginRight: '2px', color: userBehavior.liked ? 'red' : '' }" />
-                        <span>{{ userBehavior.likes }}</span>
+                        <span>{{ userBehavior.likesCount }}</span>
                     </div>
                     <div style="font-size: 20px" title="收藏" @click="toggleBookmark">
                         <Star
                             :style="{ width: '1em', height: '1em', marginRight: '2px', color: userBehavior.bookmarked ? 'yellow' : '' }" />
-                        <span>{{ userBehavior.favorites }}</span>
+                        <span>{{ userBehavior.favoritesCount }}</span>
                     </div>
 
                     <div style="font-size: 20px" title="评论" @click="toggleComments">
                         <ChatDotRound style="width: 1em; height: 1em; margin-right: 2px" />
-                        <span>{{ userBehavior.comments }}</span>
+                        <span>{{ userBehavior.commentsCount }}</span>
                     </div>
                 </span>
             </p>
