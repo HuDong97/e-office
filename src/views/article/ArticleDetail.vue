@@ -61,6 +61,7 @@ onMounted(async () => {
             const response = await articleDetailService(id);
             article.value = response.data;
             sanitizedContent.value = DOMPurify.sanitize(article.value.content);
+
         } catch (error) {
             console.error('查看文章失败', error);
             router.push('/404');
@@ -70,6 +71,7 @@ onMounted(async () => {
         router.push('/404');
     }
 });
+
 </script>
 
 <template>
@@ -78,8 +80,8 @@ onMounted(async () => {
             <h1 class="article-title">{{ article.title }}</h1>
             <p class="article-meta">
                 <span>
-                    <span class="article-date">发布时间：{{ formatDate(article.creationDate) }}</span>
-                    <span class="article-author">作者：{{ article.author }}</span>
+                    <span class="article-date">发布时间：{{ formatDate(article.createTime) }}</span>
+                    <span class="article-author">作者：{{ article.createUser }}</span>
                 </span>
                 <span class="article-icons">
                     <div style="font-size: 20px" title="浏览量">

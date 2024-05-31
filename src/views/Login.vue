@@ -108,7 +108,8 @@ const clearRegisterData = () => {
                 </el-form-item>
             </el-form>
             <!-- 登录表单 -->
-            <el-form ref="form" size="large" autocomplete="off" v-else :model="registerData" :rules="rules">
+            <el-form ref="form" size="large" autocomplete="off" v-else :model="registerData" :rules="rules"
+                @keydown.enter="login">
                 <el-form-item>
                     <h1>登录</h1>
                 </el-form-item>
@@ -137,6 +138,8 @@ const clearRegisterData = () => {
         </el-col>
     </el-row>
 </template>
+
+
 
 <style lang="scss" scoped>
 .login-page {
