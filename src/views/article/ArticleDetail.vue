@@ -6,14 +6,14 @@ import {
     ChatDotRound,
 } from '@element-plus/icons-vue';
 
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import DOMPurify from 'dompurify';
 import { ElDrawer, ElButton, ElInput } from 'element-plus';
 import { articleDetailService } from '@/api/article.js';
-import { userBehaviorService } from '@/api/userBehavior.js';
-import { reactive } from 'vue';
 import { useTokenStore } from '@/stores/token.js'
+
+
 const tokenStore = useTokenStore();
 const route = useRoute();
 const router = useRouter();
@@ -35,21 +35,21 @@ const formatDate = (dateString) => {
 };
 
 const likeUserBehavior = () => {
-    if (userBehavior.value.liked) {
-        userBehavior.value.likesCount--;
+    if (userBehavior.liked) {
+        userBehavior.likesCount--;
     } else {
-        userBehavior.value.likesCount++;
+        userBehavior.likesCount++;
     }
-    userBehavior.value.liked = !userBehavior.value.liked;
+    userBehavior.liked = !userBehavior.liked;
 };
 
 const toggleBookmark = () => {
-    if (userBehavior.value.bookmarked) {
-        userBehavior.value.favoritesCount--;
+    if (userBehavior.bookmarked) {
+        userBehavior.favoritesCount--;
     } else {
-        userBehavior.value.favoritesCount++;
+        userBehavior.favoritesCount++;
     }
-    userBehavior.value.bookmarked = !userBehavior.value.bookmarked;
+    userBehavior.bookmarked = !userBehavior.bookmarked;
 };
 
 const toggleComments = () => {
@@ -59,7 +59,7 @@ const toggleComments = () => {
 const submitComment = () => {
     if (newComment.value.trim()) {
         article.commentsCount++;
-        // 这里可以添加提交评论的逻辑，例如将评论发送到后端服务器
+        // 提交评论的逻辑，例如将评论发送到后端服务器
         newComment.value = ''; // 提交后清空输入框
     }
 };
@@ -67,25 +67,34 @@ const submitComment = () => {
 onMounted(async () => {
     const id = route.query.id;
     const articleId = route.query.id;
-    const headers = { 'Authorization': tokenStore.token }; // 定义请求头
 
     if (id) {
         try {
-            console.log('开始获取文章详情');
-            const articleResponse = await articleDetailService(id, { headers });
-            console.log('成功获取文章详情', articleResponse.data);
+            const articleResponse = await articleDetailService(id, {
+                headers: { 'Authorization': tokenStore.token }
+            });
             article.value = articleResponse.data;
             sanitizedContent.value = DOMPurify.sanitize(article.value.content);
 
-            console.log('开始获取用户行为数据');
             try {
-                const userBehaviorData = userBehaviorService(articleId, { headers });
-                console.log('成功获取用户行为数据', userBehaviorData);
-                // 更新用户行为数据
-                Object.assign(userBehavior, userBehaviorData);
-                console.log('更新用户数据', userBehavior);
+                const response = await fetch(`/api/userBehavior/counts?articleId=${articleId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': tokenStore.token,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                userBehavior.likesCount = data.likesCount;
+                userBehavior.commentsCount = data.commentsCount;
+                userBehavior.viewsCount = data.viewsCount;
+                userBehavior.favoritesCount = data.favoritesCount;
             } catch (userBehaviorError) {
-                console.error('获取用户行为数据失败', userBehaviorError);
+                console.error('获取用户行为数据失败：', userBehaviorError);
             }
 
         } catch (error) {
