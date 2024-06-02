@@ -10,6 +10,7 @@ import UserResetEmailVue from '@/views/user/UserResetEmail.vue'
 import UserResetPasswordVue from '@/views/user/UserResetPassword.vue'
 import HomeVue from '@/views/home/Home.vue'
 import ChatVue from '@/views/tools/Chat.vue'
+import TestVue from '@/views/tools/Test.vue'
 import NotFound from '@/views/404/NotFound.vue'
 
 
@@ -19,6 +20,7 @@ const routes = [
     {
         path: '/', component: LayoutVue, redirect: '/home', children: [
             { path: '/chat', component: ChatVue },
+            { path: '/test', component: TestVue },
             { path: '/home', component: HomeVue },
             { path: '/category', component: ArticleCategoryVue },
             { path: '/article/manage', component: ArticleManageVue },

@@ -12,17 +12,18 @@ import DOMPurify from 'dompurify';
 import { ElDrawer, ElButton, ElInput } from 'element-plus';
 import { articleDetailService } from '@/api/article.js';
 import { userBehaviorService } from '@/api/userBehavior.js';
-
+import { reactive } from 'vue';
+import { useTokenStore } from '@/stores/token.js'
+const tokenStore = useTokenStore();
 const route = useRoute();
 const router = useRouter();
 const article = ref(null);
-const userBehavior = ref({
-    commentsCount: 0,
-    favoritesCount: 0,
+
+const userBehavior = reactive({
     likesCount: 0,
-    viewsCount: 0,
-    liked: false,
-    bookmarked: false
+    favoritesCount: 0,
+    commentsCount: 0,
+    viewsCount: 0
 });
 const sanitizedContent = ref('');
 const commentsVisible = ref(false);
@@ -65,27 +66,27 @@ const submitComment = () => {
 
 onMounted(async () => {
     const id = route.query.id;
+    const articleId = route.query.id;
+    const headers = { 'Authorization': tokenStore.token }; // 定义请求头
+
     if (id) {
         try {
-            const articleResponse = await articleDetailService(id);
+            console.log('开始获取文章详情');
+            const articleResponse = await articleDetailService(id, { headers });
+            console.log('成功获取文章详情', articleResponse.data);
             article.value = articleResponse.data;
             sanitizedContent.value = DOMPurify.sanitize(article.value.content);
 
-            // const behaviorResponse = await userBehaviorService(id);
-            // const behaviorData = behaviorResponse.data;
-
-            // // 对含有冒号的属性名进行转换
-            // const transformedData = {};
-            // for (const key in behaviorData) {
-            //     if (Object.prototype.hasOwnProperty.call(behaviorData, key)) {
-            //         const newKey = key.replace(':', ''); // 将冒号替换为空格或其他字符
-            //         transformedData[newKey] = behaviorData[key];
-            //     }
-            // }
-
-            // userBehavior.value = transformedData;
-
-
+            console.log('开始获取用户行为数据');
+            try {
+                const userBehaviorData = userBehaviorService(articleId, { headers });
+                console.log('成功获取用户行为数据', userBehaviorData);
+                // 更新用户行为数据
+                Object.assign(userBehavior, userBehaviorData);
+                console.log('更新用户数据', userBehavior);
+            } catch (userBehaviorError) {
+                console.error('获取用户行为数据失败', userBehaviorError);
+            }
 
         } catch (error) {
             console.error('查看文章或获取用户行为数据失败', error);
@@ -108,24 +109,23 @@ onMounted(async () => {
                     <span class="article-author">作者：{{ article.createUser }}</span>
                 </span>
                 <span class="article-icons">
-                    <div style="font-size: 20px" title="浏览量">
-                        <View style="width: 1em; height: 1em; margin-right: 2px" />
-                        <span>{{ userBehavior.viewsCount }}</span>
-                    </div>
                     <div style="font-size: 20px" title="点赞" @click="likeUserBehavior">
                         <Sugar
-                            :style="{ width: '1em', height: '1em', marginRight: '2px', color: userBehavior.liked ? 'red' : '' }" />
+                            :style="{ width: '1em', height: '1em', marginRight: '2px', color: userBehavior['liked'] ? 'red' : '' }" />
                         <span>{{ userBehavior.likesCount }}</span>
                     </div>
                     <div style="font-size: 20px" title="收藏" @click="toggleBookmark">
                         <Star
-                            :style="{ width: '1em', height: '1em', marginRight: '2px', color: userBehavior.bookmarked ? 'yellow' : '' }" />
+                            :style="{ width: '1em', height: '1em', marginRight: '2px', color: userBehavior['bookmarked'] ? 'yellow' : '' }" />
                         <span>{{ userBehavior.favoritesCount }}</span>
                     </div>
-
                     <div style="font-size: 20px" title="评论" @click="toggleComments">
                         <ChatDotRound style="width: 1em; height: 1em; margin-right: 2px" />
                         <span>{{ userBehavior.commentsCount }}</span>
+                    </div>
+                    <div style="font-size: 20px" title="浏览量">
+                        <View style="width: 1em; height: 1em; margin-right: 2px" />
+                        <span>{{ userBehavior.viewsCount }}</span>
                     </div>
                 </span>
             </p>
