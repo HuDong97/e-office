@@ -59,7 +59,7 @@ const selectImage = () => {
 const submitUpload = () => {
     uploadRef.value.submit();
 }
-</script>>
+</script>
 
 <template>
     <el-card class="page-container">
