@@ -20,43 +20,59 @@ const sendMessage = async () => {
         sending.value = true;
         error.value = null;
 
-        const userMessage = {
-            id: Date.now(),
-            sender: userInfoStore.info.userPic,
-            text: newMessage.value,
-            timestamp: new Date().toLocaleTimeString(),
-        };
+        const userMessage = createUserMessage();
 
-        chatMessages.value.push(userMessage);
-        newMessage.value = '';
-        scrollToBottom();
+        addMessage(userMessage);
 
         try {
-            const response = await fetch(`/api/chat/invokeChat3?msg=${encodeURIComponent(userMessage.text)}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': tokenStore.token,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = await response.text();
-            const gptMessage = {
-                id: Date.now() + 1,
-                sender: 'GPT-3.5',
-                text: data,
-                timestamp: new Date().toLocaleTimeString(),
-            };
-            chatMessages.value.push(gptMessage);
+            const gptMessage = await fetchGptResponse(userMessage.text);
+            addMessage(gptMessage);
         } catch (err) {
-            error.value = '消息发送失败，请重试。';
+            handleError(err);
         }
         sending.value = false;
         scrollToBottom();
     }
+};
+
+const createUserMessage = () => {
+    return {
+        id: Date.now(),
+        sender: userInfoStore.info.userPic,
+        text: newMessage.value,
+        timestamp: new Date().toLocaleTimeString(),
+    };
+};
+
+const addMessage = (message) => {
+    chatMessages.value.push(message);
+    newMessage.value = '';
+};
+
+const fetchGptResponse = async (text) => {
+    const response = await fetch(`/api/chat/invokeChat3?msg=${encodeURIComponent(text)}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': tokenStore.token,
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.text();
+    return {
+        id: Date.now() + 1,
+        sender: 'GPT-3.5',
+        text: data,
+        timestamp: new Date().toLocaleTimeString(),
+    };
+};
+
+const handleError = (err) => {
+    error.value = '消息发送失败，请重试。';
+    console.error(err);
 };
 
 const scrollToBottom = () => {
