@@ -11,62 +11,55 @@ import { userAvatarUpdateService } from '@/api/user.js'
 const tokenStore = useTokenStore();
 const userInfoStore = useUserInfoStore();
 
-// 用户头像地址
 const imgUrl = ref(userInfoStore.info.userPic)
 const defaultImgUrl = avatar
-
 const uploadRef = ref()
-const isPreviewing = ref(false)
 
-// 头像上传服务器成功的回调函数
+const handleError = (message) => {
+    ElMessage.error(message);
+}
+
 const uploadSuccess = (result) => {
     if (result.code === 0) {
         imgUrl.value = result.data;
         updateAvatar();
     } else {
-        if (result.message && result.message.includes('Maximum upload size exceeded')) {
-            ElMessage.error('上传失败,文件大小超过限制,最大允许为500KB');
-        } else {
-            ElMessage.error(result.message ? result.message : '上传失败');
-        }
+        const errorMessage = result.message && result.message.includes('Maximum upload size exceeded') ?
+            '上传失败,文件大小超过限制,最大允许为500KB' :
+            (result.message || '上传失败');
+        handleError(errorMessage);
     }
 }
 
-// 更新用户头像
 const updateAvatar = async () => {
-    let result = await userAvatarUpdateService(imgUrl.value);
-    ElMessage.success(result.message ? result.message : '修改成功')
-    userInfoStore.info.userPic = imgUrl.value
+    try {
+        let result = await userAvatarUpdateService(imgUrl.value);
+        ElMessage.success(result.message || '修改成功');
+        userInfoStore.info.userPic = imgUrl.value;
+    } catch (error) {
+        handleError(error.message || '修改头像失败');
+    }
 }
 
-// 处理图片上传变化
 const handleChange = (file) => {
-    if (isPreviewing.value) {
-        isPreviewing.value = false;
-        return;
-    }
-
     const reader = new FileReader();
     reader.onload = (e) => {
         imgUrl.value = e.target.result;
     };
     reader.readAsDataURL(file.raw);
 
-    isPreviewing.value = true;
     uploadRef.value.clearFiles();
     uploadRef.value.handleStart(file.raw);
 }
 
-// 选择图片
 const selectImage = () => {
     uploadRef.value.$el.querySelector('input').click();
 }
 
-// 提交上传
 const submitUpload = () => {
     uploadRef.value.submit();
 }
-</script>
+</script>>
 
 <template>
     <el-card class="page-container">
