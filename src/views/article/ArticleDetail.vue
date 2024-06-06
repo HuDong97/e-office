@@ -11,10 +11,8 @@ import { useRoute, useRouter } from 'vue-router';
 import DOMPurify from 'dompurify';
 import { ElDrawer, ElButton, ElInput } from 'element-plus';
 import { articleDetailService } from '@/api/article.js';
-import { useTokenStore } from '@/stores/token.js'
+import { userBehaviorService } from '@/api/userBehavior.js';
 
-
-const tokenStore = useTokenStore();
 const route = useRoute();
 const router = useRouter();
 const article = ref(null);
@@ -23,7 +21,9 @@ const userBehavior = reactive({
     likesCount: 0,
     favoritesCount: 0,
     commentsCount: 0,
-    viewsCount: 0
+    viewsCount: 0,
+    liked: false,
+    bookmarked: false,
 });
 const sanitizedContent = ref('');
 const commentsVisible = ref(false);
@@ -58,45 +58,29 @@ const toggleComments = () => {
 
 const submitComment = () => {
     if (newComment.value.trim()) {
-        article.commentsCount++;
-        // 提交评论的逻辑，例如将评论发送到后端服务器
-        newComment.value = ''; // 提交后清空输入框
+        userBehavior.commentsCount++;
+        newComment.value = '';
     }
 };
 
 onMounted(async () => {
     const id = route.query.id;
-    const articleId = route.query.id;
 
     if (id) {
         try {
-            const articleResponse = await articleDetailService(id, {
-                headers: { 'Authorization': tokenStore.token }
-            });
+            const articleResponse = await articleDetailService(id);
             article.value = articleResponse.data;
             sanitizedContent.value = DOMPurify.sanitize(article.value.content);
 
             try {
-                const response = await fetch(`/api/userBehavior/counts?articleId=${articleId}`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': tokenStore.token,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                userBehavior.likesCount = data.likesCount;
-                userBehavior.commentsCount = data.commentsCount;
-                userBehavior.viewsCount = data.viewsCount;
-                userBehavior.favoritesCount = data.favoritesCount;
+                const data = await userBehaviorService(id);
+                userBehavior.likesCount = data.data.likesCount;
+                userBehavior.commentsCount = data.data.commentsCount;
+                userBehavior.viewsCount = data.data.viewsCount;
+                userBehavior.favoritesCount = data.data.favoritesCount;
             } catch (userBehaviorError) {
                 console.error('获取用户行为数据失败：', userBehaviorError);
             }
-
         } catch (error) {
             console.error('查看文章或获取用户行为数据失败', error);
             router.push('/404');
@@ -118,23 +102,23 @@ onMounted(async () => {
                     <span class="article-author">作者：{{ article.createUser }}</span>
                 </span>
                 <span class="article-icons">
+                    <div style="font-size: 20px" title="浏览量">
+                        <View style="width: 1em; height: 1em; margin-right: 2px" />
+                        <span>{{ userBehavior.viewsCount }}</span>
+                    </div>
                     <div style="font-size: 20px" title="点赞" @click="likeUserBehavior">
                         <Sugar
-                            :style="{ width: '1em', height: '1em', marginRight: '2px', color: userBehavior['liked'] ? 'red' : '' }" />
+                            :style="{ width: '1em', height: '1em', marginRight: '2px', color: userBehavior.liked ? 'red' : '' }" />
                         <span>{{ userBehavior.likesCount }}</span>
                     </div>
                     <div style="font-size: 20px" title="收藏" @click="toggleBookmark">
                         <Star
-                            :style="{ width: '1em', height: '1em', marginRight: '2px', color: userBehavior['bookmarked'] ? 'yellow' : '' }" />
+                            :style="{ width: '1em', height: '1em', marginRight: '2px', color: userBehavior.bookmarked ? 'yellow' : '' }" />
                         <span>{{ userBehavior.favoritesCount }}</span>
                     </div>
                     <div style="font-size: 20px" title="评论" @click="toggleComments">
                         <ChatDotRound style="width: 1em; height: 1em; margin-right: 2px" />
                         <span>{{ userBehavior.commentsCount }}</span>
-                    </div>
-                    <div style="font-size: 20px" title="浏览量">
-                        <View style="width: 1em; height: 1em; margin-right: 2px" />
-                        <span>{{ userBehavior.viewsCount }}</span>
                     </div>
                 </span>
             </p>
@@ -144,18 +128,14 @@ onMounted(async () => {
     <div v-else class="loading-container">
         <el-loading-spinner size="120px"></el-loading-spinner>
     </div>
-
     <el-drawer v-model="commentsVisible" :title="'评论区'" direction="rtl" size="30%">
         <div class="comments-container">
-            <!-- 评论内容，可以根据实际需求替换 -->
             <div class="comments-section">
                 <p>这是评论内容的示例。</p>
                 <p>评论1：这是一条评论。</p>
                 <p>评论2：这是另一条评论。</p>
                 <p>评论3：这是第三条评论。</p>
             </div>
-
-            <!-- 评论输入框 -->
             <div class="comment-input">
                 <div class="input-container">
                     <el-input type="textarea" v-model="newComment" placeholder="请输入你的评论" rows="3"
