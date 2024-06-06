@@ -4,6 +4,8 @@ import {
     View,
     Sugar,
     ChatDotRound,
+    Back,
+    Upload,
 } from '@element-plus/icons-vue';
 
 import { ref, onMounted, reactive } from 'vue';
@@ -90,12 +92,19 @@ onMounted(async () => {
         router.push('/404');
     }
 });
+
+const goBack = () => {
+    router.back();
+};
 </script>
 
 <template>
     <div v-if="article" class="article-container">
         <div class="article-header">
-            <h1 class="article-title">{{ article.title }}</h1>
+            <div class="title-and-back">
+                <h1 class="article-title">{{ article.title }}</h1>
+                <el-button type="primary" :icon="Back" @click="goBack" class="back-button">返回</el-button>
+            </div>
             <p class="article-meta">
                 <span>
                     <span class="article-date">发布时间：{{ formatDate(article.createTime) }}</span>
@@ -190,10 +199,20 @@ onMounted(async () => {
     border-bottom: 1px solid #ebebeb;
 }
 
+.title-and-back {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .article-title {
     margin: 0;
     font-size: 24px;
     color: #333;
+}
+
+.back-button {
+    margin-left: auto;
 }
 
 .article-meta {
