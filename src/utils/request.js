@@ -31,8 +31,8 @@ import router from '@/router'
 instance.interceptors.response.use(
     result => {
         // 对响应数据进行处理，这里返回响应数据的 data 部分
-        //判断业务状态码，0操作成功
-        if (result.data.code === 0) {
+        //判断业务状态码，1操作成功
+        if (result.data.code === 1) {
             return result.data;
         }
         //操作失败
