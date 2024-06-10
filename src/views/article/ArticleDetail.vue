@@ -102,28 +102,28 @@ const submitComment = async () => {
 
 onMounted(async () => {
     //获取文章id
-    const id = route.query.id;
+    const ArticleId = route.query.id;
 
 
-    if (id) {
+    if (ArticleId) {
         try {
-            const articleResponse = await articleDetailService(id);
+            const articleResponse = await articleDetailService(ArticleId);
             article.value = articleResponse.data;
             sanitizedContent.value = DOMPurify.sanitize(article.value.content);
 
             try {
                 // 获取用户行为数据
-                const behaviorResponse = await allUserBehavior(id);
+                const behaviorResponse = await allUserBehavior(ArticleId);
                 userBehavior.liked = behaviorResponse.data.liked === 1;
                 userBehavior.bookmarked = behaviorResponse.data.bookmarked === 1;
 
-                const data = await userBehaviorService(id);
+                const data = await userBehaviorService(ArticleId);
                 userBehavior.likesCount = data.data.likesCount;
                 userBehavior.commentsCount = data.data.commentsCount;
                 userBehavior.viewsCount = data.data.viewsCount;
                 userBehavior.favoritesCount = data.data.favoritesCount;
 
-                await viewsAddService(route.query.id);
+                await viewsAddService(ArticleId);
             } catch (userBehaviorError) {
                 console.error('获取用户行为数据失败：', userBehaviorError);
             }
