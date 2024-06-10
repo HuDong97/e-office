@@ -104,6 +104,7 @@ onMounted(async () => {
     //获取文章id
     const id = route.query.id;
 
+
     if (id) {
         try {
             const articleResponse = await articleDetailService(id);
@@ -121,6 +122,8 @@ onMounted(async () => {
                 userBehavior.commentsCount = data.data.commentsCount;
                 userBehavior.viewsCount = data.data.viewsCount;
                 userBehavior.favoritesCount = data.data.favoritesCount;
+
+                await viewsAddService(route.query.id);
             } catch (userBehaviorError) {
                 console.error('获取用户行为数据失败：', userBehaviorError);
             }
