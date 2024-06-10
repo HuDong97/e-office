@@ -6,25 +6,29 @@ export const userBehaviorService = (articleId) => {
 };
 
 // 获取用户是否点赞收藏
-export const userBehavior = (articleId) => {
+export const allUserBehavior = (articleId) => {
     return request.get('/userBehavior/ArticleBehavior', { params: { articleId } });
 };
 
-//点赞添加 
+//点赞点击
 export const likesAddService = (articleId) => {
-    return request.post('/userBehavior/setLike', { params: { articleId } });
-
+    const formData = new URLSearchParams();
+    formData.append('articleId', articleId);
+    return request.post('/userBehavior/setLike', formData);
 };
 
-//收藏添加 
+//收藏点击
 export const favoritesAddService = (articleId) => {
-    return request.post('/userBehavior/setFavorite', { params: { articleId } });
-
+    const formData = new URLSearchParams();
+    formData.append('articleId', articleId);
+    return request.post('/userBehavior/setFavorite', formData);
 };
 
 //浏览添加  
 export const viewsAddService = (articleId) => {
-    return request.post('/userBehavior/setView', { params: { articleId } });
+    const formData = new URLSearchParams();
+    formData.append('articleId', articleId);
+    return request.post('/userBehavior/setView', formData);
 
 };
 
@@ -36,17 +40,17 @@ export const commentsAddService = (commentData) => {
 
 //点赞删除
 export const likesDeleteService = (articleId) => {
-    return request.delete('/userBehavior?id=', { params: { articleId } });
+    return request.delete('userBehavior/deleteLike', { params: { articleId } });
 };
 
 //收藏删除
 export const favoritesDeleteService = (articleId) => {
-    return request.delete('/userBehavior?id=', { params: { articleId } });
+    return request.delete('userBehavior/deleteFavorite', { params: { articleId } });
 };
 
 //评论删除
 export const commentsDeleteService = (articleId) => {
-    return request.delete('/userBehavior?id=', { params: { articleId } });
+    return request.delete('userBehavior/deleteComment', { params: { articleId } });
 };
 
 

@@ -11,9 +11,19 @@ import {
 import { ref, onMounted, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import DOMPurify from 'dompurify';
-import { ElDrawer, ElButton, ElInput } from 'element-plus';
+import { ElDrawer, ElButton, ElInput, ElMessage } from 'element-plus';
 import { articleDetailService } from '@/api/article.js';
-import { userBehaviorService } from '@/api/userBehavior.js';
+import {
+    userBehaviorService,
+    allUserBehavior,
+    likesAddService,
+    commentsAddService,
+    favoritesAddService,
+    viewsAddService,
+    likesDeleteService,
+    commentsDeleteService,
+    favoritesDeleteService,
+} from '@/api/userBehavior.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -27,6 +37,7 @@ const userBehavior = reactive({
     liked: false,
     bookmarked: false,
 });
+
 const sanitizedContent = ref('');
 const commentsVisible = ref(false);
 const newComment = ref('');
@@ -36,36 +47,61 @@ const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
-const likeUserBehavior = () => {
-    if (userBehavior.liked) {
-        userBehavior.likesCount--;
-    } else {
-        userBehavior.likesCount++;
+
+
+const likeUserBehavior = async () => {
+    try {
+        if (userBehavior.liked) {
+            await likesDeleteService(route.query.id);
+            userBehavior.likesCount--;
+            userBehavior.liked = false;
+        } else {
+            await likesAddService(route.query.id);
+            userBehavior.likesCount++;
+            userBehavior.liked = true;
+        }
+    } catch (error) {
+        ElMessage.error('点赞操作失败');
     }
-    userBehavior.liked = !userBehavior.liked;
 };
 
-const toggleBookmark = () => {
-    if (userBehavior.bookmarked) {
-        userBehavior.favoritesCount--;
-    } else {
-        userBehavior.favoritesCount++;
+const toggleBookmark = async () => {
+    try {
+        if (userBehavior.bookmarked) {
+            await favoritesDeleteService(route.query.id);
+            userBehavior.favoritesCount--;
+            userBehavior.bookmarked = false;
+        } else {
+            await favoritesAddService(route.query.id);
+            userBehavior.favoritesCount++;
+            userBehavior.bookmarked = true;
+        }
+    } catch (error) {
+        ElMessage.error('收藏操作失败');
     }
-    userBehavior.bookmarked = !userBehavior.bookmarked;
 };
 
 const toggleComments = () => {
     commentsVisible.value = !commentsVisible.value;
 };
 
-const submitComment = () => {
+const submitComment = async () => {
     if (newComment.value.trim()) {
-        userBehavior.commentsCount++;
-        newComment.value = '';
+        try {
+            await commentsAddService({ articleId: route.query.id, content: newComment.value });
+            userBehavior.commentsCount++;
+            newComment.value = '';
+            ElMessage.success('评论添加成功');
+        } catch (error) {
+            ElMessage.error('评论添加失败');
+        }
+    } else {
+        ElMessage.warning('评论内容不能为空');
     }
 };
 
 onMounted(async () => {
+    //获取文章id
     const id = route.query.id;
 
     if (id) {
@@ -75,6 +111,11 @@ onMounted(async () => {
             sanitizedContent.value = DOMPurify.sanitize(article.value.content);
 
             try {
+                // 获取用户行为数据
+                const behaviorResponse = await allUserBehavior(id);
+                userBehavior.liked = behaviorResponse.data.liked === 1;
+                userBehavior.bookmarked = behaviorResponse.data.bookmarked === 1;
+
                 const data = await userBehaviorService(id);
                 userBehavior.likesCount = data.data.likesCount;
                 userBehavior.commentsCount = data.data.commentsCount;
