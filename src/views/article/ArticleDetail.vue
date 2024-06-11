@@ -188,10 +188,55 @@ const goBack = () => {
     <el-drawer v-model="commentsVisible" :title="'评论区'" direction="rtl" size="30%">
         <div class="comments-container">
             <div class="comments-section">
-                <p>这是评论内容的示例。</p>
-                <p>评论1：这是一条评论。</p>
-                <p>评论2：这是另一条评论。</p>
-                <p>评论3：这是第三条评论。</p>
+                <div class="comment">
+                    <div class="comment-bubble">
+                        <span class="comment-author">用户A：</span>
+                        <span class="comment-content">这是评论内容的示例。</span>
+                    </div>
+                </div>
+                <div class="comment">
+                    <div class="comment-bubble">
+                        <span class="comment-author">用户B：</span>
+                        <span class="comment-content">这是一条评论。</span>
+                    </div>
+                </div>
+                <div class="comment">
+                    <div class="comment-bubble">
+                        <span class="comment-author">用户C：</span>
+                        <span class="comment-content">这是另2条评论。</span>
+                    </div>
+                </div>
+                <div class="comment">
+                    <div class="comment-bubble">
+                        <span class="comment-author">用户D：</span>
+                        <span class="comment-content">这是第3条评论。</span>
+                    </div>
+                </div>
+                <div class="comment">
+                    <div class="comment-bubble">
+                        <span class="comment-author">用户E：</span>
+                        <span class="comment-content">这是第4条评论。</span>
+                    </div>
+                </div>
+                <div class="comment">
+                    <div class="comment-bubble">
+                        <span class="comment-author">用户F：</span>
+                        <span class="comment-content">这是第5条评论。</span>
+                    </div>
+                </div>
+                <div class="comment">
+                    <div class="comment-bubble">
+                        <span class="comment-author">用户G：</span>
+                        <span class="comment-content">这是第6条评论。</span>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <div class="comment-bubble">
+                        <span class="comment-author">用户G：</span>
+                        <span class="comment-content">这是顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶第7条评论。</span>
+                    </div>
+                </div>
             </div>
             <div class="comment-input">
                 <div class="input-container">
@@ -202,9 +247,42 @@ const goBack = () => {
             </div>
         </div>
     </el-drawer>
+
 </template>
 
 <style scoped>
+.comment {
+    margin-bottom: 10px;
+}
+
+.comment-bubble {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.comment-author {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.comment-content {
+    display: block;
+    word-wrap: break-word;
+    max-width: 300px;
+    /* 气泡框最大宽度 */
+}
+
+.comments-section {
+    overflow-y: auto;
+    max-height: 75vh;
+}
+
+.comment-input {
+    margin-top: 20px;
+}
+
 .article-date {
     margin-right: 30px;
 }
