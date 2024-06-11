@@ -117,13 +117,17 @@ onMounted(async () => {
                 userBehavior.liked = behaviorResponse.data.liked === 1;
                 userBehavior.bookmarked = behaviorResponse.data.bookmarked === 1;
 
+                //先向后端传入浏览+1
+                await viewsAddService(ArticleId);
+
+
+                //最后加载浏览点赞收藏评论数
                 const data = await userBehaviorService(ArticleId);
                 userBehavior.likesCount = data.data.likesCount;
                 userBehavior.commentsCount = data.data.commentsCount;
                 userBehavior.viewsCount = data.data.viewsCount;
                 userBehavior.favoritesCount = data.data.favoritesCount;
 
-                await viewsAddService(ArticleId);
             } catch (userBehaviorError) {
                 console.error('获取用户行为数据失败：', userBehaviorError);
             }
