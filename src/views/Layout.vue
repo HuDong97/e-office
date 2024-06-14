@@ -10,38 +10,44 @@ import {
     EditPen,
     SwitchButton,
     CaretBottom,
-    Message
+    Message,
+    Menu as MenuIcon
 } from '@element-plus/icons-vue'
 import avatar from '@/assets/default.png'
 
+import { ref, computed } from 'vue'
 import { useTokenStore } from '@/stores/token.js'
 import { userInfoService } from '@/api/user.js'
 import useUserInfoStore from '@/stores/userInfo.js'
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+
 const tokenStore = useTokenStore();
 const userInfoStore = useUserInfoStore();
+const router = useRouter();
 
-//调用函数,获取用户详细信息
+const isSidebarVisible = ref(true)
+
+// 计算侧边栏宽度
+const sidebarWidth = computed(() => isSidebarVisible.value ? '200px' : '0')
+
+const toggleSidebar = () => {
+    isSidebarVisible.value = !isSidebarVisible.value
+}
+
+// 获取用户信息，并根据权限控制路由跳转
 const getUserInfo = async () => {
-    //调用接口
     let result = await userInfoService();
-    //数据存储到pinia中
     userInfoStore.setInfo(result.data);
-    // 检查用户权限，如果不是admin则跳转到首页
     if (userInfoStore.info.permissions !== 'admin') {
         router.push('/404');
     }
 }
 getUserInfo();
 
-//条目被点击后,调用的函数
-import { useRouter } from 'vue-router'
-const router = useRouter();
-import { ElMessage, ElMessageBox } from 'element-plus'
-const handleCommand = (command) => {
-    //判断指令
-    if (command === 'logout') {
-        //退出登录
-        ElMessageBox.confirm(
+const handleLogout = async () => {
+    try {
+        await ElMessageBox.confirm(
             '您确认要退出吗?',
             '温馨提示',
             {
@@ -49,60 +55,51 @@ const handleCommand = (command) => {
                 cancelButtonText: '取消',
                 type: 'warning',
             }
-        )
-            .then(async () => {
-                //退出登录
-                //1.清空pinia中存储的token以及个人信息
-                tokenStore.removeToken()
-                userInfoStore.removeInfo()
-
-                //2.跳转到登录页面
-                router.push('/login')
-                ElMessage({
-                    type: 'success',
-                    message: '退出登录成功',
-                })
-
-            })
-            .catch(() => {
-                ElMessage({
-                    type: 'info',
-                    message: '用户取消了退出登录',
-                })
-            })
-    } else {
-        //路由
-        router.push('/user/' + command)
+        );
+        tokenStore.removeToken();
+        userInfoStore.removeInfo();
+        router.push('/login');
+        ElMessage({
+            type: 'success',
+            message: '退出登录成功',
+        });
+    } catch (error) {
+        ElMessage({
+            type: 'info',
+            message: '用户取消了退出登录',
+        });
     }
 }
 
-
-
-
-
-
-
+const handleCommand = (command) => {
+    if (command === 'logout') {
+        handleLogout();
+    } else {
+        router.push('/user/' + command);
+    }
+}
 </script>
 
 <template>
-    <!-- element-plus中的容器 -->
     <el-container class="layout-container">
-        <!-- 左侧菜单 -->
-        <el-aside width="200px">
-            <!-- 修改logo2为带链接的图片 -->
-            <router-link to="/home">
-                <img src="@/assets/logo2.png" alt="logo2" width="200px">
-            </router-link>
-            <!-- element-plus的菜单标签 -->
-            <el-menu active-text-color="#ffd04b" background-color="#232323" text-color="#fff" router>
+        <el-aside width="200px" class="sidebar-transition" :style="{ width: sidebarWidth }">
+
+            <div>
+                <el-button @click="toggleSidebar" plain class="toggle-sidebar-button1">
+                    <el-icon class="toggle-sidebar-menu1" style="font-size: 25px;">
+                        <MenuIcon />
+                    </el-icon>
+                </el-button>
+                <a class="sidebar-logo">Eoffice</a>
+
+            </div>
+            <el-menu active-text-color=" #ffd04b" background-color="#232323" text-color="#fff" router>
                 <el-menu-item index="/home">
                     <el-icon>
                         <House />
                     </el-icon>
                     <span>论坛首页</span>
                 </el-menu-item>
-
-                <!-- 根据用户权限条件渲染 -->
                 <template v-if="userInfoStore.info.permissions === 'admin'">
                     <el-menu-item index="/category">
                         <el-icon>
@@ -111,75 +108,66 @@ const handleCommand = (command) => {
                         <span>文章分类</span>
                     </el-menu-item>
                 </template>
-
                 <el-menu-item index="/article/manage">
                     <el-icon>
                         <Promotion />
                     </el-icon>
                     <span>文章管理</span>
                 </el-menu-item>
-
                 <el-menu-item index="/chat">
                     <el-icon>
                         <Tools />
                     </el-icon>
-                    <span>Ai工具</span>
+                    <span>Ai助手</span>
                 </el-menu-item>
-
                 <el-menu-item index="/test">
                     <el-icon>
                         <Tools />
                     </el-icon>
                     <span>测试页面</span>
                 </el-menu-item>
-
                 <el-sub-menu>
-
                     <template #title>
                         <el-icon>
                             <UserFilled />
                         </el-icon>
                         <span>个人中心</span>
                     </template>
-
                     <el-menu-item index="/user/info">
                         <el-icon>
                             <User />
                         </el-icon>
                         <span>基本资料</span>
                     </el-menu-item>
-
                     <el-menu-item index="/user/avatar">
                         <el-icon>
                             <Crop />
                         </el-icon>
                         <span>更换头像</span>
                     </el-menu-item>
-
                     <el-menu-item index="/user/resetPassword">
                         <el-icon>
                             <EditPen />
                         </el-icon>
                         <span>重置密码</span>
                     </el-menu-item>
-
                     <el-menu-item index="/user/resetEmail">
                         <el-icon>
                             <Message />
                         </el-icon>
                         <span>更换邮箱</span>
                     </el-menu-item>
-
                 </el-sub-menu>
             </el-menu>
         </el-aside>
-        <!-- 右侧主区域 -->
+        <el-button v-show="!isSidebarVisible" @click="toggleSidebar" plain class="toggle-sidebar-button">
+            <el-icon class="toggle-sidebar-menu" style="font-size: 25px;">
+                <MenuIcon />
+            </el-icon>
+        </el-button>
         <el-container>
-            <!-- 头部区域 -->
             <el-header>
                 <div>当前用户：<strong>{{ userInfoStore.info.nickname }}</strong></div>
-                <!-- 下拉菜单 -->
-                <!-- command: 条目被点击后会触发,在事件函数上可以声明一个参数,接收条目对应的指令 -->
                 <el-dropdown placement="bottom-end" @command="handleCommand">
                     <span class="el-dropdown__box">
                         <el-avatar :src="userInfoStore.info.userPic ? userInfoStore.info.userPic : avatar" />
@@ -187,7 +175,6 @@ const handleCommand = (command) => {
                             <CaretBottom />
                         </el-icon>
                     </span>
-
                     <template #dropdown>
                         <el-dropdown-menu>
                             <el-dropdown-item command="info" :icon="User">基本资料</el-dropdown-item>
@@ -199,31 +186,63 @@ const handleCommand = (command) => {
                     </template>
                 </el-dropdown>
             </el-header>
-            <!-- 中间区域 -->
             <el-main>
                 <router-view></router-view>
             </el-main>
-            <!-- 底部区域 -->
             <el-footer>
                 <img src="@/assets/logodong.png" alt="Eoffice Logo" style="height: 16px; margin-right: 2px;">
                 Eoffice ©2024 Created by 行东
             </el-footer>
-
         </el-container>
     </el-container>
 </template>
 
 <style lang="scss" scoped>
+.sidebar-logo {
+    position: absolute;
+    /* 使用绝对定位 */
+    top: 1px;
+    left: 50px;
+    font-size: 24px;
+    color: #ffffff;
+}
+
+
+.toggle-sidebar-button1 {
+    width: 50px;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: 0;
+
+}
+
+.toggle-sidebar-button {
+    width: 50px;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: 0;
+
+}
+
+.toggle-sidebar-menu1 {
+    color: #ffffff;
+
+}
+
+.toggle-sidebar-menu {
+    color: #000000;
+
+}
+
+
+
 .layout-container {
     height: 100vh;
+    overflow: hidden;
 
     .el-aside {
         background-color: #232323;
-
-        &__logo {
-            height: 120px;
-            background: url('@/assets/logo2.png') no-repeat center / 170px auto;
-        }
+        transition: width 0.3s;
 
         .el-menu {
             border-right: none;
@@ -258,6 +277,12 @@ const handleCommand = (command) => {
         justify-content: center;
         font-size: 14px;
         color: #666;
+    }
+
+
+    .sidebar-transition {
+        width: 200px;
+        transition: width 0.3s;
     }
 }
 </style>

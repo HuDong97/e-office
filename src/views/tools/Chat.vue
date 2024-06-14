@@ -90,7 +90,7 @@ const scrollToBottom = () => {
                 <el-row :gutter="20" class="chat-container">
                     <el-col :span="17">
                         <div class="chat-card">
-                            <h2>Ai聊天工具</h2>
+                            <h2>Ai助手</h2>
                             <div class="chat-window">
                                 <transition-group name="message-fade" tag="div">
                                     <div v-for="message in chatMessages" :key="message.id"
