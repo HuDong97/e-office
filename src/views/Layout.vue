@@ -166,7 +166,7 @@ const handleCommand = (command) => {
             </el-icon>
         </el-button>
         <el-container>
-            <el-header>
+            <el-header class="el-header1">
                 <div>当前用户：<strong>{{ userInfoStore.info.nickname }}</strong></div>
                 <el-dropdown placement="bottom-end" @command="handleCommand">
                     <span class="el-dropdown__box">
@@ -198,6 +198,10 @@ const handleCommand = (command) => {
 </template>
 
 <style lang="scss" scoped>
+.el-header1 {
+    border-radius: 10px;
+}
+
 .sidebar-logo {
     position: absolute;
     /* 使用绝对定位 */
