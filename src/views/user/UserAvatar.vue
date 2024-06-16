@@ -20,7 +20,7 @@ const handleError = (message) => {
 }
 
 const uploadSuccess = (result) => {
-    if (result.code === 0) {
+    if (result.code === 1) {
         imgUrl.value = result.data;
         updateAvatar();
     } else {
@@ -41,10 +41,17 @@ const updateAvatar = async () => {
     }
 }
 
+let isHandlingChange = false; // 添加一个标志
+
 const handleChange = (file) => {
+    if (isHandlingChange) return; // 如果正在处理，则返回
+
+    isHandlingChange = true; // 设置标志为 true
+
     const reader = new FileReader();
     reader.onload = (e) => {
         imgUrl.value = e.target.result;
+        isHandlingChange = false; // 处理完毕，重置标志
     };
     reader.readAsDataURL(file.raw);
 

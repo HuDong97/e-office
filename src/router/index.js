@@ -13,6 +13,7 @@ import ChatVue from '@/views/tools/Chat.vue'
 import TestVue from '@/views/tools/Test.vue'
 import NotFound from '@/views/404/NotFound.vue'
 
+import useUserInfoStore from '@/stores/userInfo.js'
 
 // 定义路由关系
 const routes = [
@@ -32,7 +33,6 @@ const routes = [
             { path: '/404', component: NotFound },
         ]
     },
-
     { path: '/:pathMatch(.*)*', redirect: '/404' }
 ];
 
@@ -42,7 +42,15 @@ const router = createRouter({
     routes: routes
 });
 
-
+// 添加全局前置守卫
+router.beforeEach((to, from, next) => {
+    const userInfoStore = useUserInfoStore();
+    if (to.path === '/category' && userInfoStore.info.permissions !== 'admin') {
+        next('/404'); // 重定向到404 
+    } else {
+        next(); // 允许访问
+    }
+});
 
 // 导出路由
 export default router;

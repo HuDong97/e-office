@@ -39,9 +39,6 @@ const toggleSidebar = () => {
 const getUserInfo = async () => {
     let result = await userInfoService();
     userInfoStore.setInfo(result.data);
-    if (userInfoStore.info.permissions !== 'admin') {
-        router.push('/404');
-    }
 }
 getUserInfo();
 
