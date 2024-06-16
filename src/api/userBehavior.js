@@ -32,25 +32,30 @@ export const viewsAddService = (articleId) => {
 
 };
 
-//评论添加 #todo commentData里面只需要传回文章id和评论内容
+//评论添加  commentData里面只需要传回文章id和评论内容
 export const commentsAddService = (commentData) => {
     return request.post('/userBehavior/setComment', commentData);
-
 };
+
+//评论显示
+export const getArticleComments = (articleId) => {
+    return request.get('/userBehavior/commentDetail', { params: { articleId } });
+};
+
 
 //点赞删除
 export const likesDeleteService = (articleId) => {
-    return request.delete('userBehavior/deleteLike', { params: { articleId } });
+    return request.delete('/userBehavior/deleteLike', { params: { articleId } });
 };
 
 //收藏删除
 export const favoritesDeleteService = (articleId) => {
-    return request.delete('userBehavior/deleteFavorite', { params: { articleId } });
+    return request.delete('/userBehavior/deleteFavorite', { params: { articleId } });
 };
 
 //评论删除
 export const commentsDeleteService = (articleId) => {
-    return request.delete('userBehavior/deleteComment', { params: { articleId } });
+    return request.delete('/userBehavior/deleteComment', { params: { articleId } });
 };
 
 

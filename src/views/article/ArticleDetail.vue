@@ -5,13 +5,12 @@ import {
     Sugar,
     ChatDotRound,
     Back,
-    Upload,
 } from '@element-plus/icons-vue';
 
 import { ref, onMounted, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import DOMPurify from 'dompurify';
-import { ElDrawer, ElButton, ElInput, ElMessage } from 'element-plus';
+import { ElMessage } from 'element-plus';
 import { articleDetailService } from '@/api/article.js';
 import {
     userBehaviorService,
@@ -23,6 +22,7 @@ import {
     likesDeleteService,
     commentsDeleteService,
     favoritesDeleteService,
+    getArticleComments,
 } from '@/api/userBehavior.js';
 
 const route = useRoute();
@@ -41,13 +41,12 @@ const userBehavior = reactive({
 const sanitizedContent = ref('');
 const commentsVisible = ref(false);
 const newComment = ref('');
+const comments = ref([]); // 新增评论数组
 
 const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
 };
-
-
 
 const likeUserBehavior = async () => {
     try {
@@ -81,8 +80,20 @@ const toggleBookmark = async () => {
     }
 };
 
-const toggleComments = () => {
+const toggleComments = async () => {
     commentsVisible.value = !commentsVisible.value;
+    if (commentsVisible.value) {
+        await loadComments(); // 切换到评论区时加载评论数据
+    }
+};
+
+const loadComments = async () => {
+    try {
+        const response = await getArticleComments(route.query.id); // 调用获取评论的方法
+        comments.value = response.data; // 将获取到的评论数据赋值给comments数组
+    } catch (error) {
+        console.error('获取评论失败：', error);
+    }
 };
 
 const submitComment = async () => {
@@ -92,6 +103,7 @@ const submitComment = async () => {
             userBehavior.commentsCount++;
             newComment.value = '';
             ElMessage.success('评论添加成功');
+            await loadComments(); // 添加评论成功后重新加载评论数据
         } catch (error) {
             ElMessage.error('评论添加失败');
         }
@@ -101,9 +113,8 @@ const submitComment = async () => {
 };
 
 onMounted(async () => {
-    //获取文章id
+    // 获取文章id
     const ArticleId = route.query.id;
-
 
     if (ArticleId) {
         try {
@@ -117,17 +128,18 @@ onMounted(async () => {
                 userBehavior.liked = behaviorResponse.data.liked === 1;
                 userBehavior.bookmarked = behaviorResponse.data.bookmarked === 1;
 
-                //先向后端传入浏览+1
+                // 先向后端传入浏览+1
                 await viewsAddService(ArticleId);
 
-
-                //最后加载浏览点赞收藏评论数
+                // 最后加载浏览点赞收藏评论数
                 const data = await userBehaviorService(ArticleId);
                 userBehavior.likesCount = data.data.likesCount;
                 userBehavior.commentsCount = data.data.commentsCount;
                 userBehavior.viewsCount = data.data.viewsCount;
                 userBehavior.favoritesCount = data.data.favoritesCount;
 
+                // 加载评论数据
+                await loadComments(); // 加载评论数据
             } catch (userBehaviorError) {
                 console.error('获取用户行为数据失败：', userBehaviorError);
             }
@@ -185,56 +197,13 @@ const goBack = () => {
     <div v-else class="loading-container">
         <el-loading-spinner size="120px"></el-loading-spinner>
     </div>
-    <el-drawer v-model="commentsVisible" :title="'评论区'" direction="rtl" size="30%">
+    <el-drawer v-model="commentsVisible" title="评论区" direction="rtl" size="30%">
         <div class="comments-container">
             <div class="comments-section">
-                <div class="comment">
+                <div v-for="comment in comments" :key="comment.id" class="comment">
                     <div class="comment-bubble">
-                        <span class="comment-author">用户A：</span>
-                        <span class="comment-content">这是评论内容的示例。</span>
-                    </div>
-                </div>
-                <div class="comment">
-                    <div class="comment-bubble">
-                        <span class="comment-author">用户B：</span>
-                        <span class="comment-content">这是一条评论。</span>
-                    </div>
-                </div>
-                <div class="comment">
-                    <div class="comment-bubble">
-                        <span class="comment-author">用户C：</span>
-                        <span class="comment-content">这是另2条评论。</span>
-                    </div>
-                </div>
-                <div class="comment">
-                    <div class="comment-bubble">
-                        <span class="comment-author">用户D：</span>
-                        <span class="comment-content">这是第3条评论。</span>
-                    </div>
-                </div>
-                <div class="comment">
-                    <div class="comment-bubble">
-                        <span class="comment-author">用户E：</span>
-                        <span class="comment-content">这是第4条评论。</span>
-                    </div>
-                </div>
-                <div class="comment">
-                    <div class="comment-bubble">
-                        <span class="comment-author">用户F：</span>
-                        <span class="comment-content">这是第5条评论。</span>
-                    </div>
-                </div>
-                <div class="comment">
-                    <div class="comment-bubble">
-                        <span class="comment-author">用户G：</span>
-                        <span class="comment-content">这是第6条评论。</span>
-                    </div>
-                </div>
-
-                <div class="comment">
-                    <div class="comment-bubble">
-                        <span class="comment-author">用户G：</span>
-                        <span class="comment-content">这是顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶顶第7条评论。</span>
+                        <span class="comment-author">用户{{ comment.userId }}：</span>
+                        <span class="comment-content">{{ comment.content }}</span>
                     </div>
                 </div>
             </div>
@@ -247,7 +216,6 @@ const goBack = () => {
             </div>
         </div>
     </el-drawer>
-
 </template>
 
 <style scoped>
