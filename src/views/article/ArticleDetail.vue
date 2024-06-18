@@ -29,7 +29,18 @@ import useUserInfoStore from '@/stores/userInfo.js'
 const userInfoStore = useUserInfoStore();
 const route = useRoute();
 const router = useRouter();
-const article = ref(null);
+const article = reactive({
+    id: null,
+    title: '',
+    content: '',
+    coverImg: '',
+    state: '',
+    categoryId: null,
+    createUser: null,
+    createTime: '',
+    updateTime: '',
+});
+const nickName = ref('');
 
 const userBehavior = reactive({
     likesCount: 0,
@@ -146,6 +157,10 @@ onMounted(async () => {
         try {
             const articleResponse = await articleDetailService(ArticleId);
             article.value = articleResponse.data;
+            Object.assign(article, articleResponse.data.article); // 设置文章数据
+            nickName.value = articleResponse.data.nickName; // 设置作者昵称
+
+
             sanitizedContent.value = DOMPurify.sanitize(article.value.content);
 
             try {
@@ -194,7 +209,7 @@ const goBack = () => {
             <p class="article-meta">
                 <span>
                     <span class="article-date">发布时间：{{ formatDate(article.createTime) }}</span>
-                    <span class="article-author">作者：{{ article.createUser }}</span>
+                    <span class="article-author">作者：{{ nickName }}</span>
                 </span>
                 <span class="article-icons">
                     <div style="font-size: 20px" title="浏览量">
@@ -230,7 +245,7 @@ const goBack = () => {
 
                 <div v-for="comment in comments" :key="comment.id" class="comment">
                     <div class="comment-bubble">
-                        <span class="comment-author">用户{{ comment.userId }}：</span>
+                        <span class="comment-author">{{ comment.userId }}</span>
                         <span class="comment-content">{{ comment.content }}</span>
 
                         <span style="display: flex; align-items: center; margin-top: 2px;">
