@@ -225,15 +225,28 @@ const goBack = () => {
     </div>
     <el-drawer v-model="commentsVisible" title="评论区" direction="rtl" size="30%">
         <div class="comments-container">
+
             <div class="comments-section">
+
                 <div v-for="comment in comments" :key="comment.id" class="comment">
                     <div class="comment-bubble">
                         <span class="comment-author">用户{{ comment.userId }}：</span>
                         <span class="comment-content">{{ comment.content }}</span>
-                        <!-- 有条件地显示删除按钮 -->
-                        <el-button v-if="comment.userId === userInfoStore.info.id" type="text"
-                            @click="confirmDelete(comment.id, userInfoStore.info.id)"
-                            class="delete-button">删除</el-button>
+
+                        <span style="display: flex; align-items: center; margin-top: 2px;">
+                            <!-- 点赞按钮 -->
+                            <Sugar style="width: 1.3em; height: 1.3em; " />
+
+                            <!-- 回复按钮 -->
+
+                            <el-button type="text" class="delete-button">回复</el-button>
+
+                            <!-- 删除按钮 -->
+                            <el-button v-if="comment.userId === userInfoStore.info.id" type="text"
+                                @click="confirmDelete(comment.id, userInfoStore.info.id)"
+                                class="delete-button">删除</el-button>
+
+                        </span>
                     </div>
                 </div>
             </div>
