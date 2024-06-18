@@ -10,7 +10,7 @@ import {
 import { ref, onMounted, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import DOMPurify from 'dompurify';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus'; // 引入 ElMessageBox 用于确认删除评论
 import { articleDetailService } from '@/api/article.js';
 import {
     userBehaviorService,
@@ -24,7 +24,9 @@ import {
     favoritesDeleteService,
     getArticleComments,
 } from '@/api/userBehavior.js';
+import useUserInfoStore from '@/stores/userInfo.js'
 
+const userInfoStore = useUserInfoStore();
 const route = useRoute();
 const router = useRouter();
 const article = ref(null);
@@ -111,6 +113,30 @@ const submitComment = async () => {
         ElMessage.warning('评论内容不能为空');
     }
 };
+
+const deleteComment = async (commentId, userId) => {
+    try {
+        await commentsDeleteService(commentId, userId); // 发送删除评论的请求
+        ElMessage.success('评论删除成功');
+        userBehavior.commentsCount--; // 更新评论数
+        await loadComments(); // 重新加载评论列表
+    } catch (error) {
+        ElMessage.error('评论删除失败');
+    }
+};
+
+const confirmDelete = (commentId, userId) => {
+    ElMessageBox.confirm('确定删除这条评论吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+    }).then(() => {
+        deleteComment(commentId, userId);
+    }).catch(() => {
+        ElMessage.info('取消删除');
+    });
+};
+
 
 onMounted(async () => {
     // 获取文章id
@@ -204,6 +230,10 @@ const goBack = () => {
                     <div class="comment-bubble">
                         <span class="comment-author">用户{{ comment.userId }}：</span>
                         <span class="comment-content">{{ comment.content }}</span>
+                        <!-- 有条件地显示删除按钮 -->
+                        <el-button v-if="comment.userId === userInfoStore.info.id" type="text"
+                            @click="confirmDelete(comment.id, userInfoStore.info.id)"
+                            class="delete-button">删除</el-button>
                     </div>
                 </div>
             </div>
@@ -343,5 +373,11 @@ const goBack = () => {
 
 .send-button {
     height: auto;
+}
+
+.delete-button {
+    margin-left: 10px;
+    color: #909399;
+    /* 设置删除按钮颜色 */
 }
 </style>

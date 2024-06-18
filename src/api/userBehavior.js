@@ -53,11 +53,10 @@ export const favoritesDeleteService = (articleId) => {
     return request.delete('/userBehavior/deleteFavorite', { params: { articleId } });
 };
 
-//评论删除
-export const commentsDeleteService = (articleId) => {
-    return request.delete('/userBehavior/deleteComment', { params: { articleId } });
+// 评论删除
+export const commentsDeleteService = (commentId, userId) => {
+    return request.delete('/userBehavior/deleteComment', { params: { id: commentId, userId: userId } });
 };
-
 
 
 
