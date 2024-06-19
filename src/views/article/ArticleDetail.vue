@@ -161,7 +161,7 @@ onMounted(async () => {
             nickName.value = articleResponse.data.nickName; // 设置作者昵称
 
 
-            sanitizedContent.value = DOMPurify.sanitize(article.value.content);
+            sanitizedContent.value = DOMPurify.sanitize(article.content);
 
             try {
                 // 获取用户行为数据
