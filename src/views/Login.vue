@@ -62,6 +62,8 @@ const login = async () => {
         router.push('/')
     } catch (error) {
 
+        ElMessage.error(errorMessage);
+
     }
 }
 

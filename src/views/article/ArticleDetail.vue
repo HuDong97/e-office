@@ -245,7 +245,7 @@ const goBack = () => {
 
                 <div v-for="comment in comments" :key="comment.id" class="comment">
                     <div class="comment-bubble">
-                        <span class="comment-author">{{ comment.userId }}</span>
+                        <span class="comment-author">用户:{{ comment.userId }}</span>
                         <span class="comment-content">{{ comment.content }}</span>
 
                         <span style="display: flex; align-items: center; margin-top: 2px;">

@@ -24,12 +24,12 @@ const updateNickname = async () => {
 
     try {
         let result = await userNicknameUpdateService(userInfo.value.nickname);
-        ElMessage.success(result.message ? result.message : '修改成功');
+        ElMessage.success(result.message);
 
         // 修改pinia中的个人信息
         userInfoStore.setInfo({ ...userInfoStore.info, nickname: userInfo.value.nickname });
     } catch (error) {
-        ElMessage.error('修改失败，请稍后再试');
+        ElMessage.error(errorMessage);
     }
 }
 </script>

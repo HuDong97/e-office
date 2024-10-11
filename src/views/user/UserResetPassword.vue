@@ -26,7 +26,7 @@ const updatePassword = async () => {
         handleCommand();
     } catch (error) {
         // 处理更新失败的情况，例如提示用户密码更新失败
-        ElMessage.error(error.message || '密码更新失败');
+        ElMessage.error(errorMessage);
     }
 };
 
