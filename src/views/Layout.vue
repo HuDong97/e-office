@@ -33,13 +33,13 @@ const sidebarWidth = computed(() => isSidebarVisible.value ? '200px' : '0')
 
 const toggleSidebar = () => {
     isSidebarVisible.value = !isSidebarVisible.value
-}
+};
 
 // 获取用户信息，并根据权限控制路由跳转
 const getUserInfo = async () => {
     let result = await userInfoService();
     userInfoStore.setInfo(result.data);
-}
+};
 getUserInfo();
 
 const handleLogout = async () => {

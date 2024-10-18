@@ -43,13 +43,20 @@ const rules = {
 }
 
 const register = async () => {
+    // 在提交数据之前检查两次输入的密码是否一致
+    if (registerData.value.password !== registerData.value.rePassword) {
+        ElMessage.error('两次输入的密码不一致，请重新输入');
+        return; // 如果密码不一致，直接返回，不发送请求
+    }
+
     try {
         let result = await userRegisterService(registerData.value);
-        ElMessage.success(result.message ? result.message : '注册成功')
+        ElMessage.success(result.message ? result.message : '注册成功');
     } catch (error) {
-
+        ElMessage.error('注册失败');
     }
 };
+
 
 const tokenStore = useTokenStore();
 const router = useRouter()
