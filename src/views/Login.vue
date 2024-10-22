@@ -1,6 +1,6 @@
 <script setup>
 import { User, Lock, Message } from '@element-plus/icons-vue'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue';
 import { ElMessage } from 'element-plus'
 import { userRegisterService, userLoginService } from '@/api/user.js'
 import { useTokenStore } from '@/stores/token.js'
@@ -61,26 +61,42 @@ const register = async () => {
 const tokenStore = useTokenStore();
 const router = useRouter()
 
+const rememberPassword = ref(false);
+
+onMounted(() => {
+    const savedUsername = localStorage.getItem('savedUsername');
+    const savedPassword = localStorage.getItem('savedPassword');
+    if (savedUsername && savedPassword) {
+        registerData.value.username = savedUsername;
+        registerData.value.password = savedPassword;
+        rememberPassword.value = true;
+    }
+});
+
 const login = async () => {
     try {
         let result = await userLoginService(registerData.value);
-        ElMessage.success('登录成功')
-        tokenStore.setToken(result.data)
-        router.push('/')
+        ElMessage.success('登录成功');
+        tokenStore.setToken(result.data);
+        if (rememberPassword.value) {
+            localStorage.setItem('savedUsername', registerData.value.username);
+            localStorage.setItem('savedPassword', registerData.value.password);
+        } else {
+            localStorage.removeItem('savedUsername');
+            localStorage.removeItem('savedPassword');
+        }
+        router.push('/');
     } catch (error) {
-
-        ElMessage.error(errorMessage);
-
+        ElMessage.error('登录失败，请检查用户名或密码');
     }
-}
-
+};
 const clearRegisterData = () => {
     registerData.value = {
         username: '',
         password: '',
         rePassword: ''
     }
-}
+};
 </script>
 
 <template>
@@ -131,7 +147,7 @@ const clearRegisterData = () => {
                 </el-form-item>
                 <el-form-item class="flex">
                     <div class="flex">
-                        <el-checkbox>记住我</el-checkbox>
+                        <el-checkbox v-model="rememberPassword">记住密码</el-checkbox>
                         <el-link type="primary" :underline="false">忘记密码？</el-link>
                     </div>
                 </el-form-item>
