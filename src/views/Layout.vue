@@ -17,7 +17,7 @@ import avatar from '@/assets/default.png'
 
 import { ref, computed } from 'vue'
 import { useTokenStore } from '@/stores/token.js'
-import { userInfoService } from '@/api/user.js'
+import { userInfoService, userLogoutService } from '@/api/user.js'
 import useUserInfoStore from '@/stores/userInfo.js'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -53,6 +53,10 @@ const handleLogout = async () => {
                 type: 'warning',
             }
         );
+
+        const currentToken = tokenStore.getToken(); // 获取当前的token
+        await userLogoutService(currentToken); // 调用后端的注销接口删除redis里面的token缓存
+        console.log('向后端传递信息完毕', currentToken);
         tokenStore.removeToken();
         userInfoStore.removeInfo();
         router.push('/login');
