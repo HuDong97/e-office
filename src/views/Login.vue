@@ -6,7 +6,9 @@ import { userRegisterService, userLoginService } from '@/api/user.js'
 import { useTokenStore } from '@/stores/token.js'
 import { useRouter } from 'vue-router'
 
-const isRegister = ref(false)
+const isRegister = ref(false)  // 注册表格状态
+const forgotPassword = ref(false);  // 忘记密码状态
+
 const registerData = ref({
     username: '',
     password: '',
@@ -61,7 +63,7 @@ const register = async () => {
 const tokenStore = useTokenStore();
 const router = useRouter()
 
-const rememberPassword = ref(false);
+const rememberPassword = ref(false);  //记住密码框状态
 
 onMounted(() => {
     const savedUsername = localStorage.getItem('savedUsername');
@@ -94,17 +96,41 @@ const clearRegisterData = () => {
     registerData.value = {
         username: '',
         password: '',
-        rePassword: ''
+        rePassword: '',
+        email: ''
     }
 };
+
 </script>
 
 <template>
     <el-row class="login-page">
         <el-col :span="12" class="bg"></el-col>
         <el-col :span="6" :offset="3" class="form">
+            <!-- 忘记密码表单 -->
+            <el-form ref="form" size="large" autocomplete="off" v-if="forgotPassword" :model="registerData"
+                :rules="rules">
+                <el-form-item>
+                    <h1>忘记密码</h1>
+                </el-form-item>
+                <el-form-item prop="email">
+                    <el-input :prefix-icon="Message" type="email" placeholder="请输入您的注册邮箱"
+                        v-model="registerData.email"></el-input>
+                </el-form-item>
+                <!-- 提交重置密码请求按钮 -->
+                <el-form-item>
+                    <el-button class="button" type="primary" auto-insert-space
+                        @click="submitForgotPassword">提交</el-button>
+                </el-form-item>
+                <!-- 返回登录按钮 -->
+                <el-form-item class="flex">
+                    <el-link type="info" :underline="false" @click="forgotPassword = false">← 返回登录</el-link>
+                </el-form-item>
+            </el-form>
+
             <!-- 注册表单 -->
-            <el-form ref="form" size="large" autocomplete="off" v-if="isRegister" :model="registerData" :rules="rules">
+            <el-form ref="form" size="large" autocomplete="off" v-if="isRegister && !forgotPassword"
+                :model="registerData" :rules="rules">
                 <el-form-item>
                     <h1>注册</h1>
                 </el-form-item>
@@ -123,7 +149,6 @@ const clearRegisterData = () => {
                     <el-input :prefix-icon="Lock" type="password" placeholder="请输入再次密码"
                         v-model="registerData.rePassword"></el-input>
                 </el-form-item>
-                <!-- 注册按钮 -->
                 <el-form-item>
                     <el-button class="button" type="primary" auto-insert-space @click="register">注册</el-button>
                 </el-form-item>
@@ -132,9 +157,10 @@ const clearRegisterData = () => {
                         返回</el-link>
                 </el-form-item>
             </el-form>
+
             <!-- 登录表单 -->
-            <el-form ref="form" size="large" autocomplete="off" v-else :model="registerData" :rules="rules"
-                @keydown.enter="login">
+            <el-form ref="form" size="large" autocomplete="off" v-else-if="!isRegister && !forgotPassword"
+                :model="registerData" :rules="rules" @keydown.enter="login">
                 <el-form-item>
                     <h1>登录</h1>
                 </el-form-item>
@@ -148,10 +174,9 @@ const clearRegisterData = () => {
                 <el-form-item class="flex">
                     <div class="flex">
                         <el-checkbox v-model="rememberPassword">记住密码</el-checkbox>
-                        <el-link type="primary" :underline="false">忘记密码？</el-link>
+                        <el-link type="primary" :underline="false" @click="forgotPassword = true">忘记密码？</el-link>
                     </div>
                 </el-form-item>
-                <!-- 登录按钮 -->
                 <el-form-item>
                     <el-button class="button" type="primary" auto-insert-space @click="login">登录</el-button>
                 </el-form-item>
@@ -162,6 +187,7 @@ const clearRegisterData = () => {
             </el-form>
         </el-col>
     </el-row>
+
 </template>
 
 
