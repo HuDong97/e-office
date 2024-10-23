@@ -112,11 +112,33 @@ const clearRegisterData = () => {
                 :rules="rules">
                 <el-form-item>
                     <h1>忘记密码</h1>
+
+                    <!-- 添加注册邮箱框 -->
                 </el-form-item>
                 <el-form-item prop="email">
                     <el-input :prefix-icon="Message" type="email" placeholder="请输入您的注册邮箱"
                         v-model="registerData.email"></el-input>
                 </el-form-item>
+
+                <!-- 添加验证码框和获取验证码按钮 -->
+                <el-form-item prop="captcha" class="captcha-container">
+                    <el-input class="captcha-input" placeholder="请输入验证码" v-model="registerData.captcha"></el-input>
+                    <el-button class="captcha-button" @click="getCaptcha">获取验证码</el-button>
+                </el-form-item>
+
+
+                <!-- 添加新密码输入框 -->
+                <el-form-item prop="newPassword">
+                    <el-input :prefix-icon="Lock" type="password" placeholder="请输入新密码"
+                        v-model="registerData.newPassword"></el-input>
+                </el-form-item>
+
+                <!-- 添加确认新密码输入框 -->
+                <el-form-item prop="confirmPassword">
+                    <el-input :prefix-icon="Lock" type="password" placeholder="请确认新密码"
+                        v-model="registerData.confirmPassword"></el-input>
+                </el-form-item>
+
                 <!-- 提交重置密码请求按钮 -->
                 <el-form-item>
                     <el-button class="button" type="primary" auto-insert-space
@@ -221,6 +243,24 @@ const clearRegisterData = () => {
             width: 100%;
             display: flex;
             justify-content: space-between;
+        }
+
+        /* 新增验证码框样式 */
+        .captcha-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .captcha-input {
+            width: calc(100% - 110px);
+            /* 调整输入框宽度 */
+        }
+
+        .captcha-button {
+            margin-left: 10px;
+            width: 100px;
+            /* 固定按钮宽度 */
         }
     }
 }
