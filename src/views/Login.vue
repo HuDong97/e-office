@@ -15,7 +15,8 @@ const registerData = ref({
     username: '',
     password: '',
     email: '',
-    rePassword: ''
+    rePassword: '',
+    captcha: ''
 });
 
 
@@ -103,19 +104,25 @@ const rules = {
 };
 
 const register = async () => {
-    // 在提交数据之前检查两次输入的密码是否一致，用户无视提醒后强制提交时判断
     if (registerData.value.password !== registerData.value.rePassword) {
         ElMessage.error('两次输入的密码不一致，请重新输入');
-        return; // 如果密码不一致，直接返回，不发送请求
+        return;
     }
 
     try {
-        let result = await userRegisterService(registerData.value);
-        ElMessage.success(result.message ? result.message : '注册成功');
+        await userRegisterService({
+            username: registerData.value.username,
+            password: registerData.value.password,
+            email: registerData.value.email,
+            code: registerData.value.captcha
+        });
+        ElMessage.success('注册成功');
     } catch (error) {
-        ElMessage.error('注册失败');
+        ElMessage.error(result.message ? result.message : '注册失败');
     }
 };
+
+
 
 
 const tokenStore = useTokenStore();
@@ -147,7 +154,7 @@ const login = async () => {
         }
         router.push('/');
     } catch (error) {
-        ElMessage.error('登录失败，请检查用户名或密码');
+        ElMessage.error(result.message ? result.message : '登录失败，请检查用户名或密码');
     }
 };
 const clearRegisterData = () => {
@@ -155,7 +162,8 @@ const clearRegisterData = () => {
         username: '',
         password: '',
         rePassword: '',
-        email: ''
+        email: '',
+        captcha: ''
     }
 };
 
@@ -226,6 +234,14 @@ const clearRegisterData = () => {
                     <el-input :prefix-icon="Message" type="email" placeholder="请输入邮箱"
                         v-model="registerData.email"></el-input>
                 </el-form-item>
+
+                <el-form-item prop="captcha" class="captcha-container">
+                    <el-input class="captcha-input" placeholder="请输入验证码" v-model="registerData.captcha"></el-input>
+                    <el-button class="captcha-button" :disabled="isButtonDisabled" @click="getCaptcha">
+                        {{ isButtonDisabled ? `${timer}s 后重试` : '获取验证码' }}
+                    </el-button>
+                </el-form-item>
+
                 <el-form-item prop="password">
                     <el-input :prefix-icon="Lock" type="password" placeholder="请输入密码"
                         v-model="registerData.password"></el-input>

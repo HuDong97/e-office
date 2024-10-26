@@ -2,12 +2,12 @@
 import request from '@/utils/request.js'
 
 // 提供调用注册接口的函数
-export const userRegisterService = (registerData) => {
-    // 借助于UrlSearchParams完成传递
+export const userRegisterService = ({ username, password, email, code, }) => {
     const params = new URLSearchParams();
-    for (let key in registerData) {
-        params.append(key, registerData[key]);
-    }
+    params.append('username', username);
+    params.append('password', password);
+    params.append('email', email);
+    params.append('code', code);
     return request.post('/user/register', params);
 };
 
