@@ -54,3 +54,19 @@ export const userLogoutService = (token) => {
     return request.post('/user/logout', { token });
 };
 
+// 获取验证码
+export const getResetCodeService = (email) => {
+    const params = new URLSearchParams();
+    params.append('email', email);
+    return request.post('/user/getResetCode', params);
+};
+
+// 重置密码
+export const resetPasswordService = ({ email, code, newPassword }) => {
+    const params = new URLSearchParams();
+    params.append('email', email);
+    params.append('code', code);
+    params.append('newPassword', newPassword);
+    return request.post('/user/resetPassword', params);
+};
+

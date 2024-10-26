@@ -2,20 +2,78 @@
 import { User, Lock, Message } from '@element-plus/icons-vue'
 import { ref, onMounted } from 'vue';
 import { ElMessage } from 'element-plus'
-import { userRegisterService, userLoginService } from '@/api/user.js'
+import { userRegisterService, userLoginService, getResetCodeService, resetPasswordService } from '@/api/user.js'
 import { useTokenStore } from '@/stores/token.js'
 import { useRouter } from 'vue-router'
 
 const isRegister = ref(false)  // 注册表格状态
 const forgotPassword = ref(false);  // 忘记密码状态
+const timer = ref(0);  // 倒计时
+const isButtonDisabled = ref(false);  // 按钮状态
 
 const registerData = ref({
     username: '',
     password: '',
     email: '',
     rePassword: ''
-})
+});
 
+
+
+// 提交忘记密码重置请求时的逻辑
+const submitForgotPassword = async () => {
+    if (registerData.value.password !== registerData.value.rePassword) {
+        ElMessage.error('两次输入的密码不一致，请重新输入');
+        return;
+    }
+    try {
+        // 调用接口，发送邮箱、验证码和新密码
+        await resetPasswordService({
+            email: registerData.value.email,
+            code: registerData.value.captcha,
+            newPassword: registerData.value.password
+        });
+        ElMessage.success('密码重置成功');
+        forgotPassword.value = false; // 重置成功后返回登录界面
+        clearRegisterData();
+    } catch (error) {
+        ElMessage.error('密码重置失败');
+    }
+};
+
+
+// 获取验证码
+const getCaptcha = async () => {
+    if (isButtonDisabled.value) return;  // 按钮禁用时不执行操作
+    startTimer();  // 开始倒计时
+
+    try {
+        // 调用接口发送验证码请求
+        await getResetCodeService(registerData.value.email);
+        ElMessage.success('验证码已发送，请查收');
+    } catch (error) {
+        ElMessage.error('获取验证码失败');
+    }
+};
+
+// 验证码倒计时函数
+const startTimer = () => {
+    timer.value = 60; // 设置倒计时时间为60秒
+    isButtonDisabled.value = true;  // 禁用按钮
+
+    const countdown = setInterval(() => {
+        timer.value--;
+        if (timer.value <= 0) {
+            clearInterval(countdown);  // 停止倒计时
+            isButtonDisabled.value = false;  // 启用按钮
+        }
+    }, 1000); // 每秒更新一次
+};
+
+
+
+
+// 确认两次密码是否一致,仅提醒
 const checkRePassword = (rule, value, callback) => {
     if (value === '') {
         callback(new Error('请再次确认密码'))
@@ -24,7 +82,7 @@ const checkRePassword = (rule, value, callback) => {
     } else {
         callback()
     }
-}
+};
 
 const rules = {
     username: [
@@ -42,10 +100,10 @@ const rules = {
     rePassword: [
         { validator: checkRePassword, trigger: 'blur' }
     ]
-}
+};
 
 const register = async () => {
-    // 在提交数据之前检查两次输入的密码是否一致
+    // 在提交数据之前检查两次输入的密码是否一致，用户无视提醒后强制提交时判断
     if (registerData.value.password !== registerData.value.rePassword) {
         ElMessage.error('两次输入的密码不一致，请重新输入');
         return; // 如果密码不一致，直接返回，不发送请求
@@ -123,20 +181,23 @@ const clearRegisterData = () => {
                 <!-- 添加验证码框和获取验证码按钮 -->
                 <el-form-item prop="captcha" class="captcha-container">
                     <el-input class="captcha-input" placeholder="请输入验证码" v-model="registerData.captcha"></el-input>
-                    <el-button class="captcha-button" @click="getCaptcha">获取验证码</el-button>
+                    <el-button class="captcha-button" :disabled="isButtonDisabled" @click="getCaptcha">
+                        {{ isButtonDisabled ? `${timer}s 后重试` : '获取验证码' }}
+                    </el-button>
                 </el-form-item>
+
 
 
                 <!-- 添加新密码输入框 -->
-                <el-form-item prop="newPassword">
+                <el-form-item prop="password">
                     <el-input :prefix-icon="Lock" type="password" placeholder="请输入新密码"
-                        v-model="registerData.newPassword"></el-input>
+                        v-model="registerData.password"></el-input>
                 </el-form-item>
 
                 <!-- 添加确认新密码输入框 -->
-                <el-form-item prop="confirmPassword">
+                <el-form-item prop="rePassword">
                     <el-input :prefix-icon="Lock" type="password" placeholder="请确认新密码"
-                        v-model="registerData.confirmPassword"></el-input>
+                        v-model="registerData.rePassword"></el-input>
                 </el-form-item>
 
                 <!-- 提交重置密码请求按钮 -->
@@ -144,9 +205,11 @@ const clearRegisterData = () => {
                     <el-button class="button" type="primary" auto-insert-space
                         @click="submitForgotPassword">提交</el-button>
                 </el-form-item>
+
                 <!-- 返回登录按钮 -->
                 <el-form-item class="flex">
-                    <el-link type="info" :underline="false" @click="forgotPassword = false">← 返回登录</el-link>
+                    <el-link type="info" :underline="false" @click="forgotPassword = false; clearRegisterData()">←
+                        返回登录</el-link>
                 </el-form-item>
             </el-form>
 
@@ -196,7 +259,8 @@ const clearRegisterData = () => {
                 <el-form-item class="flex">
                     <div class="flex">
                         <el-checkbox v-model="rememberPassword">记住密码</el-checkbox>
-                        <el-link type="primary" :underline="false" @click="forgotPassword = true">忘记密码？</el-link>
+                        <el-link type="primary" :underline="false"
+                            @click="forgotPassword = true; clearRegisterData()">忘记密码？</el-link>
                     </div>
                 </el-form-item>
                 <el-form-item>
