@@ -121,12 +121,7 @@ const handleCommand = (command) => {
                     </el-icon>
                     <span>Ai助手</span>
                 </el-menu-item>
-                <el-menu-item index="/test">
-                    <el-icon>
-                        <Tools />
-                    </el-icon>
-                    <span>测试页面</span>
-                </el-menu-item>
+
                 <el-sub-menu>
                     <template #title>
                         <el-icon>
