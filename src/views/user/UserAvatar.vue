@@ -14,58 +14,60 @@ const userInfoStore = useUserInfoStore();
 const imgUrl = ref(userInfoStore.info.userPic)
 const defaultImgUrl = avatar
 const uploadRef = ref()
+const avatarFile = ref(null) // 保存用户选择的文件
 
 const handleError = (message) => {
     ElMessage.error(message);
 }
 
 const uploadSuccess = (result) => {
-    if (result.code === 1) {
+    if (result.code === 1) { // 判断 code 是否为 1
         imgUrl.value = result.data;
-        updateAvatar();
+        userInfoStore.info.userPic = imgUrl.value;
+        ElMessage.success('头像修改成功'); // 成功提示
     } else {
         const errorMessage = result.message && result.message.includes('Maximum upload size exceeded') ?
             '上传失败,文件大小超过限制,最大允许为500KB' :
             (result.message || '上传失败');
         handleError(errorMessage);
     }
-}
-
-const updateAvatar = async () => {
-    try {
-        let result = await userAvatarUpdateService(imgUrl.value);
-        ElMessage.success('头像修改成功');
-        userInfoStore.info.userPic = imgUrl.value;
-    } catch (error) {
-        handleError(error.message || '头像修改失败');
-    }
-}
-
-let isHandlingChange = false; // 添加一个标志
+};
 
 const handleChange = (file) => {
-    if (isHandlingChange) return; // 如果正在处理，则返回
-
-    isHandlingChange = true; // 设置标志为 true
-
+    avatarFile.value = file.raw; // 保存文件用于后续上传
     const reader = new FileReader();
     reader.onload = (e) => {
-        imgUrl.value = e.target.result;
-        isHandlingChange = false; // 处理完毕，重置标志
+        imgUrl.value = e.target.result; // 本地预览图片
     };
     reader.readAsDataURL(file.raw);
 
-    uploadRef.value.clearFiles();
-    uploadRef.value.handleStart(file.raw);
-}
+    uploadRef.value.clearFiles(); // 清除文件列表
+};
 
 const selectImage = () => {
     uploadRef.value.$el.querySelector('input').click();
-}
+};
 
-const submitUpload = () => {
-    uploadRef.value.submit();
-}
+const submitUpload = async () => {
+    if (!avatarFile.value) {
+        return handleError('请先选择头像文件');
+    }
+
+    // 创建 FormData 并上传文件
+    const formData = new FormData();
+    formData.append('file', avatarFile.value);
+
+    try {
+        const result = await userAvatarUpdateService(formData);
+        if (result.code === 1) { // 使用 code === 1 判断成功状态
+            uploadSuccess(result); // 调用上传成功逻辑
+        } else {
+            handleError(result.message || '上传失败');
+        }
+    } catch (error) {
+        handleError(error.message || '上传失败');
+    }
+};
 </script>
 
 <template>
@@ -78,8 +80,7 @@ const submitUpload = () => {
         <el-row>
             <el-col :span="12">
                 <el-upload ref="uploadRef" class="avatar-uploader" :show-file-list="false" :auto-upload="false"
-                    action="/api/uploadFile/uploadPicture" name="file" :headers="{ 'Authorization': tokenStore.token }"
-                    :on-change="handleChange" :on-success="uploadSuccess">
+                    name="file" :on-change="handleChange">
                     <img v-if="imgUrl" :src="imgUrl" class="avatar" />
                     <img v-else :src="defaultImgUrl" width="278" />
                 </el-upload>

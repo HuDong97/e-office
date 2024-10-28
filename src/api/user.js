@@ -32,11 +32,9 @@ export const userNicknameUpdateService = (nickname) => {
     return request.patch('/user/updateNickname', params);
 };
 
-// 修改头像
-export const userAvatarUpdateService = (avatarUrl) => {
-    const params = new URLSearchParams();
-    params.append('avatarUrl', avatarUrl);
-    return request.patch('/user/updateAvatar', params);
+// 修改用户头像
+export const userAvatarUpdateService = (formData) => {
+    return request.patch('/user/updateAvatar', formData);
 };
 
 // 更新用户密码
