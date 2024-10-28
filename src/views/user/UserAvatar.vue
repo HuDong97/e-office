@@ -34,10 +34,10 @@ const uploadSuccess = (result) => {
 const updateAvatar = async () => {
     try {
         let result = await userAvatarUpdateService(imgUrl.value);
-        ElMessage.success(result.message || '修改成功');
+        ElMessage.success('头像修改成功');
         userInfoStore.info.userPic = imgUrl.value;
     } catch (error) {
-        handleError(error.message || '修改头像失败');
+        handleError(error.message || '头像修改失败');
     }
 }
 

@@ -49,7 +49,7 @@ const addCategory = async () => {
     }
 
     let result = await articleCategoryAddService(categoryModel.value)
-    ElMessage.success(result.msg ? result.msg : '添加成功')
+    ElMessage.success('添加成功')
 
     // 重新获取分类数据
     articleCategoryList()
@@ -65,7 +65,7 @@ const updateCategory = async () => {
     }
 
     let result = await articleCategoryUpdateService(categoryModel.value)
-    ElMessage.success(result.msg ? result.msg : '修改成功')
+    ElMessage.success('修改成功')
 
     // 重新获取分类数据
     articleCategoryList()

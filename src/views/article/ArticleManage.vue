@@ -82,7 +82,7 @@ const uploadSuccess = (result) => {
 const addArticle = async (clickState) => {
     articleModel.value.state = clickState;
     let result = await articleAddService(articleModel.value);
-    ElMessage.success(result.message || '添加成功');
+    ElMessage.success('添加成功');
     visibleDrawer.value = false;
     articleList()
 }
@@ -99,7 +99,7 @@ const viewArticleDetails = (clickState) => {
 const updateArticle = async (clickState) => {
     articleModel.value.state = clickState;
     let result = await articleUpdateService(articleModel.value);
-    ElMessage.success(result.message || '修改成功');
+    ElMessage.success('修改成功');
     visibleDrawer.value = false;
     articleList()
 }
