@@ -9,13 +9,12 @@ import {
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
-import { useTokenStore } from '@/stores/token.js';
 import { articleListService, articleAddService, articleDeleteService, articleUpdateService } from '@/api/article.js'
 import { articleCategoryListService } from '@/api/category.js'
 //条目被点击后,调用的函数
 import { useRouter } from 'vue-router'
 const router = useRouter();
-const tokenStore = useTokenStore();
+
 
 // 数据模型
 const categorys = ref([])
@@ -35,8 +34,19 @@ const articleModel = ref({
     content: '',
     state: '',
     createTime: '',
-})
+});
 
+
+const avatarFile = ref(null); // 保存用户选择的文件
+
+const handleChange = (file) => {
+    avatarFile.value = file.raw; // 保存文件用于后续上传
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        articleModel.value.coverImg = e.target.result; // 本地预览图片
+    };
+    reader.readAsDataURL(file.raw);
+};
 
 // 分页处理函数
 const onSizeChange = (size) => {
@@ -73,18 +83,24 @@ const articleList = async () => {
     });
 }
 
-// 上传成功回调函数
-const uploadSuccess = (result) => {
-    articleModel.value.coverImg = result.data;
-}
+
 
 // 添加文章
 const addArticle = async (clickState) => {
+    // 检查封面是否为空
+    if (!articleModel.value.coverImg) {
+        ElMessage.error('请上传文章封面');
+        return; // 如果没有封面，直接返回
+    }
     articleModel.value.state = clickState;
-    let result = await articleAddService(articleModel.value);
-    ElMessage.success('添加成功');
-    visibleDrawer.value = false;
-    articleList()
+    let result = await articleAddService(articleModel.value, avatarFile.value);
+    if (result.code === 1) { // 判断 code 是否为 1
+        ElMessage.success('添加成功');
+        visibleDrawer.value = false;
+        articleList();
+    } else {
+        ElMessage.error('添加失败: ' + result.message);
+    }
 }
 //查看文章详情
 const viewArticleDetails = (clickState) => {
@@ -97,13 +113,30 @@ const viewArticleDetails = (clickState) => {
 
 // 修改文章
 const updateArticle = async (clickState) => {
+    if (!articleModel.value.coverImg) {
+        ElMessage.error('请上传文章封面');
+        return;
+    }
     articleModel.value.state = clickState;
-    let result = await articleUpdateService(articleModel.value);
-    ElMessage.success('修改成功');
-    visibleDrawer.value = false;
-    articleList()
-}
 
+    // 只发送所需的数据到后端
+    const dataToSend = {
+        title: articleModel.value.title,
+        content: articleModel.value.content,
+        categoryId: articleModel.value.categoryId,
+        id: articleModel.value.id,
+    };
+
+    const result = await articleUpdateService(dataToSend, avatarFile.value)
+
+    if (result.code === 1) {
+        ElMessage.success('修改成功');
+        visibleDrawer.value = false;
+        articleList();
+    } else {
+        ElMessage.error('修改失败: ' + result.message);
+    }
+};
 // 删除文章
 const deleteArticle = (row) => {
     ElMessageBox.confirm('你确认要删除该文章吗?', '温馨提示', {
@@ -236,8 +269,7 @@ articleList();
                     </el-form-item>
                     <el-form-item label="文章封面">
                         <el-upload class="avatar-uploader" :auto-upload="false" :show-file-list="false"
-                            action="/api/upload" name="file" :headers="{ 'Authorization': tokenStore.token }"
-                            :on-success="uploadSuccess">
+                            :before-upload="beforeUpload" :on-change="handleChange" name="file">
                             <img v-if="articleModel.coverImg" :src="articleModel.coverImg" class="avatar" />
                             <el-icon v-else class="avatar-uploader-icon">
                                 <Plus />

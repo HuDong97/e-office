@@ -4,11 +4,10 @@ import { Plus, Upload } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import avatar from '@/assets/default.png'
 
-import { useTokenStore } from '@/stores/token.js'
+
 import useUserInfoStore from '@/stores/userInfo.js'
 import { userAvatarUpdateService } from '@/api/user.js'
 
-const tokenStore = useTokenStore();
 const userInfoStore = useUserInfoStore();
 
 const imgUrl = ref(userInfoStore.info.userPic)
