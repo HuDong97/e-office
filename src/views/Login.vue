@@ -87,8 +87,8 @@ const checkRePassword = (rule, value, callback) => {
 
 const rules = {
     username: [
-        { required: true, message: '请输入用户名', trigger: 'blur' },
-        { min: 4, max: 16, message: '长度为4~16位非空字符', trigger: 'blur' }
+        { required: true, message: '请输入用户名/邮箱', trigger: 'blur' },
+        { min: 4, max: 30, message: '长度为4~30位非空字符', trigger: 'blur' }
     ],
     password: [
         { required: true, message: '请输入密码', trigger: 'blur' },
@@ -154,7 +154,7 @@ const login = async () => {
         }
         router.push('/');
     } catch (error) {
-        ElMessage.error(result.message ? result.message : '登录失败，请检查用户名或密码');
+        ElMessage.error(result.message ? result.message : '登录失败，请检查账号或密码');
     }
 };
 const clearRegisterData = () => {
@@ -266,7 +266,7 @@ const clearRegisterData = () => {
                     <h1>登录</h1>
                 </el-form-item>
                 <el-form-item prop="username">
-                    <el-input :prefix-icon="User" placeholder="请输入用户名" v-model="registerData.username"></el-input>
+                    <el-input :prefix-icon="User" placeholder="用户名/邮箱" v-model="registerData.username"></el-input>
                 </el-form-item>
                 <el-form-item prop="password">
                     <el-input name="password" :prefix-icon="Lock" type="password" placeholder="请输入密码"
