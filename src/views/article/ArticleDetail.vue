@@ -41,6 +41,7 @@ const article = reactive({
     updateTime: '',
 });
 const nickName = ref('');
+const avatar = ref('');
 
 const userBehavior = reactive({
     likesCount: 0,
@@ -159,6 +160,7 @@ onMounted(async () => {
             article.value = articleResponse.data;
             Object.assign(article, articleResponse.data.article); // 设置文章数据
             nickName.value = articleResponse.data.nickName; // 设置作者昵称
+            avatar.value = articleResponse.data.avatar; // 设置作者头像
 
 
             sanitizedContent.value = DOMPurify.sanitize(article.content);
@@ -206,27 +208,33 @@ const goBack = () => {
                 <h1 class="article-title">{{ article.title }}</h1>
                 <el-button type="primary" :icon="Back" @click="goBack" class="back-button">返回</el-button>
             </div>
-            <p class="article-meta">
-                <span>
-                    <span class="article-date">发布时间：{{ formatDate(article.createTime) }}</span>
-                    <span class="article-author">作者：{{ nickName }}</span>
+            <p class="article-meta" style="display: flex; align-items: center; justify-content: space-between;">
+                <span style="display: flex; align-items: center;">
+                    <span class="article-date" style="margin-right: 10px;">发布时间：{{ formatDate(article.createTime)
+                        }}</span>
+                    <div style="margin-right: 10px;">
+                        <img :src="avatar" alt="作者头像" v-if="avatar"
+                            style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;" />
+                        <strong v-else>{{ avatar }}</strong> <!-- 如果没有头像，则显示链接 -->
+                    </div>
+                    <span class="article-author" style="margin-right: 10px;">{{ nickName }}</span>
                 </span>
-                <span class="article-icons">
-                    <div style="font-size: 20px" title="浏览量">
+                <span class="article-icons" style="display: flex; align-items: center;">
+                    <div style="font-size: 20px; margin-right: 15px;" title="浏览量">
                         <View style="width: 1em; height: 1em; margin-right: 2px" />
                         <span>{{ userBehavior.viewsCount }}</span>
                     </div>
-                    <div style="font-size: 20px" title="点赞" @click="likeUserBehavior">
+                    <div style="font-size: 20px; margin-right: 15px;" title="点赞" @click="likeUserBehavior">
                         <Sugar
                             :style="{ width: '1em', height: '1em', marginRight: '2px', color: userBehavior.liked ? 'red' : '' }" />
                         <span>{{ userBehavior.likesCount }}</span>
                     </div>
-                    <div style="font-size: 20px" title="收藏" @click="toggleBookmark">
+                    <div style="font-size: 20px; margin-right: 15px;" title="收藏" @click="toggleBookmark">
                         <Star
                             :style="{ width: '1em', height: '1em', marginRight: '2px', color: userBehavior.bookmarked ? 'yellow' : '' }" />
                         <span>{{ userBehavior.favoritesCount }}</span>
                     </div>
-                    <div style="font-size: 20px" title="评论" @click="toggleComments">
+                    <div style="font-size: 20px;" title="评论" @click="toggleComments">
                         <ChatDotRound style="width: 1em; height: 1em; margin-right: 2px" />
                         <span>{{ userBehavior.commentsCount }}</span>
                     </div>
