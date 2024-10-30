@@ -83,15 +83,17 @@ const handleCommand = (command) => {
 
 <template>
     <el-container class="layout-container">
-        <el-aside width="200px" class="sidebar-transition" :style="{ width: sidebarWidth }">
+        <el-aside :class="{ 'sidebar-hidden': !isSidebarVisible, 'disable-scroll': isSidebarVisible }"
+            class="sidebar-transition" :style="{ width: sidebarWidth }">
 
             <div>
                 <el-button @click="toggleSidebar" plain class="toggle-sidebar-button1">
                     <el-icon class="toggle-sidebar-menu1" style="font-size: 25px;">
                         <MenuIcon />
                     </el-icon>
+                    <a class="sidebar-logo">Eoffice</a>
                 </el-button>
-                <a class="sidebar-logo">Eoffice</a>
+
 
             </div>
             <el-menu active-text-color=" #ffd04b" background-color="#232323" text-color="#fff" router>
@@ -194,6 +196,16 @@ const handleCommand = (command) => {
 </template>
 
 <style lang="scss" scoped>
+.sidebar-hidden {
+    overflow: hidden;
+    /* 隐藏滚动条 */
+}
+
+.disable-scroll {
+    overflow: hidden;
+    /* 禁用侧边栏出现时的滚动条 */
+}
+
 .el-header1 {
     border-radius: 10px;
 }
@@ -201,7 +213,7 @@ const handleCommand = (command) => {
 .sidebar-logo {
     position: absolute;
     /* 使用绝对定位 */
-    top: 1px;
+    top: 5px;
     left: 50px;
     font-size: 24px;
     color: #ffffff;
