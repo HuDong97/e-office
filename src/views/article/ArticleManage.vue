@@ -125,6 +125,7 @@ const updateArticle = async (clickState) => {
         content: articleModel.value.content,
         categoryId: articleModel.value.categoryId,
         id: articleModel.value.id,
+        coverImg: articleModel.value.coverImg,
     };
 
     const result = await articleUpdateService(dataToSend, avatarFile.value)

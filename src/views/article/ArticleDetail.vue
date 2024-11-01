@@ -142,10 +142,10 @@ const submitComment = async () => {
             await commentsAddService({ articleId: route.query.id, content: newComment.value });
             userBehavior.commentsCount++;
             newComment.value = '';
-            ElMessage.success('评论添加成功');
+            ElMessage.success('评论成功');
             await loadComments(); // 添加评论成功后重新加载评论数据
         } catch (error) {
-            ElMessage.error('评论添加失败');
+            ElMessage.error('评论失败');
         }
     } else {
         ElMessage.warning('评论内容不能为空');

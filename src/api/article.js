@@ -45,8 +45,10 @@ export const articleUpdateService = (articleData, coverImg) => {
         }
     }
 
-    // 添加封面图片文件
-    formData.append('file', coverImg);
+    // 仅在 coverImg 存在时才添加封面图片文件
+    if (coverImg) {
+        formData.append('file', coverImg);
+    }
 
     // 使用 put 请求发送 formData
     return request.put('/article', formData, {
