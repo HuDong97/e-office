@@ -27,6 +27,28 @@ import {
 import useUserInfoStore from '@/stores/userInfo.js'
 
 const userInfoStore = useUserInfoStore();
+
+const formatCommentDate = (dateString) => {
+    const now = new Date();
+    const commentDate = new Date(dateString);
+    const diffInMs = now - commentDate;
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInMinutes < 60) {
+        return `${diffInMinutes}分钟前`;
+    } else if (diffInHours < 24) {
+        return `${diffInHours}小时前`;
+    } else if (diffInDays < 7) {
+        return `${diffInDays}天前 ${commentDate.getHours()}:${commentDate.getMinutes()}`;
+    } else if (now.getFullYear() === commentDate.getFullYear()) {
+        return `${commentDate.getMonth() + 1}月${commentDate.getDate()}日`;
+    } else {
+        return `${commentDate.getFullYear()}年${commentDate.getMonth() + 1}月${commentDate.getDate()}日`;
+    }
+};
+
 const route = useRoute();
 const router = useRouter();
 const article = reactive({
@@ -104,7 +126,7 @@ const toggleComments = async () => {
 const loadComments = async () => {
     try {
         const response = await getArticleComments(route.query.id); // 调用获取评论的方法
-        comments.value = response.data; // 将获取到的评论数据赋值给comments数组
+        comments.value = response.data; // 将获取到的评论数据赋值给 comments 数组
     } catch (error) {
         console.error('获取评论失败：', error);
     }
@@ -199,6 +221,13 @@ onMounted(async () => {
 const goBack = () => {
     router.back();
 };
+
+const handleKeydown = (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault(); // 防止换行
+        submitComment(); // 调用发送评论的方法
+    }
+};
 </script>
 
 <template>
@@ -250,33 +279,33 @@ const goBack = () => {
         <div class="comments-container">
 
             <div class="comments-section">
-
                 <div v-for="comment in comments" :key="comment.id" class="comment">
-                    <div class="comment-bubble">
-                        <span class="comment-author">用户:{{ comment.userId }}</span>
-                        <span class="comment-content">{{ comment.content }}</span>
-
-                        <span style="display: flex; align-items: center; margin-top: 2px;">
-                            <!-- 点赞按钮 -->
-                            <Sugar style="width: 1.3em; height: 1.3em; " />
-
-                            <!-- 回复按钮 -->
-
-                            <el-button type="text" class="delete-button">回复</el-button>
-
-                            <!-- 删除按钮 -->
+                    <img :src="comment.avatar" class="comment-avatar" alt="用户头像" />
+                    <div class="comment-content">
+                        <span class="comment-header">{{ comment.nickname }}</span> <!-- 用户昵称 -->
+                        <div class="comment-bubble">
+                            <p class="comment-body">{{ comment.content }}</p> <!-- 评论内容 -->
+                        </div>
+                        <span class="delete-button">
+                            {{ formatCommentDate(comment.createdTime) }}
                             <el-button v-if="comment.userId === userInfoStore.info.id" type="text"
-                                @click="confirmDelete(comment.id, userInfoStore.info.id)"
-                                class="delete-button">删除</el-button>
+                                @click="confirmDelete(comment.id, comment.userId)"
+                                style="color: inherit; font-size: inherit; margin-left: 10px;">
+                                删除
+                            </el-button>
+
 
                         </span>
+
+
                     </div>
                 </div>
             </div>
             <div class="comment-input">
                 <div class="input-container">
-                    <el-input type="textarea" v-model="newComment" placeholder="请输入你的评论" rows="3"
-                        class="input"></el-input>
+                    <el-input type="textarea" v-model="newComment" placeholder="请输入你的评论" rows="3" class="input"
+                        @keydown="handleKeydown">
+                    </el-input>
                     <el-button type="primary" @click="submitComment" class="send-button">发送</el-button>
                 </div>
             </div>
@@ -286,14 +315,57 @@ const goBack = () => {
 
 <style scoped>
 .comment {
-    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.comment-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.comment-content {
+    display: flex;
+    flex-direction: column;
+    max-width: 75%;
+}
+
+.comment-header {
+    font-weight: bold;
+    font-size: 0.9em;
+    margin-bottom: 5px;
+}
+
+.comment-body {
+    margin: 0;
+    padding: 5;
+    font-size: 0.85em;
+    line-height: 1.4;
+    color: #333;
+    margin-bottom: 5px;
+    word-wrap: break-word;
+}
+
+.comment-timestamp {
+    font-size: 0.75em;
+    color: #999;
+
 }
 
 .comment-bubble {
-    background-color: #f0f0f0;
+    background-color: #e6f7ff;
     padding: 10px;
-    border-radius: 8px;
+    border-radius: 10px;
     display: inline-block;
+}
+
+.delete-button {
+    margin-left: 10px;
+    color: #909399;
+
 }
 
 .comment-author {
@@ -301,12 +373,7 @@ const goBack = () => {
     margin-right: 5px;
 }
 
-.comment-content {
-    display: block;
-    word-wrap: break-word;
-    max-width: 300px;
-    /* 气泡框最大宽度 */
-}
+
 
 .comments-section {
     overflow-y: auto;
@@ -409,11 +476,5 @@ const goBack = () => {
 
 .send-button {
     height: auto;
-}
-
-.delete-button {
-    margin-left: 10px;
-    color: #909399;
-    /* 设置删除按钮颜色 */
 }
 </style>
