@@ -28,6 +28,8 @@ import useUserInfoStore from '@/stores/userInfo.js'
 
 const userInfoStore = useUserInfoStore();
 
+const formatTimeUnit = (unit) => (unit < 10 ? `0${unit}` : unit);
+
 const formatCommentDate = (dateString) => {
     const now = new Date();
     const commentDate = new Date(dateString);
@@ -41,7 +43,9 @@ const formatCommentDate = (dateString) => {
     } else if (diffInHours < 24) {
         return `${diffInHours}小时前`;
     } else if (diffInDays < 7) {
-        return `${diffInDays}天前 ${commentDate.getHours()}:${commentDate.getMinutes()}`;
+        const hours = commentDate.getHours();
+        const minutes = formatTimeUnit(commentDate.getMinutes());
+        return `${diffInDays}天前 ${hours}:${minutes}`;
     } else if (now.getFullYear() === commentDate.getFullYear()) {
         return `${commentDate.getMonth() + 1}月${commentDate.getDate()}日`;
     } else {
