@@ -193,6 +193,12 @@ const formatDate = (timestamp) => {
 
 articleCategoryList();
 articleList();
+
+const resetAndSearch = () => {
+    categoryId.value = '';
+    state.value = '';
+    articleList();  // 重置后调用 articleList 重新加载数据
+};
 </script>
 
 <template>
@@ -223,7 +229,7 @@ articleList();
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="articleList">搜索</el-button>
-                    <el-button @click="categoryId = ''; state = ''">重置</el-button>
+                    <el-button @click="resetAndSearch">重置</el-button>
                 </el-form-item>
             </el-form>
 
@@ -291,8 +297,8 @@ articleList();
                                     [{ 'align': [] }, { 'direction': 'rtl' }],
                                     ['blockquote', 'code-block'],
                                     [{ 'indent': '-1' }, { 'indent': '+1' }],
-                                    [{ 'size': ['small', false, 'large', 'huge'] }],
-                                    ['link', 'image', 'formula'],
+                                    [{ 'size': ['small', false, 'large', 'huge'] }]
+
 
                                 ]">
                             </QuillEditor>
