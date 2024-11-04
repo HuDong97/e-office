@@ -169,9 +169,7 @@ const handleCommand = (command) => {
                 <el-dropdown placement="bottom-end" @command="handleCommand">
                     <span class="el-dropdown__box">
                         <el-avatar :src="userInfoStore.info.userPic ? userInfoStore.info.userPic : avatar" />
-                        <el-icon>
-                            <CaretBottom />
-                        </el-icon>
+
                     </span>
                     <template #dropdown>
                         <el-dropdown-menu>

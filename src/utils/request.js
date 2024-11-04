@@ -43,15 +43,30 @@ instance.interceptors.response.use(
 
     },
     err => {
-        //判断响应状态码,如果为401,则证明未登录,提示请登录,并跳转到登录页面
-        if (err.response.status === 401) {
-            ElMessage.error('请先登录')
-            router.push('/login')
+        // 判断响应状态码
+        if (err.response) {
+            const status = err.response.status;
+            const message = err.response.data.message; // 从后端获取错误信息
+
+            // 处理不同的错误状态码
+            if (status === 401) {
+                // 处理未授权错误
+                ElMessage.error(message || '请先登录');
+                router.push('/login');
+            } else if (status === 409) {
+                // 处理冲突错误
+                ElMessage.error(message || '账号在其他设备登录，请重新登录');
+                router.push('/login'); // 重定向到登录页面
+            } else {
+                // 处理其他错误
+                ElMessage.error(message || '服务异常');
+            }
         } else {
-            ElMessage.error('服务异常')
+            // 处理网络错误或没有响应的情况
+            ElMessage.error('网络错误，请稍后重试');
         }
-        return Promise.reject(err);//异步的状态转化成失败的状态
+        return Promise.reject(err); // 异步的状态转化成失败的状态
     }
-)
+);
 
 export default instance;
