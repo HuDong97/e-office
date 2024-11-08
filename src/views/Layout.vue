@@ -56,7 +56,6 @@ const handleLogout = async () => {
 
         const currentToken = tokenStore.getToken(); // 获取当前的token
         await userLogoutService(currentToken); // 调用后端的注销接口删除redis里面的token缓存
-        console.log('向后端传递信息完毕', currentToken);
         tokenStore.removeToken();
         userInfoStore.removeInfo();
         router.push('/login');

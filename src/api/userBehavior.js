@@ -58,5 +58,19 @@ export const commentsDeleteService = (commentId, userId) => {
     return request.delete('/userBehavior/deleteComment', { params: { id: commentId, userId: userId } });
 };
 
+// 评论点赞
+export const setCommentLikeService = (articleId, commentId) => {
+    return request.post('/userBehavior/setCommentLike', null, {
+        params: { articleId, commentId }
+    });
+};
+
+// 取消评论点赞
+export const cancelCommentLikeService = (articleId, commentId) => {
+    return request.delete('/userBehavior/cancelCommentLike', {
+        params: { articleId, commentId }
+    });
+};
+
 
 

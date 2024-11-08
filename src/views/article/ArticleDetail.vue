@@ -23,6 +23,8 @@ import {
     commentsDeleteService,
     favoritesDeleteService,
     getArticleComments,
+    setCommentLikeService,
+    cancelCommentLikeService
 } from '@/api/userBehavior.js';
 import useUserInfoStore from '@/stores/userInfo.js'
 
@@ -232,6 +234,29 @@ const handleKeydown = (event) => {
         submitComment(); // 调用发送评论的方法
     }
 };
+
+const likeComment = async (comment) => {
+    try {
+
+        // 如果当前评论已经点赞
+        if (comment.isLiked === 1) {
+            // 取消点赞
+            await cancelCommentLikeService(route.query.id, comment.id);
+            comment.isLiked = 0;  // 更新本地数据为未点赞
+            comment.likeCount--;   // 点赞数减一
+        } else {
+            // 点赞评论
+            await setCommentLikeService(route.query.id, comment.id);
+            comment.isLiked = 1;   // 更新本地数据为已点赞
+            comment.likeCount++;   // 点赞数加一
+        }
+    } catch (error) {
+        ElMessage.error('点赞操作失败');
+    }
+};
+
+
+
 </script>
 
 <template>
@@ -281,30 +306,36 @@ const handleKeydown = (event) => {
     </div>
     <el-drawer v-model="commentsVisible" title="评论区" direction="rtl" size="30%">
         <div class="comments-container">
-
-            <div class="comments-section">
-                <div v-for="comment in comments" :key="comment.id" class="comment">
-                    <img :src="comment.avatar" class="comment-avatar" alt="用户头像" />
-                    <div class="comment-content">
-                        <span class="comment-header">{{ comment.nickname }}</span> <!-- 用户昵称 -->
-                        <div class="comment-bubble">
-                            <p class="comment-body">{{ comment.content }}</p> <!-- 评论内容 -->
-                        </div>
-                        <span class="delete-button">
-                            {{ formatCommentDate(comment.createdTime) }}
-                            <el-button v-if="comment.userId === userInfoStore.info.id" type="text"
-                                @click="confirmDelete(comment.id, comment.userId)"
-                                style="color: inherit; font-size: inherit; margin-left: 10px;">
-                                删除
-                            </el-button>
-
-
-                        </span>
-
-
+            <div v-for="comment in comments" :key="comment.id" class="comment">
+                <img :src="comment.avatar" class="comment-avatar" alt="用户头像" />
+                <div class="comment-content">
+                    <span class="comment-header">{{ comment.nickname }}</span>
+                    <div class="comment-bubble">
+                        <p class="comment-body">{{ comment.content }}</p>
                     </div>
+                    <span class="comment-actions">
+                        <span class="comment-timestamp">{{ formatCommentDate(comment.createdTime) }}</span>
+
+                        <div style="font-size: 15px; margin-right: 15px;" title="点赞" @click="likeComment(comment)">
+                            <Sugar :style="{
+                                width: '1em',
+                                height: '1em',
+                                marginRight: '2px',
+                                color: comment.isLiked === 1 ? 'red' : ''
+                            }" />
+                            <span>{{ comment.likeCount }}</span>
+                        </div>
+
+                        <el-button v-if="comment.userId === userInfoStore.info.id" type="text"
+                            @click="confirmDelete(comment.id, comment.userId)"
+                            style="color: inherit; font-size: inherit; margin-left: 10px;">
+                            删除
+                        </el-button>
+                    </span>
                 </div>
             </div>
+
+
             <div class="comment-input">
                 <div class="input-container">
                     <el-input type="textarea" v-model="newComment" placeholder="请输入你的评论" rows="3" class="input"
@@ -354,7 +385,7 @@ const handleKeydown = (event) => {
 }
 
 .comment-timestamp {
-    font-size: 0.75em;
+    font-size: 1.2em;
     color: #999;
 
 }
@@ -366,10 +397,32 @@ const handleKeydown = (event) => {
     display: inline-block;
 }
 
-.delete-button {
-    margin-left: 10px;
-    color: #909399;
 
+
+.comment-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-size: 0.75em;
+    color: #999;
+}
+
+.comment-actions span {
+    margin-right: 10px;
+}
+
+
+.comment-actions .delete-button {
+    color: #409EFF;
+    /* 删除按钮颜色 */
+    font-size: 0.8em;
+
+}
+
+.comment-actions .like-button {
+    font-size: 0.8em;
 }
 
 .comment-author {
