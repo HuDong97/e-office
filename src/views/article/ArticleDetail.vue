@@ -281,9 +281,10 @@ const likeComment = async (comment) => {
           >
           <div style="margin-right: 10px">
             <img
-              :src="avatar"
+              :src="
+                avatar && avatar !== '' ? avatar : '/src/assets/default.png'
+              "
               alt="作者头像"
-              v-if="avatar"
               style="
                 width: 30px;
                 height: 30px;
@@ -291,9 +292,8 @@ const likeComment = async (comment) => {
                 object-fit: cover;
               "
             />
-            <strong v-else>{{ avatar }}</strong>
-            <!-- 如果没有头像，则显示链接 -->
           </div>
+
           <span class="article-author" style="margin-right: 10px">{{
             nickName
           }}</span>
@@ -353,7 +353,16 @@ const likeComment = async (comment) => {
   >
     <div class="comments-container">
       <div v-for="comment in comments" :key="comment.id" class="comment">
-        <img :src="comment.avatar" class="comment-avatar" alt="用户头像" />
+        <img
+          :src="
+            comment.avatar && comment.avatar !== ''
+              ? comment.avatar
+              : '/src/assets/default.png'
+          "
+          class="comment-avatar"
+          alt="用户头像"
+        />
+
         <div class="comment-content">
           <span class="comment-header">{{ comment.nickname }}</span>
           <div class="comment-bubble">
