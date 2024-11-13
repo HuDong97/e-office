@@ -87,11 +87,16 @@ const handleCommand = (command) => {
       :style="{ width: sidebarWidth }"
     >
       <div>
-        <el-button @click="toggleSidebar" plain class="toggle-sidebar-button1">
-          <el-icon class="toggle-sidebar-menu1" style="font-size: 25px">
+        <el-button class="toggle-sidebar-button1">
+          <el-icon
+            @click="toggleSidebar"
+            plain
+            class="toggle-sidebar-menu1"
+            style="font-size: 25px"
+          >
             <MenuIcon />
           </el-icon>
-          <a class="sidebar-logo">Eoffice</a>
+          <a class="sidebar-logo" @click="router.push('/home')">Eoffice</a>
         </el-button>
       </div>
       <el-menu
