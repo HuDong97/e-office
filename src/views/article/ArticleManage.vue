@@ -22,7 +22,7 @@ const state = ref("");
 const articles = ref([]);
 const pageNum = ref(1);
 const total = ref(20);
-const pageSize = ref(10);
+const pageSize = ref(5);
 const visibleDrawer = ref(false);
 const drewerTitle = ref("");
 const articleModel = ref({
@@ -297,7 +297,7 @@ const resetAndSearch = () => {
       <el-pagination
         v-model:current-page="pageNum"
         v-model:page-size="pageSize"
-        :page-sizes="[3, 5, 10, 15]"
+        :page-sizes="[5, 10, 15]"
         layout="jumper, total, sizes, prev, pager, next"
         background
         :total="total"
@@ -400,6 +400,11 @@ const resetAndSearch = () => {
 <style lang="scss" scoped>
 .page-container {
   min-height: 100%;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 20px;
+  padding: 2rem;
   box-sizing: border-box;
 
   .header {

@@ -108,6 +108,15 @@ const submitUpload = async () => {
 </template>
 
 <style lang="scss" scoped>
+.page-container {
+  min-height: 100%;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 20px;
+  padding: 2rem;
+  box-sizing: border-box;
+}
 .avatar-uploader {
   :deep() {
     .avatar {

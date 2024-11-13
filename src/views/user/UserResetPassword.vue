@@ -129,3 +129,15 @@ const handleCommand = () => {
     </el-row>
   </el-card>
 </template>
+
+<style lang="scss" scoped>
+.page-container {
+  min-height: 100%;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 20px;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+</style>

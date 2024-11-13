@@ -165,7 +165,12 @@ const title = ref("");
     </el-table>
 
     <!-- 添加分类弹窗 -->
-    <el-dialog v-model="dialogVisible" :title="title" width="30%">
+    <el-dialog
+      v-model="dialogVisible"
+      :title="title"
+      width="30%"
+      :style="{ borderRadius: '15px' }"
+    >
       <el-form
         :model="categoryModel"
         :rules="rules"
@@ -205,6 +210,11 @@ const title = ref("");
 <style lang="scss" scoped>
 .page-container {
   min-height: 100%;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 20px;
+  padding: 2rem;
   box-sizing: border-box;
 
   .header {

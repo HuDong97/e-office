@@ -1,8 +1,6 @@
 <script setup>
-import { ref } from "vue";
-import { ElPagination } from "element-plus";
+import { ref, computed } from "vue";
 
-const searchQuery = ref("");
 const posts = ref([
   {
     id: 1,
@@ -10,6 +8,7 @@ const posts = ref([
     contentSnippet: "帖子内容摘要1...",
     author: "作者1",
     createdAt: "2024-01-01",
+    views: 100,
   },
   {
     id: 2,
@@ -17,6 +16,7 @@ const posts = ref([
     contentSnippet: "帖子内容摘要2...",
     author: "作者2",
     createdAt: "2024-01-02",
+    views: 150,
   },
   {
     id: 3,
@@ -24,36 +24,29 @@ const posts = ref([
     contentSnippet: "帖子内容摘要3...",
     author: "作者3",
     createdAt: "2024-01-02",
+    views: 200,
   },
-
-  // 添加更多的帖子数据
-]);
-const currentPage = ref(1);
-const pageSize = ref(10);
-const totalPosts = ref(100);
-
-const popularTags = ref(["标签1", "标签2", "标签3"]);
-const recentPosts = ref([
-  { id: 1, title: "最新帖子1" },
-  { id: 2, title: "最新帖子2" },
-  { id: 3, title: "最新帖子3" },
-  { id: 4, title: "最新帖子4" },
-  { id: 5, title: "最新帖子5" },
-  { id: 6, title: "最新帖子6" },
-  { id: 7, title: "最新帖子7" },
-  { id: 8, title: "最新帖子8" },
-  { id: 9, title: "最新帖子9" },
-  { id: 10, title: "最新帖子10" },
-  // 添加更多的最新帖子数据
+  {
+    id: 4,
+    title: "帖子标题4",
+    contentSnippet: "帖子内容摘要4...",
+    author: "作者4",
+    createdAt: "2024-01-02",
+    views: 50,
+  },
 ]);
 
-const searchPosts = () => {
-  // 搜索帖子逻辑
-};
+const selectedTab = ref("popular"); // 默认显示热门文章
 
-const fetchPosts = () => {
-  // 获取帖子逻辑
-};
+const sortedPosts = computed(() => {
+  if (selectedTab.value === "latest") {
+    return [...posts.value].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+  } else {
+    return [...posts.value].sort((a, b) => b.views - a.views);
+  }
+});
 
 const formatDate = (dateStr) => {
   const date = new Date(dateStr);
@@ -66,61 +59,44 @@ const formatDate = (dateStr) => {
 
 <template>
   <el-card class="page-container">
-    <!-- 搜索框 -->
-    <section class="search-bar">
-      <input
-        type="text"
-        placeholder="搜索帖子..."
-        v-model="searchQuery"
-        @keyup.enter="searchPosts"
-      />
-      <button @click="searchPosts">搜索</button>
-    </section>
+    <!-- 切换按钮 -->
+    <div class="button-group">
+      <el-button
+        :type="selectedTab === 'popular' ? 'primary' : 'default'"
+        class="half-width-button no-border"
+        @click="selectedTab = 'popular'"
+        :style="{ backgroundColor: selectedTab === 'popular' ? '#E67762' : '' }"
+      >
+        热门文章
+      </el-button>
+      <el-button
+        :type="selectedTab === 'latest' ? 'primary' : 'default'"
+        class="half-width-button no-border"
+        @click="selectedTab = 'latest'"
+        :style="{ backgroundColor: selectedTab === 'latest' ? '#07c160' : '' }"
+      >
+        最新文章
+      </el-button>
+    </div>
 
     <!-- 主要内容区 -->
     <main class="main-content">
       <div class="posts-list">
         <!-- 帖子列表 -->
-        <div v-for="post in posts" :key="post.id" class="post-item">
-          <h2>{{ post.title }}</h2>
-          <p>{{ post.contentSnippet }}</p>
-          <div class="post-meta">
-            <span>作者: {{ post.author }}</span>
-            <span>发布时间: {{ formatDate(post.createdAt) }}</span>
+        <div v-for="post in sortedPosts" :key="post.id" class="post-item">
+          <div class="cover-box">
+            <img src="/src/assets/default.png" alt="封面" class="cover-image" />
+          </div>
+          <div class="post-content">
+            <h2>{{ post.title }}</h2>
+            <p>{{ post.contentSnippet }}</p>
+            <div class="post-meta">
+              <span>作者: {{ post.author }}</span>
+              <span>发布时间: {{ formatDate(post.createdAt) }}</span>
+            </div>
           </div>
         </div>
-
-        <!-- 分页组件 -->
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :total="totalPosts"
-          @current-change="fetchPosts"
-          @size-change="fetchPosts"
-          layout="prev, pager, next"
-          background
-        ></el-pagination>
       </div>
-
-      <!-- 侧边栏 -->
-      <aside class="sidebar">
-        <div class="sidebar-section">
-          <h3>热门标签</h3>
-          <div class="tags">
-            <span v-for="tag in popularTags" :key="tag" class="tag">{{
-              tag
-            }}</span>
-          </div>
-        </div>
-        <div class="sidebar-section">
-          <h3>最新关注</h3>
-          <ul>
-            <li v-for="recentPost in recentPosts" :key="recentPost.id">
-              {{ recentPost.title }}
-            </li>
-          </ul>
-        </div>
-      </aside>
     </main>
   </el-card>
 </template>
@@ -128,60 +104,74 @@ const formatDate = (dateStr) => {
 <style lang="scss" scoped>
 .page-container {
   min-height: 100%;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 20px;
+  padding: 0;
   box-sizing: border-box;
-
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
 }
 
-.search-bar {
+.el-card {
+  border-radius: 20px;
+}
+
+/* 按钮区域样式 */
+.button-group {
   display: flex;
-  justify-content: center;
-  padding: 1rem;
-  background-color: #ececec;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
 }
 
-.search-bar input {
-  width: 300px;
-  padding: 0.5rem;
-  margin-right: 1rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-}
-
-.search-bar button {
-  padding: 0.5rem 1rem;
-  background-color: #007bff;
-  color: #fff;
+.half-width-button {
+  width: 50%;
+  margin-left: 0;
+  margin-right: 0;
   border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  padding: 0;
 }
 
-.search-bar button:hover {
-  background-color: #0056b3;
+.no-border {
+  border: none;
 }
 
 .main-content {
   display: flex;
   flex: 1;
-  padding: 1rem;
+  padding: 0;
 }
 
 .posts-list {
   flex: 3;
-  margin-right: 1rem;
+  margin-right: 0;
 }
 
 .post-item {
+  display: flex;
   padding: 1.5rem;
   margin-bottom: 1rem;
   background-color: #fff;
-  border-radius: 4px;
+  border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cover-box {
+  width: 88px;
+  height: 88px;
+  margin-right: 1rem;
+  overflow: hidden;
+  border-radius: 8px;
+  background-color: #f0f0f0;
+}
+
+.cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-content {
+  flex: 1;
 }
 
 .post-item h2 {
@@ -198,37 +188,7 @@ const formatDate = (dateStr) => {
 .post-meta {
   font-size: 0.875rem;
   color: #adb5bd;
-}
-
-.sidebar {
-  flex: 1;
-}
-
-.sidebar-section {
-  margin-bottom: 1.5rem;
-  background-color: #fff;
-  padding: 1rem;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.sidebar-section h3 {
-  margin: 0 0 1rem 0;
-  font-size: 1.25rem;
-  color: #343a40;
-}
-
-.tags .tag {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  margin: 0.25rem;
-  background-color: #007bff;
-  color: #fff;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.tags .tag:hover {
-  background-color: #0056b3;
+  display: flex;
+  gap: 1rem;
 }
 </style>

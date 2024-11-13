@@ -407,7 +407,8 @@ const likeComment = async (comment) => {
             type="textarea"
             v-model="newComment"
             placeholder="请输入你的评论"
-            rows="3"
+            rows="1"
+            :autosize="{ minRows: 1, maxRows: 6 }"
             class="input"
             @keydown="handleKeydown"
           >
@@ -503,10 +504,6 @@ const likeComment = async (comment) => {
   max-height: 75vh;
 }
 
-.comment-input {
-  margin-top: 20px;
-}
-
 .article-date {
   margin-right: 30px;
 }
@@ -534,14 +531,17 @@ const likeComment = async (comment) => {
 }
 
 .article-container {
-  max-width: 65%;
-  height: 55vh;
-  margin: 10vh auto;
-  padding: 25px;
+  width: 100%; /* 合并后确保宽度为100% */
+  max-width: 1200px; /* 使用最大限制的1200px */
+  height: 55vh; /* 保留原样 */
+  min-height: 100%; /* 保留原样 */
+  margin: 0 auto; /* 使用最终生效的居中方式 */
+  padding: 2rem; /* 使用较后面的定义 */
   font-family: "Arial", sans-serif;
   background-color: #fff;
-  border-radius: 8px;
+  border-radius: 20px; /* 使用最终生效的20px */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box; /* 保留定义 */
 }
 
 .article-header {

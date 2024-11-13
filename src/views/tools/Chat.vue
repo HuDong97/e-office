@@ -84,73 +84,94 @@ const scrollToBottom = () => {
     chatWindow.scrollTop = chatWindow.scrollHeight;
   });
 };
+
+const handleKeydown = (event) => {
+  if (event.key === "Enter" && event.shiftKey) {
+    // Shift + Enter 换行
+    return;
+  } else if (event.key === "Enter" && !event.shiftKey) {
+    // Enter 发送消息
+    sendMessage();
+    event.preventDefault(); // 防止换行
+  }
+};
 </script>
 
 <template>
-  <div class="tools">
-    <el-container>
-      <el-main>
-        <el-row :gutter="20" class="chat-container">
-          <el-col :span="17">
-            <div class="chat-card">
-              <h2>Ai助手</h2>
-              <div class="chat-window">
-                <transition-group name="message-fade" tag="div">
-                  <div
-                    v-for="message in chatMessages"
-                    :key="message.id"
-                    :class="[
-                      'chat-message',
-                      message.sender === userInfoStore.info.userPic
-                        ? 'user-message'
-                        : 'system-message',
-                    ]"
-                  >
-                    <div class="message-content">
-                      <span class="message-text">{{ message.text }}</span>
-                      <span class="timestamp">{{ message.timestamp }}</span>
-                    </div>
-                    <img
-                      :src="message.sender"
-                      v-if="message.sender === userInfoStore.info.userPic"
-                      class="avatar"
-                      alt="Avatar"
-                    />
-                    <span class="sender" v-else>{{ message.sender }}</span>
-                  </div>
-                </transition-group>
+  <el-card class="page-container">
+    <template #header>
+      <div class="header">
+        <span>AI助手</span>
+      </div>
+    </template>
+
+    <el-row>
+      <el-col :span="24">
+        <div class="chat-card">
+          <div class="chat-window">
+            <transition-group name="message-fade" tag="div">
+              <div
+                v-for="message in chatMessages"
+                :key="message.id"
+                :class="[
+                  'chat-message',
+                  message.sender === userInfoStore.info.userPic
+                    ? 'user-message'
+                    : 'system-message',
+                ]"
+              >
+                <div class="message-content">
+                  <span class="message-text">{{ message.text }}</span>
+                  <span class="timestamp">{{ message.timestamp }}</span>
+                </div>
+                <img
+                  :src="message.sender"
+                  v-if="message.sender === userInfoStore.info.userPic"
+                  class="avatar"
+                  alt="Avatar"
+                />
+                <span class="sender" v-else>{{ message.sender }}</span>
               </div>
+            </transition-group>
+          </div>
+
+          <div class="input-area">
+            <div class="input-container">
               <el-input
+                type="textarea"
                 v-model="newMessage"
                 placeholder="输入你的消息"
-                @keyup.enter="sendMessage"
-                :disabled="sending"
-                class="input-box"
+                rows="1"
+                :autosize="{ minRows: 1, maxRows: 6 }"
+                class="input"
+                @keydown="handleKeydown"
               ></el-input>
               <el-button
                 type="primary"
                 @click="sendMessage"
                 :disabled="sending"
                 class="send-button"
-                >发送</el-button
               >
-              <div v-if="error" class="error-message">{{ error }}</div>
+                发送
+              </el-button>
             </div>
-          </el-col>
-        </el-row>
-      </el-main>
-    </el-container>
-  </div>
+          </div>
+          <div v-if="error" class="error-message">{{ error }}</div>
+        </div>
+      </el-col>
+    </el-row>
+  </el-card>
 </template>
 
 <style scoped>
-.tools {
-  padding: 20px;
-}
-
-.chat-container {
-  margin-top: 20px;
-  justify-content: center;
+.page-container {
+  min-height: 100%;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 20px;
+  padding: 2rem;
+  box-sizing: border-box;
 }
 
 .chat-card {
@@ -257,11 +278,20 @@ const scrollToBottom = () => {
   border-radius: 50%;
 }
 
-.input-box {
-  margin-top: 5px;
+.input-container {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.input {
+  flex-grow: 1;
+  margin-right: 10px;
 }
 
 .send-button {
-  margin-top: 10px;
+  margin-left: 10px;
+  height: auto;
 }
 </style>
