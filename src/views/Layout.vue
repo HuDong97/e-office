@@ -1,7 +1,7 @@
 <script setup>
 import {
   Management,
-  Tools,
+  MagicStick,
   House,
   Promotion,
   UserFilled,
@@ -9,7 +9,6 @@ import {
   Crop,
   EditPen,
   SwitchButton,
-  CaretBottom,
   Message,
   Menu as MenuIcon,
 } from "@element-plus/icons-vue";
@@ -127,7 +126,7 @@ const handleCommand = (command) => {
         </el-menu-item>
         <el-menu-item index="/chat">
           <el-icon>
-            <Tools />
+            <MagicStick />
           </el-icon>
           <span>Ai助手</span>
         </el-menu-item>
