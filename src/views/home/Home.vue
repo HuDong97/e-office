@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed, onMounted } from "vue"; // 导入 onMounted
-import { getLatestArticlesService } from "@/api/article.js"; // 获取最新文章的接口
+import { ref, computed, onMounted } from "vue";
+import { getLatestArticlesService } from "@/api/article.js";
+import { useRouter } from "vue-router";
 
 // 存储最新文章数据
 const posts = ref([]);
@@ -80,6 +81,12 @@ const truncateContent = (content, limit = 10) => {
   }
   return content;
 };
+
+// 使用 vue-router 的路由推送进行页面跳转
+const router = useRouter();
+const goToArticleDetail = (id) => {
+  router.push({ path: "/article/detail", query: { id: id } });
+};
 </script>
 
 <template>
@@ -108,7 +115,12 @@ const truncateContent = (content, limit = 10) => {
     <main class="main-content">
       <div class="posts-list">
         <!-- 帖子列表 -->
-        <div v-for="post in sortedPosts" :key="post.id" class="post-item">
+        <div
+          v-for="post in sortedPosts"
+          :key="post.id"
+          class="post-item"
+          @click="goToArticleDetail(post.id)"
+        >
           <div class="cover-box">
             <img
               :src="post.coverImg || '/src/assets/default.png'"
@@ -118,6 +130,7 @@ const truncateContent = (content, limit = 10) => {
           </div>
           <div class="post-content">
             <h2>{{ post.title }}</h2>
+
             <!-- 使用 truncateContent 来截取文章内容 -->
             <div
               v-html="truncateContent(post.contentSnippet || post.content)"
