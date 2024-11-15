@@ -62,3 +62,8 @@ export const articleDeleteService = (id) => {
 export const articleDetailService = (id) => {
   return request.get("/article/detail", { params: { id } });
 };
+
+// 获取最新4篇文章
+export const getLatestArticlesService = () => {
+  return request.get("/article/latestArticles");
+};

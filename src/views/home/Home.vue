@@ -1,7 +1,11 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue"; // 导入 onMounted
+import { getLatestArticlesService } from "@/api/article.js"; // 获取最新文章的接口
 
-const posts = ref([
+// 存储最新文章数据
+const posts = ref([]);
+// 存储热门文章模拟数据
+const popularPosts = ref([
   {
     id: 1,
     title: "帖子标题1",
@@ -36,24 +40,45 @@ const posts = ref([
   },
 ]);
 
-const selectedTab = ref("popular"); // 默认显示热门文章
-
-const sortedPosts = computed(() => {
-  if (selectedTab.value === "latest") {
-    return [...posts.value].sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    );
-  } else {
-    return [...posts.value].sort((a, b) => b.views - a.views);
+// 获取最新文章列表并更新 posts
+onMounted(async () => {
+  try {
+    const response = await getLatestArticlesService(); // 获取最新文章接口
+    if (response.data && response.data.length > 0) {
+      posts.value = response.data;
+    }
+  } catch (error) {
+    console.error("获取最新文章失败:", error);
   }
 });
 
+// 切换选项的逻辑
+const selectedTab = ref("latest"); // 默认显示最新文章
+
+// 格式化日期
 const formatDate = (dateStr) => {
   const date = new Date(dateStr);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
     2,
     "0"
   )}-${String(date.getDate()).padStart(2, "0")}`;
+};
+
+// 计算属性，返回当前选中的文章数据
+const sortedPosts = computed(() => {
+  if (selectedTab.value === "latest") {
+    return posts.value;
+  } else {
+    return popularPosts.value;
+  }
+});
+
+// 截取文章内容并加上省略号
+const truncateContent = (content, limit = 10) => {
+  if (content && content.length > limit) {
+    return content.slice(0, limit) + "...";
+  }
+  return content;
 };
 </script>
 
@@ -85,13 +110,23 @@ const formatDate = (dateStr) => {
         <!-- 帖子列表 -->
         <div v-for="post in sortedPosts" :key="post.id" class="post-item">
           <div class="cover-box">
-            <img src="/src/assets/default.png" alt="封面" class="cover-image" />
+            <img
+              :src="post.coverImg || '/src/assets/default.png'"
+              alt="封面"
+              class="cover-image"
+            />
           </div>
           <div class="post-content">
             <h2>{{ post.title }}</h2>
-            <p>{{ post.contentSnippet }}</p>
+            <!-- 使用 truncateContent 来截取文章内容 -->
+            <div
+              v-html="truncateContent(post.contentSnippet || post.content)"
+            ></div>
             <div class="post-meta">
-              <span>发布时间: {{ formatDate(post.createdAt) }}</span>
+              <span
+                >发布时间:
+                {{ formatDate(post.createTime || post.createdAt) }}</span
+              >
             </div>
           </div>
         </div>
