@@ -91,7 +91,6 @@ const formatDate = (dateStr) => {
             <h2>{{ post.title }}</h2>
             <p>{{ post.contentSnippet }}</p>
             <div class="post-meta">
-              <span>作者: {{ post.author }}</span>
               <span>发布时间: {{ formatDate(post.createdAt) }}</span>
             </div>
           </div>

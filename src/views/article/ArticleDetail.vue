@@ -4,7 +4,7 @@ import { Star, View, Sugar, ChatDotRound, Back } from "@element-plus/icons-vue";
 import { ref, onMounted, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import DOMPurify from "dompurify";
-import { ElMessage, ElMessageBox } from "element-plus"; // 引入 ElMessageBox 用于确认删除评论
+import { ElMessage, ElMessageBox } from "element-plus";
 import { articleDetailService } from "@/api/article.js";
 import {
   userBehaviorService,
