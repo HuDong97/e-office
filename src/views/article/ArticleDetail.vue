@@ -299,44 +299,61 @@ const likeComment = async (comment) => {
           }}</span>
         </span>
         <span class="article-icons" style="display: flex; align-items: center">
-          <div style="font-size: 20px; margin-right: 15px" title="浏览量">
-            <View style="width: 1em; height: 1em; margin-right: 2px" />
-            <span>{{ userBehavior.viewsCount }}</span>
-          </div>
-          <div
-            style="font-size: 20px; margin-right: 15px"
-            title="点赞"
-            @click="likeUserBehavior"
+          <el-tooltip content="浏览量" popper-class="custom-tooltip">
+            <div style="font-size: 20px; margin-right: 15px">
+              <View style="width: 1em; height: 1em; margin-right: 2px" />
+              <span>{{ userBehavior.viewsCount }}</span>
+            </div>
+          </el-tooltip>
+
+          <el-tooltip content="点赞" popper-class="custom-tooltip">
+            <div
+              style="font-size: 20px; margin-right: 15px"
+              @click="likeUserBehavior"
+              class="icon-heartbeat"
+            >
+              <Sugar
+                :style="{
+                  width: '1em',
+                  height: '1em',
+                  marginRight: '2px',
+                  color: userBehavior.liked ? 'red' : '',
+                }"
+              />
+              <span>{{ userBehavior.likesCount }}</span>
+            </div>
+          </el-tooltip>
+
+          <el-tooltip content="收藏" popper-class="custom-tooltip">
+            <div
+              style="font-size: 20px; margin-right: 15px"
+              @click="toggleBookmark"
+              class="icon-heartbeat"
+            >
+              <Star
+                :style="{
+                  width: '1em',
+                  height: '1em',
+                  marginRight: '2px',
+                  color: userBehavior.bookmarked ? '#FFC107' : '',
+                }"
+              />
+              <span>{{ userBehavior.favoritesCount }}</span>
+            </div>
+          </el-tooltip>
+
+          <el-tooltip content="评论" popper-class="custom-tooltip"
+            ><div
+              style="font-size: 20px"
+              @click="toggleComments"
+              class="icon-heartbeat"
+            >
+              <ChatDotRound
+                style="width: 1em; height: 1em; margin-right: 2px"
+              />
+              <span>{{ userBehavior.commentsCount }}</span>
+            </div></el-tooltip
           >
-            <Sugar
-              :style="{
-                width: '1em',
-                height: '1em',
-                marginRight: '2px',
-                color: userBehavior.liked ? 'red' : '',
-              }"
-            />
-            <span>{{ userBehavior.likesCount }}</span>
-          </div>
-          <div
-            style="font-size: 20px; margin-right: 15px"
-            title="收藏"
-            @click="toggleBookmark"
-          >
-            <Star
-              :style="{
-                width: '1em',
-                height: '1em',
-                marginRight: '2px',
-                color: userBehavior.bookmarked ? 'yellow' : '',
-              }"
-            />
-            <span>{{ userBehavior.favoritesCount }}</span>
-          </div>
-          <div style="font-size: 20px" title="评论" @click="toggleComments">
-            <ChatDotRound style="width: 1em; height: 1em; margin-right: 2px" />
-            <span>{{ userBehavior.commentsCount }}</span>
-          </div>
         </span>
       </p>
     </div>
@@ -531,17 +548,17 @@ const likeComment = async (comment) => {
 }
 
 .article-container {
-  width: 100%; /* 合并后确保宽度为100% */
-  max-width: 1200px; /* 使用最大限制的1200px */
-  height: 55vh; /* 保留原样 */
-  min-height: 100%; /* 保留原样 */
-  margin: 0 auto; /* 使用最终生效的居中方式 */
-  padding: 2rem; /* 使用较后面的定义 */
+  width: 100%;
+  max-width: 1200px;
+  height: 55vh;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 2rem;
   font-family: "Arial", sans-serif;
   background-color: #fff;
-  border-radius: 20px; /* 使用最终生效的20px */
+  border-radius: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box; /* 保留定义 */
+  box-sizing: border-box;
 }
 
 .article-header {
@@ -599,5 +616,30 @@ const likeComment = async (comment) => {
 
 .send-button {
   height: auto;
+}
+
+.icon-heartbeat {
+  display: inline-block;
+  transition: transform 0.2s ease-in-out;
+}
+
+.icon-heartbeat :hover {
+  animation: heartbeat 0.3s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+.custom-tooltip {
+  border-radius: 10px;
+  padding: 5px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 </style>
