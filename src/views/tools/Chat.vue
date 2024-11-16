@@ -293,5 +293,6 @@ const handleKeydown = (event) => {
 .send-button {
   margin-left: 10px;
   height: auto;
+  border-radius: 50px;
 }
 </style>

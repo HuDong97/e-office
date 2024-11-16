@@ -216,11 +216,50 @@ const title = ref("");
   border-radius: 20px;
   padding: 2rem;
   box-sizing: border-box;
+  background-color: #fff;
 
   .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    border-radius: 15px;
+    padding: 10px;
+  }
+
+  .el-table {
+    border-radius: 15px;
+    overflow: hidden;
+  }
+
+  .el-table th,
+  .el-table td {
+    border-radius: 10px;
+  }
+
+  .el-button {
+    border-radius: 50px;
+  }
+
+  .el-dialog {
+    border-radius: 15px;
+  }
+
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+
+    .el-button {
+      border-radius: 50px;
+    }
+  }
+
+  .el-input {
+    border-radius: 8px;
+  }
+
+  .el-form-item {
+    margin-bottom: 15px;
   }
 }
 </style>

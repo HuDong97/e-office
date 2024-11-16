@@ -503,7 +503,6 @@ const likeComment = async (comment) => {
 
 .comment-actions .delete-button {
   color: #409eff;
-  /* 删除按钮颜色 */
   font-size: 0.8em;
 }
 
@@ -580,6 +579,7 @@ const likeComment = async (comment) => {
 
 .back-button {
   margin-left: auto;
+  border-radius: 20px;
 }
 
 .article-meta {

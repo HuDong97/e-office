@@ -414,6 +414,26 @@ const resetAndSearch = () => {
   }
 }
 
+.el-button {
+  border-radius: 50px;
+}
+
+.el-form,
+.el-input,
+.el-select,
+.el-upload {
+  border-radius: 10px;
+}
+
+.el-drawer,
+.el-dialog {
+  border-radius: 20px;
+}
+
+.el-dialog__footer .el-button {
+  border-radius: 50px;
+}
+
 .avatar-uploader {
   :deep() {
     .avatar {
