@@ -1,6 +1,3 @@
-// 导入主要的样式文件
-import "./assets/main.scss";
-
 // 导入必要的库和组件
 import { createApp } from "vue"; //导入vue
 import ElementPlus from "element-plus"; //导入element-plus
@@ -10,6 +7,8 @@ import App from "./App.vue"; // 导入根组件（App.vue）
 import { createPinia } from "pinia"; // 导入Pinia用于状态管理
 import { createPersistedState } from "pinia-persistedstate-plugin"; // 导入Pinia插件用于状态持久化
 import locale from "element-plus/dist/locale/zh-cn.js"; // 导入Element Plus的中文语言包
+// 导入主要的样式文件
+import "./assets/main.scss";
 
 // 创建Vue应用实例
 const app = createApp(App);

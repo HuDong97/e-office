@@ -397,7 +397,7 @@ const resetAndSearch = () => {
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .page-container {
   min-height: 100%;
   width: 100%;
@@ -415,7 +415,11 @@ const resetAndSearch = () => {
 }
 
 .el-button {
-  border-radius: 50px;
+  border-radius: 20px;
+}
+
+.el-message-box {
+  border-radius: 20px;
 }
 
 .el-form,

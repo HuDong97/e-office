@@ -439,7 +439,7 @@ const likeComment = async (comment) => {
   </el-drawer>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .comment {
   display: flex;
   align-items: flex-start;
