@@ -176,7 +176,7 @@ const handleCommand = (command) => {
       </el-icon>
     </el-button>
     <el-container>
-      <el-header class="el-header1">
+      <el-header>
         <div>
           当前用户：<strong>{{ userInfoStore.info.nickname }}</strong>
         </div>
@@ -233,10 +233,6 @@ const handleCommand = (command) => {
 .disable-scroll {
   overflow: hidden;
   /* 禁用侧边栏出现时的滚动条 */
-}
-
-.el-header1 {
-  border-radius: 10px;
 }
 
 .sidebar-logo {

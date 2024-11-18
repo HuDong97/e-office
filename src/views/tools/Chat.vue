@@ -163,7 +163,7 @@ const handleKeydown = (event) => {
   </el-card>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .page-container {
   min-height: 100%;
   width: 100%;

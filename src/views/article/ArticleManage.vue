@@ -435,7 +435,7 @@ const resetAndSearch = () => {
 }
 
 .el-dialog__footer .el-button {
-  border-radius: 50px;
+  border-radius: 20px;
 }
 
 .avatar-uploader {

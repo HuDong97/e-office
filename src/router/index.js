@@ -8,7 +8,7 @@ import UserAvatarVue from "@/views/user/UserAvatar.vue";
 import UserInfoVue from "@/views/user/UserInfo.vue";
 import UserResetEmailVue from "@/views/user/UserResetEmail.vue";
 import UserResetPasswordVue from "@/views/user/UserResetPassword.vue";
-import HomeVue from "@/views/home/Home.vue";
+import HomeVue from "@/views/Home.vue";
 import ChatVue from "@/views/tools/Chat.vue";
 import NotFound from "@/views/404/NotFound.vue";
 
@@ -17,13 +17,13 @@ import useUserInfoStore from "@/stores/userInfo.js";
 // 定义路由关系
 const routes = [
   { path: "/login", component: LoginVue },
+  { path: "/home", component: HomeVue },
   {
     path: "/",
     component: LayoutVue,
     redirect: "/home",
     children: [
       { path: "/chat", component: ChatVue },
-      { path: "/home", component: HomeVue },
       { path: "/category", component: ArticleCategoryVue },
       { path: "/article/manage", component: ArticleManageVue },
       { path: "/article/detail", component: ArticleDetail },
