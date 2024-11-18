@@ -474,7 +474,6 @@ const scrollToTop = () => {
 </template>
 
 <style lang="scss" scoped>
-html,
 .el-header {
   z-index: 0;
   position: absolute;
@@ -502,14 +501,14 @@ html,
   }
 }
 .el-header > div {
-  margin-left: 10px; /* 设置左间距 */
+  margin-left: 10px;
 }
 .el-avatar {
-  margin-right: 10px; /* 设置头像的右间距 */
+  margin-right: 10px;
 }
-/* 固定侧边栏 */
+
 .sidebar-wrapper {
-  position: fixed; /* 固定在页面的左侧 */
+  position: fixed;
   z-index: 10;
   top: 0px;
   left: 0;
@@ -547,7 +546,7 @@ html,
 }
 
 .page-container {
-  margin: 0 auto; /* 居中 */
+  margin: 0 auto;
   border-radius: 20px;
   padding: 0;
   z-index: 10;
@@ -559,7 +558,6 @@ html,
   border-radius: 20px;
 }
 
-/* 按钮区域样式 */
 .button-group {
   display: flex;
   justify-content: flex-start;
