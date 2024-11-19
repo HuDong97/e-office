@@ -173,7 +173,6 @@ let currentPostIndex = 0;
 // 滚动事件控制显示弹窗和加载更多数据
 const handleScroll = throttle((event) => {
   event.preventDefault(); // 阻止默认滚动行为
-
   // 判断滚动方向，只有向下滚动才加载文章
 
   if (event.deltaY <= 0) return; // 向上滚动时不执行任何操作
@@ -224,19 +223,19 @@ const handleScroll = throttle((event) => {
     });
 
     // 手动让页面滚动到底部
-
-    window.scrollTo(0, document.body.scrollHeight);
   }
 }, 200); // 设置为 200 毫秒触发一次
 
 // 绑定滚动事件
 onMounted(() => {
   window.addEventListener("wheel", handleScroll, { passive: false }); // passive: false 确保可以调用 preventDefault
+  window.addEventListener("scroll", handleScroll, { passive: true }); // 添加 scroll 事件
 });
 
 // 移除滚动事件
 onBeforeUnmount(() => {
   window.removeEventListener("wheel", handleScroll);
+  window.removeEventListener("scroll", handleScroll); // 移除 scroll 事件
 });
 
 const scrollToTop = () => {
