@@ -29,8 +29,8 @@ import { ElMessage, ElMessageBox } from "element-plus";
 // 计算顶部导航栏的宽度，减去侧边栏宽度
 const headerWidth = computed(() => {
   return isSidebarVisible.value
-    ? `calc(100vw - ${sidebarWidth.value}-15px)` // 侧边栏可见时，不预留空位
-    : `calc(100vw - 55px)`; // 侧边栏隐藏时，预留右侧40px空位
+    ? `calc(100vw - ${sidebarWidth.value})`
+    : `calc(100vw - 55px)`;
 });
 
 const tokenStore = useTokenStore();
@@ -182,11 +182,9 @@ const handleScroll = throttle((event) => {
 
   scrollCount++;
 
-  // 滚动达到3次后显示返回顶部按钮
+  // 当滚动偏移量超出可视窗口高度时显示返回顶部按钮
+  showBackToTop.value = window.scrollY > window.innerHeight;
 
-  if (scrollCount >= 3) {
-    showBackToTop.value = true;
-  }
   // 获取所有 el-card 元素的总高度
   const cards = document.querySelectorAll(".el-card .post-item");
   const totalHeight = Array.from(cards).reduce(
@@ -475,8 +473,8 @@ const scrollToTop = () => {
 
 <style lang="scss" scoped>
 .el-header {
+  position: fixed;
   z-index: 0;
-  position: absolute;
   top: 0;
   right: 0;
   background-color: #fff;
@@ -593,6 +591,11 @@ const scrollToTop = () => {
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+.post-item:hover {
+  background-color: #f7f7f7;
 }
 
 .cover-box {
@@ -639,18 +642,33 @@ const scrollToTop = () => {
 
 .sidebar-logo {
   position: absolute;
-  top: -32px;
+  top: -29px;
   left: 52px;
-  font-size: 25px;
+
+  font-family: Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 400;
   color: #ffffff;
+  text-transform: none;
+  letter-spacing: normal;
+  line-height: normal;
 }
 
-.toggle-sidebar-button1,
-.toggle-sidebar-button {
+.toggle-sidebar-button1 {
   width: 50px;
   background-color: transparent;
   border: 1px solid transparent;
   padding: 0;
+}
+
+.toggle-sidebar-button {
+  position: fixed;
+  width: 50px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  padding: 0;
+  top: 1px;
+  left: 1px;
 }
 
 .toggle-sidebar-menu1 {

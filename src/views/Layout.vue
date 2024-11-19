@@ -238,10 +238,15 @@ const handleCommand = (command) => {
 .sidebar-logo {
   position: absolute;
   /* 使用绝对定位 */
-  top: 5px;
-  left: 50px;
+  top: 3px;
+  left: 52px;
+  font-family: Arial, sans-serif;
   font-size: 24px;
+  font-weight: 400;
   color: #ffffff;
+  text-transform: none;
+  letter-spacing: normal;
+  line-height: normal;
 }
 
 .toggle-sidebar-button1 {
