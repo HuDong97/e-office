@@ -194,20 +194,6 @@ const handleScroll = throttle((event) => {
   // 页面内容区的滚动偏移量+可视窗口高度
   const scrollPosition = window.scrollY + window.innerHeight;
 
-  console.log(
-    "滚轮偏移量 + 可视窗口高度:",
-    scrollPosition,
-
-    "滚轮偏移量:",
-    window.scrollY,
-
-    "可视窗口高度:",
-    window.innerHeight,
-
-    "页面总高度:",
-    totalHeight
-  );
-
   // 判断是否滚动到 `el-card` 元素的总高度，加载更多文章
   if (
     scrollPosition >= totalHeight - 50 &&

@@ -367,6 +367,7 @@ const resetAndSearch = () => {
                   [{ indent: '-1' }, { indent: '+1' }],
                   [{ size: ['small', false, 'large', 'huge'] }],
                 ]"
+                :style="{ height: '260px' }"
               >
               </QuillEditor>
             </div>
@@ -458,22 +459,27 @@ const resetAndSearch = () => {
     .el-upload:hover {
       border-color: var(--el-color-primary);
     }
-
-    .el-icon.avatar-uploader-icon {
-      font-size: 28px;
-      color: #8c939d;
-      width: 178px;
-      height: 178px;
-      text-align: center;
-    }
   }
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
+
+  border: 1px dashed #a9aaac;
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .editor {
   width: 100%;
 
   :deep(.ql-editor) {
-    min-height: 200px;
+    min-height: 260px;
   }
 }
 </style>
