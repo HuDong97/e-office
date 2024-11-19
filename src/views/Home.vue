@@ -307,96 +307,94 @@ const scrollToTop = () => {
       </el-dropdown>
     </el-header>
 
-    <div class="sidebar-wrapper">
-      <el-aside
-        :class="{
-          'sidebar-hidden': !isSidebarVisible,
-          'disable-scroll': isSidebarVisible,
-        }"
-        class="sidebar-transition"
-        :style="{ width: sidebarWidth }"
+    <el-aside
+      :class="{
+        'sidebar-hidden': !isSidebarVisible,
+        'disable-scroll': isSidebarVisible,
+      }"
+      class="sidebar-transition"
+      :style="{ width: sidebarWidth }"
+    >
+      <div>
+        <el-button class="toggle-sidebar-button1">
+          <el-icon
+            @click="toggleSidebar"
+            plain
+            class="toggle-sidebar-menu1"
+            style="font-size: 25px"
+          >
+            <MenuIcon />
+          </el-icon>
+        </el-button>
+      </div>
+      <el-menu
+        active-text-color=" #ffd04b"
+        background-color="#232323"
+        text-color="#fff"
+        router
       >
-        <div>
-          <el-button class="toggle-sidebar-button1">
-            <el-icon
-              @click="toggleSidebar"
-              plain
-              class="toggle-sidebar-menu1"
-              style="font-size: 25px"
-            >
-              <MenuIcon />
-            </el-icon>
-          </el-button>
-        </div>
-        <el-menu
-          active-text-color=" #ffd04b"
-          background-color="#232323"
-          text-color="#fff"
-          router
-        >
-          <a class="sidebar-logo" @click="router.push('/home')">Eoffice</a>
-          <el-menu-item index="/home">
+        <a class="sidebar-logo" @click="router.push('/home')">Eoffice</a>
+        <el-menu-item index="/home">
+          <el-icon>
+            <House />
+          </el-icon>
+          <span>论坛首页</span>
+        </el-menu-item>
+        <template v-if="userInfoStore.info.permissions === 'admin'">
+          <el-menu-item index="/category">
             <el-icon>
-              <House />
+              <Management />
             </el-icon>
-            <span>论坛首页</span>
+            <span>文章分类</span>
           </el-menu-item>
-          <template v-if="userInfoStore.info.permissions === 'admin'">
-            <el-menu-item index="/category">
-              <el-icon>
-                <Management />
-              </el-icon>
-              <span>文章分类</span>
-            </el-menu-item>
-          </template>
-          <el-menu-item index="/article/manage">
-            <el-icon>
-              <Promotion />
-            </el-icon>
-            <span>文章管理</span>
-          </el-menu-item>
-          <el-menu-item index="/chat">
-            <el-icon>
-              <MagicStick />
-            </el-icon>
-            <span>Ai助手</span>
-          </el-menu-item>
+        </template>
+        <el-menu-item index="/article/manage">
+          <el-icon>
+            <Promotion />
+          </el-icon>
+          <span>文章管理</span>
+        </el-menu-item>
+        <el-menu-item index="/chat">
+          <el-icon>
+            <MagicStick />
+          </el-icon>
+          <span>Ai助手</span>
+        </el-menu-item>
 
-          <el-sub-menu>
-            <template #title>
-              <el-icon>
-                <UserFilled />
-              </el-icon>
-              <span>个人中心</span>
-            </template>
-            <el-menu-item index="/user/info">
-              <el-icon>
-                <User />
-              </el-icon>
-              <span>基本资料</span>
-            </el-menu-item>
-            <el-menu-item index="/user/avatar">
-              <el-icon>
-                <Crop />
-              </el-icon>
-              <span>更换头像</span>
-            </el-menu-item>
-            <el-menu-item index="/user/resetPassword">
-              <el-icon>
-                <EditPen />
-              </el-icon>
-              <span>重置密码</span>
-            </el-menu-item>
-            <el-menu-item index="/user/resetEmail">
-              <el-icon>
-                <Message />
-              </el-icon>
-              <span>更换邮箱</span>
-            </el-menu-item>
-          </el-sub-menu>
-        </el-menu>
-      </el-aside>
-    </div>
+        <el-sub-menu>
+          <template #title>
+            <el-icon>
+              <UserFilled />
+            </el-icon>
+            <span>个人中心</span>
+          </template>
+          <el-menu-item index="/user/info">
+            <el-icon>
+              <User />
+            </el-icon>
+            <span>基本资料</span>
+          </el-menu-item>
+          <el-menu-item index="/user/avatar">
+            <el-icon>
+              <Crop />
+            </el-icon>
+            <span>更换头像</span>
+          </el-menu-item>
+          <el-menu-item index="/user/resetPassword">
+            <el-icon>
+              <EditPen />
+            </el-icon>
+            <span>重置密码</span>
+          </el-menu-item>
+          <el-menu-item index="/user/resetEmail">
+            <el-icon>
+              <Message />
+            </el-icon>
+            <span>更换邮箱</span>
+          </el-menu-item>
+        </el-sub-menu>
+      </el-menu>
+    </el-aside>
     <el-button
       v-show="!isSidebarVisible"
       @click="toggleSidebar"
@@ -503,15 +501,6 @@ const scrollToTop = () => {
 }
 .el-avatar {
   margin-right: 10px;
-}
-
-.sidebar-wrapper {
-  position: fixed;
-  z-index: 10;
-  top: 0px;
-  left: 0;
-  height: 100vh;
-  background-color: #232323;
 }
 
 .el-aside {
@@ -682,6 +671,12 @@ const scrollToTop = () => {
 .sidebar-transition {
   width: 200px;
   transition: width 0.3s;
+  position: fixed;
+  z-index: 10;
+  top: 0px;
+  left: 0;
+  height: 100vh;
+  background-color: #232323;
 }
 
 .layout-container {
