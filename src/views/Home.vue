@@ -126,8 +126,6 @@ const popularPosts = ref([
 
 const showBackToTop = ref(false);
 
-let scrollCount = 0; // 滚动次数
-
 // 获取最新文章列表并更新 posts
 onMounted(async () => {
   try {
@@ -177,12 +175,18 @@ const handleScroll = throttle((event) => {
 
   if (event.deltaY <= 0) return; // 向上滚动时不执行任何操作
 
-  // 记录滚动次数
-
-  scrollCount++;
-
   // 当滚动偏移量超出可视窗口高度时显示返回顶部按钮
   showBackToTop.value = window.scrollY > window.innerHeight;
+
+  // 向下滑动时，则隐藏侧边栏
+  if (window.scrollY > 10) {
+    isSidebarVisible.value = false;
+  }
+
+  // 判断当页面滚动到顶部时，显示侧边栏
+  if (window.scrollY === 0) {
+    isSidebarVisible.value = true;
+  }
 
   // 获取所有 el-card 元素的总高度
   const cards = document.querySelectorAll(".el-card .post-item");
@@ -233,9 +237,6 @@ const scrollToTop = () => {
 
   // 隐藏返回顶部按钮
   showBackToTop.value = false;
-
-  // 清空滚动次数
-  scrollCount = 0;
 
   // 重置加载更多数据的索引
   currentPostIndex = 0;
