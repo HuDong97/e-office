@@ -167,7 +167,8 @@ const truncateContent = (content, limit = 10) => {
 // 使用 vue-router 的路由推送进行页面跳转
 const router = useRouter();
 const goToArticleDetail = (id) => {
-  router.push({ path: "/article/detail", query: { id: id } });
+  // 直接在新标签页打开文章详情页
+  window.open(`/article/detail?id=${id}`, "_blank");
 };
 
 // 滚动事件控制显示弹窗和加载更多数据

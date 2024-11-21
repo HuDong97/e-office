@@ -224,7 +224,14 @@ onMounted(async () => {
 });
 
 const goBack = () => {
-  router.back();
+  // 判断历史记录是否为空
+  if (window.history.length > 1) {
+    // 如果有历史记录，执行返回上一级操作
+    router.back();
+  } else {
+    // 如果没有历史记录，关闭当前页面
+    window.close();
+  }
 };
 
 const handleKeydown = (event) => {
