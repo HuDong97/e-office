@@ -192,6 +192,8 @@ onMounted(async () => {
 
       sanitizedContent.value = DOMPurify.sanitize(article.content);
 
+      const state = articleResponse.data.article.state;
+
       try {
         // 获取用户行为数据
         const behaviorResponse = await allUserBehavior(ArticleId);
@@ -202,7 +204,7 @@ onMounted(async () => {
         await viewsAddService(ArticleId);
 
         // 最后加载浏览点赞收藏评论数
-        const data = await userBehaviorService(ArticleId);
+        const data = await userBehaviorService(ArticleId, state);
         userBehavior.likesCount = data.data.likesCount;
         userBehavior.commentsCount = data.data.commentsCount;
         userBehavior.viewsCount = data.data.viewsCount;

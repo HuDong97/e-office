@@ -1,8 +1,8 @@
 import request from "@/utils/request.js";
 
 // 获取文章行为统计数据
-export const userBehaviorService = (articleId) => {
-  return request.get("/userBehavior/counts", { params: { articleId } });
+export const userBehaviorService = (articleId, state) => {
+  return request.get("/userBehavior/counts", { params: { articleId, state } });
 };
 
 // 获取用户是否点赞收藏

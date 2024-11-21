@@ -196,6 +196,7 @@ const handleScroll = throttle(async (event) => {
     isSidebarVisible.value = true;
   }
 
+  function displayArticle() {}
   // 判断是否滚动到底部，给一个容差值，比如300px
   if (documentHeight - scrollPosition <= 300 && !noMoreArticles.value) {
     const lastArticle = posts.value[posts.value.length - 1];
@@ -235,20 +236,6 @@ const handleScroll = throttle(async (event) => {
   }
 }, 300); // 设置为 300 毫秒触发一次
 
-// JavaScript - 加载文章时添加类名
-function displayArticle(article) {
-  const articleElement = document.createElement("div");
-  articleElement.classList.add("article");
-  articleElement.innerHTML = article.title;
-
-  // 文章加载完成后添加 loaded 类，触发淡入动画
-  setTimeout(() => {
-    articleElement.classList.add("loaded");
-  }, 100); // 轻微延时，确保样式生效
-
-  document.getElementById("articles-container").appendChild(articleElement);
-}
-
 // 监听滚动事件
 window.addEventListener("scroll", handleScroll);
 
@@ -275,16 +262,16 @@ const scrollToTop = () => {
   showBackToTop.value = false;
 
   // 重置加载更多数据的索引
-  currentPostIndex = 0;
+  const currentPostIndex = 0;
 };
 </script>
 <template>
   <div id="topAnchor" ref="faultTree" class="wrap">
     <a
       id="TOPUp"
-      href="#topAnchor"
       v-if="showBackToTop"
       @click.prevent="scrollToTop"
+      style="cursor: pointer"
     >
       <img
         style="width: 100%; height: 100%"
@@ -704,14 +691,5 @@ const scrollToTop = () => {
 .layout-container {
   height: 100vh;
   overflow: hidden;
-}
-/* CSS - 添加淡入效果 */
-.article {
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
-}
-
-.article.loaded {
-  opacity: 1;
 }
 </style>
