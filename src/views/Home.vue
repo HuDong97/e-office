@@ -13,7 +13,10 @@ import {
   Menu as MenuIcon,
 } from "@element-plus/icons-vue";
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
-import { getLatestArticlesService } from "@/api/article.js";
+import {
+  getLatestArticlesService,
+  getNextArticlesService,
+} from "@/api/article.js";
 import { useRouter } from "vue-router";
 
 import { throttle } from "lodash";
@@ -25,6 +28,8 @@ import { userInfoService, userLogoutService } from "@/api/user.js";
 import useUserInfoStore from "@/stores/userInfo.js";
 
 import { ElMessage, ElMessageBox } from "element-plus";
+
+const noMoreArticles = ref(false); // 用来标记是否已经没有更多文章
 
 // 计算顶部导航栏的宽度，减去侧边栏宽度
 const headerWidth = computed(() => {
@@ -165,15 +170,17 @@ const goToArticleDetail = (id) => {
   router.push({ path: "/article/detail", query: { id: id } });
 };
 
-// 加载更多数据的逻辑
-let currentPostIndex = 0;
-
 // 滚动事件控制显示弹窗和加载更多数据
-const handleScroll = throttle((event) => {
+const handleScroll = throttle(async (event) => {
   event.preventDefault(); // 阻止默认滚动行为
-  // 判断滚动方向，只有向下滚动才加载文章
 
   if (event.deltaY <= 0) return; // 向上滚动时不执行任何操作
+
+  // 获取当前滚动位置（即：页面的垂直偏移量）
+  const scrollPosition = window.scrollY + window.innerHeight;
+
+  // 获取页面的总高度
+  const documentHeight = document.documentElement.scrollHeight;
 
   // 当滚动偏移量超出可视窗口高度时显示返回顶部按钮
   showBackToTop.value = window.scrollY > window.innerHeight;
@@ -188,33 +195,61 @@ const handleScroll = throttle((event) => {
     isSidebarVisible.value = true;
   }
 
-  // 获取所有 el-card 元素的总高度
-  const cards = document.querySelectorAll(".el-card .post-item");
-  const totalHeight = Array.from(cards).reduce(
-    (acc, card) => acc + card.offsetHeight,
-    0
-  );
+  // 判断是否滚动到底部，给一个容差值，比如300px
+  if (documentHeight - scrollPosition <= 300 && !noMoreArticles.value) {
+    const lastArticle = posts.value[posts.value.length - 1];
+    const lastArticleId = lastArticle ? lastArticle.id : null;
 
-  // 页面内容区的滚动偏移量+可视窗口高度
-  const scrollPosition = window.scrollY + window.innerHeight;
+    try {
+      // 调用后续文章的接口，假设接口返回4篇文章
+      const response = await getNextArticlesService(lastArticleId);
 
-  // 判断是否滚动到 `el-card` 元素的总高度，加载更多文章
-  if (
-    scrollPosition >= totalHeight - 50 &&
-    currentPostIndex < posts.value.length
-  ) {
-    const nextPost = posts.value[currentPostIndex];
-    sortedPosts.value.push(nextPost); // 添加新的文章到列表
-    currentPostIndex++; // 更新索引
+      if (response.data && response.data.length > 0) {
+        // 将返回的4篇文章追加到列表中
+        posts.value.push(...response.data);
 
-    ElMessage({
-      message: `加载新文章...`,
-      type: "info",
-    });
-
-    // 手动让页面滚动到底部
+        // 启动逐条显示的逻辑
+        let currentIndex = posts.value.length - 4; // 设定当前显示文章的起始索引
+        const interval = setInterval(() => {
+          if (currentIndex < posts.value.length) {
+            // 在前端逐条显示文章
+            displayArticle(posts.value[currentIndex]);
+            currentIndex++;
+          } else {
+            clearInterval(interval); // 所有文章显示完后清除定时器
+          }
+        }, 500); // 每隔500ms显示一篇文章
+      } else {
+        // 当页面滚动到底部时显示没有更多文章
+        noMoreArticles.value = true; // 没有更多文章
+        ElMessage({
+          message: `没有更多文章了`,
+          type: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("获取后续文章失败:", error);
+      noMoreArticles.value = true; // 发生错误时也设置为没有更多文章
+    }
   }
-}, 200); // 设置为 200 毫秒触发一次
+}, 300); // 设置为 300 毫秒触发一次
+
+// JavaScript - 加载文章时添加类名
+function displayArticle(article) {
+  const articleElement = document.createElement("div");
+  articleElement.classList.add("article");
+  articleElement.innerHTML = article.title;
+
+  // 文章加载完成后添加 loaded 类，触发淡入动画
+  setTimeout(() => {
+    articleElement.classList.add("loaded");
+  }, 100); // 轻微延时，确保样式生效
+
+  document.getElementById("articles-container").appendChild(articleElement);
+}
+
+// 监听滚动事件
+window.addEventListener("scroll", handleScroll);
 
 // 绑定滚动事件
 onMounted(() => {
@@ -668,5 +703,14 @@ const scrollToTop = () => {
 .layout-container {
   height: 100vh;
   overflow: hidden;
+}
+/* CSS - 添加淡入效果 */
+.article {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.article.loaded {
+  opacity: 1;
 }
 </style>

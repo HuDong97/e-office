@@ -67,3 +67,8 @@ export const articleDetailService = (id) => {
 export const getLatestArticlesService = () => {
   return request.get("/article/latestArticles");
 };
+
+// 获取指定文章后续的4篇文章
+export const getNextArticlesService = (articleId) => {
+  return request.get("/article/nextArticles", { params: { articleId } });
+};
