@@ -16,6 +16,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import {
   getLatestArticlesService,
   getNextArticlesService,
+  getHotArticlesService,
 } from "@/api/article.js";
 import { useRouter } from "vue-router";
 
@@ -92,47 +93,27 @@ const handleCommand = (command) => {
 
 // 存储最新文章数据
 const posts = ref([]);
-// 存储热门文章模拟数据
-const popularPosts = ref([
-  {
-    id: 1,
-    title: "帖子标题1",
-    contentSnippet: "帖子内容摘要1...",
-    author: "作者1",
-    createdAt: "2024-01-01",
-    views: 100,
-  },
-  {
-    id: 2,
-    title: "帖子标题2",
-    contentSnippet: "帖子内容摘要2...",
-    author: "作者2",
-    createdAt: "2024-01-02",
-    views: 150,
-  },
-  {
-    id: 3,
-    title: "帖子标题3",
-    contentSnippet: "帖子内容摘要3...",
-    author: "作者3",
-    createdAt: "2024-01-02",
-    views: 200,
-  },
-  {
-    id: 4,
-    title: "帖子标题4",
-    contentSnippet: "帖子内容摘要4...",
-    author: "作者4",
-    createdAt: "2024-01-02",
-    views: 50,
-  },
-]);
+
+// 存储热门文章数据
+const popularPosts = ref([]);
 // 控制返回顶部按钮的显示与隐藏
 
 const showBackToTop = ref(false);
 
-// 获取最新文章列表并更新 posts
+// 获取最新文章列表和热门文章列表并更新 posts和popularPosts
 onMounted(async () => {
+  try {
+    // 调用获取热门文章的接口
+    const response = await getHotArticlesService();
+    if (response.data && response.data.length > 0) {
+      popularPosts.value = response.data;
+    } else {
+      console.warn("没有热门文章数据");
+    }
+  } catch (error) {
+    console.error("获取热门文章失败:", error);
+  }
+
   try {
     const response = await getLatestArticlesService(); // 获取最新文章接口
     if (response.data && response.data.length > 0) {
@@ -144,7 +125,7 @@ onMounted(async () => {
 });
 
 // 切换选项的逻辑
-const selectedTab = ref("latest"); // 默认显示最新文章
+const selectedTab = ref("popular"); // 默认显示热点文章
 
 // 格式化日期
 const formatDate = (dateStr) => {

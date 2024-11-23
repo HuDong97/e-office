@@ -72,3 +72,8 @@ export const getLatestArticlesService = () => {
 export const getNextArticlesService = (articleId) => {
   return request.get("/article/nextArticles", { params: { articleId } });
 };
+
+// 获取热门文章
+export const getHotArticlesService = () => {
+  return request.get("/article/hotArticles");
+};
