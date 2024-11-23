@@ -178,41 +178,45 @@ const handleScroll = throttle(async (event) => {
   }
 
   function displayArticle() {}
-  // 判断是否滚动到底部，给一个容差值，比如300px
-  if (documentHeight - scrollPosition <= 300 && !noMoreArticles.value) {
-    const lastArticle = posts.value[posts.value.length - 1];
-    const lastArticleId = lastArticle ? lastArticle.id : null;
 
-    try {
-      // 调用后续文章的接口，假设接口返回4篇文章
-      const response = await getNextArticlesService(lastArticleId);
+  // 根据 Tab 类型控制加载逻辑
+  if (selectedTab.value === "latest") {
+    // 判断是否滚动到底部，给一个容差值，比如300px
+    if (documentHeight - scrollPosition <= 300 && !noMoreArticles.value) {
+      const lastArticle = posts.value[posts.value.length - 1];
+      const lastArticleId = lastArticle ? lastArticle.id : null;
 
-      if (response.data && response.data.length > 0) {
-        // 将返回的4篇文章追加到列表中
-        posts.value.push(...response.data);
+      try {
+        // 调用后续文章的接口，假设接口返回4篇文章
+        const response = await getNextArticlesService(lastArticleId);
 
-        // 启动逐条显示的逻辑
-        let currentIndex = posts.value.length - 4; // 设定当前显示文章的起始索引
-        const interval = setInterval(() => {
-          if (currentIndex < posts.value.length) {
-            // 在前端逐条显示文章
-            displayArticle(posts.value[currentIndex]);
-            currentIndex++;
-          } else {
-            clearInterval(interval); // 所有文章显示完后清除定时器
-          }
-        }, 500); // 每隔500ms显示一篇文章
-      } else {
-        // 当页面滚动到底部时显示没有更多文章
-        noMoreArticles.value = true; // 没有更多文章
-        ElMessage({
-          message: `没有更多文章了`,
-          type: "warning",
-        });
+        if (response.data && response.data.length > 0) {
+          // 将返回的4篇文章追加到列表中
+          posts.value.push(...response.data);
+
+          // 启动逐条显示的逻辑
+          let currentIndex = posts.value.length - 4; // 设定当前显示文章的起始索引
+          const interval = setInterval(() => {
+            if (currentIndex < posts.value.length) {
+              // 在前端逐条显示文章
+              displayArticle(posts.value[currentIndex]);
+              currentIndex++;
+            } else {
+              clearInterval(interval); // 所有文章显示完后清除定时器
+            }
+          }, 500); // 每隔500ms显示一篇文章
+        } else {
+          // 当页面滚动到底部时显示没有更多文章
+          noMoreArticles.value = true; // 没有更多文章
+          ElMessage({
+            message: `没有更多文章了`,
+            type: "warning",
+          });
+        }
+      } catch (error) {
+        console.error("获取后续文章失败:", error);
+        noMoreArticles.value = true; // 发生错误时也设置为没有更多文章
       }
-    } catch (error) {
-      console.error("获取后续文章失败:", error);
-      noMoreArticles.value = true; // 发生错误时也设置为没有更多文章
     }
   }
 }, 300); // 设置为 300 毫秒触发一次
@@ -405,7 +409,7 @@ const scrollToTop = () => {
         class="half-width-button no-border"
         @click="selectedTab = 'popular'"
         :style="{
-          backgroundColor: selectedTab === 'popular' ? '#E67762' : '',
+          backgroundColor: selectedTab === 'popular' ? '#e9464d' : '',
         }"
       >
         热门文章
