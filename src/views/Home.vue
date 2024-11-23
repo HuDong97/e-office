@@ -156,8 +156,6 @@ const goToArticleDetail = (id) => {
 const handleScroll = throttle(async (event) => {
   event.preventDefault(); // 阻止默认滚动行为
 
-  if (event.deltaY <= 0) return; // 向上滚动时不执行任何操作
-
   // 获取当前滚动位置（即：页面的垂直偏移量）
   const scrollPosition = window.scrollY + window.innerHeight;
 
@@ -173,9 +171,11 @@ const handleScroll = throttle(async (event) => {
   }
 
   // 判断当页面滚动到顶部时，显示侧边栏
-  if (window.scrollY === 0) {
+  if (window.scrollY < 10) {
     isSidebarVisible.value = true;
   }
+
+  if (event.deltaY <= 0) return; // 向上滚动时不执行任何操作
 
   function displayArticle() {}
 
@@ -491,10 +491,10 @@ const scrollToTop = () => {
   }
 }
 .el-header > div {
-  margin-left: 10px;
+  margin-left: 25px;
 }
 .el-avatar {
-  margin-right: 10px;
+  margin-right: -5px;
 }
 
 .el-aside {

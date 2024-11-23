@@ -63,7 +63,7 @@ export const articleDetailService = (id) => {
   return request.get("/article/detail", { params: { id } });
 };
 
-// 获取最新4篇文章
+// 获取最新8篇文章
 export const getLatestArticlesService = () => {
   return request.get("/article/latestArticles");
 };
