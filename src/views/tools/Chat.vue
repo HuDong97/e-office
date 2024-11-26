@@ -21,15 +21,21 @@ const sendMessage = async () => {
     error.value = null;
 
     const userMessage = createUserMessage();
-
     addMessage(userMessage);
+
+    // 显示加载动画
+    loading.value = true;
 
     try {
       const gptMessage = await fetchGptResponse(userMessage.text);
       addMessage(gptMessage);
     } catch (err) {
       handleError(err);
+    } finally {
+      // 隐藏加载动画
+      loading.value = false;
     }
+
     sending.value = false;
     scrollToBottom();
   }
@@ -100,6 +106,8 @@ const handleKeydown = (event) => {
     event.preventDefault(); // 防止换行
   }
 };
+
+const loading = ref(false);
 </script>
 
 <template>
@@ -140,6 +148,15 @@ const handleKeydown = (event) => {
             </transition-group>
           </div>
 
+          <!-- 显示加载动画 -->
+          <div v-if="loading" class="loading-overlay">
+            <div class="dot-container">
+              <div class="dot"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+            </div>
+          </div>
+
           <div class="input-area">
             <div class="input-container">
               <el-input
@@ -169,6 +186,54 @@ const handleKeydown = (event) => {
 </template>
 
 <style lang="scss" scoped>
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.dot-container {
+  display: flex;
+  justify-content: space-between;
+  width: 50px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #409eff;
+  animation: bounce 0.6s infinite alternate;
+}
+
+.dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-10px);
+  }
+}
+
 .page-container {
   min-height: 100%;
   width: 100%;
