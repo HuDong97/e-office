@@ -1,23 +1,34 @@
-// 导入request.js请求工具
-import request from "@/utils/request.js";
+// chat.js
 
-// 调用后端 /invokeChat3 接口的方法
-export const chat3Service = (msg) => {
-  return request
-    .get("/chat/invokeChat3", {
-      params: { msg },
-    })
-    .then((response) => {
-      console.log("chat3Service response:", response); // 输出返回数据检查
-      // 假设返回的data字段是包含响应文本的对象
-      if (response && response.data) {
-        return response.data; // 直接返回 data 字段
-      } else {
-        throw new Error("Invalid response format");
-      }
-    })
-    .catch((error) => {
-      console.error("Error in chat3Service:", error); // 捕获错误并输出
-      throw error; // 继续抛出错误，前端可以处理
+export const sendChatMessage = async (text, token) => {
+  try {
+    // 处理请求参数并进行编码
+    const encodedText = encodeURIComponent(text);
+
+    const response = await fetch(`/api/chat/invokeChat3?msg=${encodedText}`, {
+      method: "GET",
+      headers: {
+        Authorization: token,
+      },
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    // 假设返回的数据为 JSON 格式
+    const responseData = await response.json();
+    if (!responseData.data) {
+      throw new Error("后端响应格式错误：缺少 data 字段");
+    }
+
+    return {
+      id: Date.now() + 1,
+      sender: "GPT-3.5",
+      text: responseData.data,
+      timestamp: new Date().toLocaleTimeString(),
+    };
+  } catch (error) {
+    throw error;
+  }
 };

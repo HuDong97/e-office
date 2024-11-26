@@ -2,6 +2,7 @@
 import { ref, nextTick } from "vue";
 import { useTokenStore } from "@/stores/token.js";
 import useUserInfoStore from "@/stores/userInfo.js";
+import { sendChatMessage } from "@/api/chat.js";
 
 const tokenStore = useTokenStore();
 const userInfoStore = useUserInfoStore();
@@ -21,11 +22,14 @@ const sendMessage = async () => {
     error.value = null;
 
     const userMessage = createUserMessage();
-
     addMessage(userMessage);
 
     try {
-      const gptMessage = await fetchGptResponse(userMessage.text);
+      // 使用解耦后的函数发送消息
+      const gptMessage = await sendChatMessage(
+        newMessage.value,
+        tokenStore.token
+      );
       addMessage(gptMessage);
     } catch (err) {
       handleError(err);
@@ -47,35 +51,6 @@ const createUserMessage = () => {
 const addMessage = (message) => {
   chatMessages.value.push(message);
   newMessage.value = "";
-};
-
-const fetchGptResponse = async (text) => {
-  const response = await fetch(
-    `/api/chat/invokeChat3?msg=${encodeURIComponent(text)}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: tokenStore.token,
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! Status: ${response.status}`);
-  }
-
-  // 解析 JSON 数据
-  const responseData = await response.json(); // 假设后端返回的是 JSON 格式
-  if (!responseData.data) {
-    throw new Error("后端响应格式错误：缺少 data 字段");
-  }
-
-  return {
-    id: Date.now() + 1,
-    sender: "GPT-3.5",
-    text: responseData.data, // 提取 data 字段内容
-    timestamp: new Date().toLocaleTimeString(),
-  };
 };
 
 const handleError = (err) => {
