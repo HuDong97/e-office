@@ -64,11 +64,16 @@ const fetchGptResponse = async (text) => {
     throw new Error(`HTTP error! Status: ${response.status}`);
   }
 
-  const data = await response.text();
+  // 解析 JSON 数据
+  const responseData = await response.json(); // 假设后端返回的是 JSON 格式
+  if (!responseData.data) {
+    throw new Error("后端响应格式错误：缺少 data 字段");
+  }
+
   return {
     id: Date.now() + 1,
     sender: "GPT-3.5",
-    text: data,
+    text: responseData.data, // 提取 data 字段内容
     timestamp: new Date().toLocaleTimeString(),
   };
 };
