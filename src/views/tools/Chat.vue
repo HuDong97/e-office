@@ -1,10 +1,8 @@
 <script setup>
 import { ref, nextTick } from "vue";
-import { useTokenStore } from "@/stores/token.js";
 import useUserInfoStore from "@/stores/userInfo.js";
 import { invokeChatService } from "@/api/chat.js";
-
-const tokenStore = useTokenStore();
+import { ElMessage } from "element-plus";
 const userInfoStore = useUserInfoStore();
 
 const chatMessages = ref([]);
@@ -31,7 +29,7 @@ const sendMessage = async () => {
       const gptMessage = await fetchGptResponse(userMessage.text);
       addMessage(gptMessage);
     } catch (err) {
-      handleError(err);
+      ElMessage.error("网络波动，请重试。");
     } finally {
       // 隐藏加载动画
       loading.value = false;
@@ -74,11 +72,6 @@ const fetchGptResponse = async (text) => {
     console.error("获取 GPT 响应失败：", error);
     throw new Error(`获取 GPT 响应失败：${error.message}`);
   }
-};
-
-const handleError = (err) => {
-  error.value = "消息发送失败，请重试。";
-  console.error(err);
 };
 
 const scrollToBottom = () => {
