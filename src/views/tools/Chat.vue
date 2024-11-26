@@ -2,6 +2,7 @@
 import { ref, nextTick } from "vue";
 import { useTokenStore } from "@/stores/token.js";
 import useUserInfoStore from "@/stores/userInfo.js";
+import { invokeChatService } from "@/api/chat.js";
 
 const tokenStore = useTokenStore();
 const userInfoStore = useUserInfoStore();
@@ -56,32 +57,23 @@ const addMessage = (message) => {
 };
 
 const fetchGptResponse = async (text) => {
-  const response = await fetch(
-    `/api/chat/invokeChat3?msg=${encodeURIComponent(text)}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: tokenStore.token,
-      },
+  try {
+    const response = await invokeChatService(text);
+
+    if (!response || !response.data) {
+      throw new Error("后端响应格式错误：数据为空或缺少 data 字段");
     }
-  );
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! Status: ${response.status}`);
+    return {
+      id: Date.now() + 1,
+      sender: "GPT-3.5",
+      text: response.data, // 直接取 data 字段内容
+      timestamp: new Date().toLocaleTimeString(),
+    };
+  } catch (error) {
+    console.error("获取 GPT 响应失败：", error);
+    throw new Error(`获取 GPT 响应失败：${error.message}`);
   }
-
-  // 解析 JSON 数据
-  const responseData = await response.json(); // 假设后端返回的是 JSON 格式
-  if (!responseData.data) {
-    throw new Error("后端响应格式错误：缺少 data 字段");
-  }
-
-  return {
-    id: Date.now() + 1,
-    sender: "GPT-3.5",
-    text: responseData.data, // 提取 data 字段内容
-    timestamp: new Date().toLocaleTimeString(),
-  };
 };
 
 const handleError = (err) => {
