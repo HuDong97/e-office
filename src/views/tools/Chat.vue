@@ -2,7 +2,7 @@
 import { ref, nextTick } from "vue";
 import useUserInfoStore from "@/stores/userInfo.js";
 import { invokeChatService } from "@/api/chat.js";
-import { ElMessage } from "element-plus";
+
 const userInfoStore = useUserInfoStore();
 
 const chatMessages = ref([]);
@@ -29,7 +29,6 @@ const sendMessage = async () => {
       const gptMessage = await fetchGptResponse(userMessage.text);
       addMessage(gptMessage);
     } catch (err) {
-      ElMessage.error("网络波动，请重试。");
     } finally {
       // 隐藏加载动画
       loading.value = false;

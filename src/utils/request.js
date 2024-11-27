@@ -27,7 +27,9 @@ instance.interceptors.response.use(
     if (result.data.code === 1) {
       return result.data;
     }
-    showError(result.data.message ? result.data.message : "服务异常");
+    showError(
+      result.data.message ? result.data.message : "网络波动,请稍后重试"
+    );
     return Promise.reject(result.data);
   },
   (err) => {
@@ -42,7 +44,7 @@ instance.interceptors.response.use(
         showError(message || "账号在其他设备登录，请重新登录");
         router.push("/login");
       } else {
-        showError(message || "服务异常");
+        showError(message || "网络波动,请稍后重试");
       }
     } else {
       showError("网络错误，请稍后重试");
