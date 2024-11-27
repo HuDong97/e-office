@@ -174,8 +174,8 @@ const loading = ref(false);
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 110%;
+  height: 110%;
   background-color: rgba(255, 255, 255, 0.8);
   display: flex;
   justify-content: center;
@@ -234,6 +234,8 @@ const loading = ref(false);
   border-radius: 25px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .chat-window {
