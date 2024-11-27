@@ -47,7 +47,7 @@ instance.interceptors.response.use(
         showError(message || "网络波动,请稍后重试");
       }
     } else {
-      showError("网络错误，请稍后重试");
+      showError("网络波动,请稍后重试");
     }
     return Promise.reject(err);
   }
