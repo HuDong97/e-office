@@ -108,7 +108,7 @@ onMounted(async () => {
     if (response.data && response.data.length > 0) {
       popularPosts.value = response.data;
     } else {
-      console.warn("没有热门文章数据");
+      ElMessage.warning("网络波动,请刷新");
     }
   } catch (error) {
     console.error("获取热门文章失败:", error);
