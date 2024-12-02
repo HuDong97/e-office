@@ -378,56 +378,57 @@ const likeComment = async (comment) => {
     size="30%"
   >
     <div class="comments-container">
-      <div v-for="comment in comments" :key="comment.id" class="comment">
-        <img
-          :src="
-            comment.avatar && comment.avatar !== ''
-              ? comment.avatar
-              : '/src/assets/default.png'
-          "
-          class="comment-avatar"
-          alt="用户头像"
-        />
-
-        <div class="comment-content">
-          <span class="comment-header">{{ comment.nickname }}</span>
-          <div class="comment-bubble">
-            <p class="comment-body">{{ comment.content }}</p>
-          </div>
-          <span class="comment-actions">
-            <span class="comment-timestamp">{{
-              formatCommentDate(comment.createdTime)
-            }}</span>
-
-            <div
-              style="font-size: 15px; margin-right: 15px"
-              title="点赞"
-              @click="likeComment(comment)"
-            >
-              <Sugar
-                :style="{
-                  width: '1em',
-                  height: '1em',
-                  marginRight: '2px',
-                  color: comment.isLiked === 1 ? 'red' : '',
-                }"
-              />
-              <span>{{ comment.likeCount }}</span>
+      <!-- 评论内容区域 -->
+      <div class="comments-list">
+        <div v-for="comment in comments" :key="comment.id" class="comment">
+          <img
+            :src="
+              comment.avatar && comment.avatar !== ''
+                ? comment.avatar
+                : '/src/assets/default.png'
+            "
+            class="comment-avatar"
+            alt="用户头像"
+          />
+          <div class="comment-content">
+            <span class="comment-header">{{ comment.nickname }}</span>
+            <div class="comment-bubble">
+              <p class="comment-body">{{ comment.content }}</p>
             </div>
-
-            <el-button
-              v-if="comment.userId === userInfoStore.info.id"
-              type="text"
-              @click="confirmDelete(comment.id, comment.userId)"
-              style="color: inherit; font-size: inherit; margin-left: 10px"
-            >
-              删除
-            </el-button>
-          </span>
+            <span class="comment-actions">
+              <span class="comment-timestamp">{{
+                formatCommentDate(comment.createdTime)
+              }}</span>
+              <div
+                style="font-size: 15px; margin-right: 15px"
+                title="点赞"
+                @click="likeComment(comment)"
+              >
+                <Sugar
+                  :style="{
+                    width: '1em',
+                    height: '1em',
+                    marginRight: '2px',
+                    color: comment.isLiked === 1 ? 'red' : '',
+                  }"
+                />
+                <span>{{ comment.likeCount }}</span>
+              </div>
+              <el-button
+                v-if="comment.userId === userInfoStore.info.id"
+                type="text"
+                @click="confirmDelete(comment.id, comment.userId)"
+                style="color: inherit; font-size: inherit; margin-left: 10px"
+              >
+                删除
+              </el-button>
+            </span>
+          </div>
         </div>
       </div>
 
-      <div class="comment-input">
+      <!-- 评论输入框 -->
+      <div class="comment-input" style="margin-top: auto">
         <div class="input-container">
           <el-input
             type="textarea"
@@ -437,6 +438,7 @@ const likeComment = async (comment) => {
             :autosize="{ minRows: 1, maxRows: 6 }"
             class="input"
             @keydown="handleKeydown"
+            style="max-height: 100px; overflow-y: auto"
           >
           </el-input>
           <el-button type="primary" @click="submitComment" class="send-button"
@@ -453,6 +455,10 @@ const likeComment = async (comment) => {
   display: flex;
   align-items: flex-start;
   margin-bottom: 15px;
+}
+.comments-list {
+  overflow-y: auto;
+  flex-grow: 1;
 }
 
 .comment-avatar {

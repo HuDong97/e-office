@@ -151,6 +151,7 @@ const loading = ref(false);
                 :autosize="{ minRows: 1, maxRows: 6 }"
                 class="input"
                 @keydown="handleKeydown"
+                style="max-height: 80px; overflow-y: auto"
               ></el-input>
               <el-button
                 type="primary"
