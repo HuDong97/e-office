@@ -27,9 +27,7 @@ instance.interceptors.response.use(
     if (result.data.code === 1) {
       return result.data;
     }
-    showError(
-      result.data.message ? result.data.message : "网络波动,请稍后重试"
-    );
+    showError(result.data.message || "系统繁忙，请稍后重试");
     return Promise.reject(result.data);
   },
   (err) => {
@@ -38,16 +36,23 @@ instance.interceptors.response.use(
       const message = err.response.data.message;
 
       if (status === 401) {
-        showError(message || "请先登录");
+        showError(message || "您的登录已过期，请重新登录");
         router.push("/login");
       } else if (status === 409) {
-        showError(message || "账号在其他设备登录，请重新登录");
+        showError(message || "您的账号在其他设备上登录，请重新登录");
         router.push("/login");
+      } else if (status >= 500) {
+        showError("服务器开小差了，请稍后再试");
       } else {
-        showError(message || "网络波动,请稍后重试");
+        showError(message || "请求失败，请稍后重试");
       }
     } else {
-      showError("网络波动,请稍后重试");
+      // 处理无响应错误
+      if (err.message.includes("timeout")) {
+        showError("请求超时，请检查网络连接");
+      } else {
+        showError("网络似乎出了点问题，请检查网络后重试");
+      }
     }
     return Promise.reject(err);
   }

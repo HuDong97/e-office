@@ -46,6 +46,14 @@ const handleChange = (file) => {
   reader.readAsDataURL(file.raw);
 };
 
+const validateImageSize = (file) => {
+  if (file && file.size / 1024 >= 500) {
+    ElMessage.error("图片大小不能超过 500KB");
+    return false; // 验证失败
+  }
+  return true; // 验证通过
+};
+
 // 分页处理函数
 const onSizeChange = (size) => {
   pageSize.value = size;
@@ -90,6 +98,10 @@ const addArticle = async (clickState) => {
     ElMessage.error("请上传文章封面");
     return; // 如果没有封面，直接返回
   }
+  // 检查图片大小
+  if (avatarFile.value && !validateImageSize(avatarFile.value)) {
+    return; // 图片大小不符合要求，阻止提交
+  }
   articleModel.value.state = clickState;
   let result = await articleAddService(articleModel.value, avatarFile.value);
   if (result.code === 1) {
@@ -115,6 +127,11 @@ const updateArticle = async (clickState) => {
   if (!articleModel.value.coverImg) {
     ElMessage.error("请上传文章封面");
     return;
+  }
+
+  // 检查图片大小
+  if (avatarFile.value && !validateImageSize(avatarFile.value)) {
+    return; // 图片大小不符合要求，阻止提交
   }
   articleModel.value.state = clickState;
 
@@ -439,14 +456,13 @@ const resetAndSearch = () => {
   border-radius: 20px;
 }
 
+.avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
 .avatar-uploader {
   :deep() {
-    .avatar {
-      width: 178px;
-      height: 178px;
-      display: block;
-    }
-
     .el-upload {
       border: 1px dashed var(--el-border-color);
       border-radius: 6px;

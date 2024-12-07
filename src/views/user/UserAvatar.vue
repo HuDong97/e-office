@@ -24,12 +24,6 @@ const uploadSuccess = (result) => {
     imgUrl.value = result.data;
     userInfoStore.info.userPic = imgUrl.value;
     ElMessage.success("头像修改成功"); // 成功提示
-  } else {
-    const errorMessage =
-      result.message && result.message.includes("Maximum upload size exceeded")
-        ? "上传失败,文件大小超过限制,最大允许为500KB"
-        : result.message || "上传失败";
-    handleError(errorMessage);
   }
 };
 
@@ -51,6 +45,12 @@ const selectImage = () => {
 const submitUpload = async () => {
   if (!avatarFile.value) {
     return handleError("请先选择头像文件");
+  }
+
+  // 检查文件大小是否超过 500k
+  const maxFileSize = 500 * 1024; // 500kB
+  if (avatarFile.value.size > maxFileSize) {
+    return handleError("文件大小不能超过500k");
   }
 
   // 创建 FormData 并上传文件
