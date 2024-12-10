@@ -10,6 +10,7 @@ import {
   EditPen,
   SwitchButton,
   Message,
+  Search,
   Menu as MenuIcon,
 } from "@element-plus/icons-vue";
 import avatar from "@/assets/default.png";

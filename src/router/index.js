@@ -9,6 +9,7 @@ import UserInfoVue from "@/views/user/UserInfo.vue";
 import UserResetEmailVue from "@/views/user/UserResetEmail.vue";
 import UserResetPasswordVue from "@/views/user/UserResetPassword.vue";
 import HomeVue from "@/views/Home.vue";
+import Search from "@/views/Search.vue";
 import ChatVue from "@/views/tools/Chat.vue";
 import NotFound from "@/views/404/NotFound.vue";
 
@@ -18,6 +19,7 @@ import useUserInfoStore from "@/stores/userInfo.js";
 const routes = [
   { path: "/login", component: LoginVue },
   { path: "/home", component: HomeVue },
+  { path: "/search", component: Search },
   {
     path: "/",
     component: LayoutVue,

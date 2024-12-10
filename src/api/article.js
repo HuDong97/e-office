@@ -77,3 +77,8 @@ export const getNextArticlesService = (articleId) => {
 export const getHotArticlesService = () => {
   return request.get("/article/hotArticles");
 };
+
+// 通过关键字查询文章
+export const searchArticleService = (keyword) => {
+  return request.get("/article/searchArticles", { params: { keyword } });
+};

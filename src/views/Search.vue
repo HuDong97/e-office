@@ -14,12 +14,8 @@ import {
   Menu as MenuIcon,
 } from "@element-plus/icons-vue";
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
-import {
-  getLatestArticlesService,
-  getNextArticlesService,
-  getHotArticlesService,
-} from "@/api/article.js";
-import { useRouter } from "vue-router";
+import { searchArticleService } from "@/api/article.js";
+import { useRoute, useRouter } from "vue-router";
 
 import { throttle } from "lodash";
 
@@ -30,19 +26,7 @@ import { userInfoService, userLogoutService } from "@/api/user.js";
 import useUserInfoStore from "@/stores/userInfo.js";
 
 import { ElMessage, ElMessageBox } from "element-plus";
-
 const keyword = ref(""); // 用于绑定搜索框内容
-
-const handleSearch = () => {
-  if (keyword.value) {
-    // 跳转到 /search 页面并携带搜索关键词作为查询参数
-    router.push({ path: "/search", query: { keyword: keyword.value } });
-  } else {
-    console.log("请输入搜索关键词");
-  }
-};
-
-const noMoreArticles = ref(false); // 用来标记是否已经没有更多文章
 
 // 计算顶部导航栏的宽度，减去侧边栏宽度
 const headerWidth = computed(() => {
@@ -103,51 +87,45 @@ const handleCommand = (command) => {
   }
 };
 
-// 存储最新文章数据
-const posts = ref([]);
+const route = useRoute();
 
-// 存储热门文章数据
-const popularPosts = ref([]);
+onMounted(() => {
+  keyword.value = route.query.keyword || ""; // 从 URL 参数获取搜索关键词
+  if (keyword.value) {
+    handleSearch(); // 如果有关键词，自动调用搜索函数
+  }
+});
+
+// 存储文章数据
+const searchPosts = ref([]);
 // 控制返回顶部按钮的显示与隐藏
 
 const showBackToTop = ref(false);
 
-// 获取最新文章列表和热门文章列表并更新 posts和popularPosts
-onMounted(async () => {
+const handleSearch = async () => {
+  if (!keyword.value.trim()) {
+    ElMessage.warning("请输入搜索关键字");
+    return;
+  }
+
   try {
-    // 调用获取热门文章的接口
-    const response = await getHotArticlesService();
+    const response = await searchArticleService(keyword.value);
     if (response.data && response.data.length > 0) {
-      popularPosts.value = response.data;
+      searchPosts.value = response.data;
     } else {
-      ElMessage.warning("网络波动,请刷新");
+      ElMessage.warning("未查询到相关内容");
     }
   } catch (error) {
-    console.error("获取热门文章失败:", error);
+    ElMessage.error("搜索失败，请稍后再试！");
+    console.error("搜索错误：", error);
   }
-
-  try {
-    const response = await getLatestArticlesService(); // 获取最新文章接口
-    if (response.data && response.data.length > 0) {
-      posts.value = response.data;
-    }
-  } catch (error) {
-    console.error("获取最新文章失败:", error);
-  }
-});
-
-// 切换选项的逻辑
-const selectedTab = ref("popular"); // 默认显示热点文章
+};
 
 // 格式化日期
 const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleDateString("zh-CN"); // 使用本地日期格式
 };
-
-// 计算属性，返回当前选中的文章数据
-const sortedPosts = computed(() => {
-  return selectedTab.value === "latest" ? posts.value : popularPosts.value;
-});
+const sortedPosts = computed(() => searchPosts.value);
 
 // 截取文章内容并加上省略号
 const truncateContent = (content, limit = 10) => {
@@ -159,21 +137,13 @@ const truncateContent = (content, limit = 10) => {
 
 // 使用 vue-router 的路由推送进行页面跳转
 const router = useRouter();
-const goToArticleDetail = (id) => {
+const goToArticleDetail = (artivle_id) => {
   // 直接在新标签页打开文章详情页
-  window.open(`/article/detail?id=${id}`, "_blank");
+  window.open(`/article/detail?id=${artivle_id}`, "_blank");
 };
 
 // 滚动事件控制显示弹窗和加载更多数据
 const handleScroll = throttle(async (event) => {
-  event.preventDefault(); // 阻止默认滚动行为
-
-  // 获取当前滚动位置（即：页面的垂直偏移量）
-  const scrollPosition = window.scrollY + window.innerHeight;
-
-  // 获取页面的总高度
-  const documentHeight = document.documentElement.scrollHeight;
-
   // 当滚动偏移量超出可视窗口高度时显示返回顶部按钮
   showBackToTop.value = window.scrollY > window.innerHeight;
 
@@ -188,49 +158,6 @@ const handleScroll = throttle(async (event) => {
   }
 
   if (event.deltaY <= 0) return; // 向上滚动时不执行任何操作
-
-  function displayArticle() {}
-
-  // 根据 Tab 类型控制加载逻辑
-  if (selectedTab.value === "latest") {
-    // 判断是否滚动到底部，给一个容差值，比如300px
-    if (documentHeight - scrollPosition <= 300 && !noMoreArticles.value) {
-      const lastArticle = posts.value[posts.value.length - 1];
-      const lastArticleId = lastArticle ? lastArticle.id : null;
-
-      try {
-        // 调用后续文章的接口，假设接口返回4篇文章
-        const response = await getNextArticlesService(lastArticleId);
-
-        if (response.data && response.data.length > 0) {
-          // 将返回的4篇文章追加到列表中
-          posts.value.push(...response.data);
-
-          // 启动逐条显示的逻辑
-          let currentIndex = posts.value.length - 4; // 设定当前显示文章的起始索引
-          const interval = setInterval(() => {
-            if (currentIndex < posts.value.length) {
-              // 在前端逐条显示文章
-              displayArticle(posts.value[currentIndex]);
-              currentIndex++;
-            } else {
-              clearInterval(interval); // 所有文章显示完后清除定时器
-            }
-          }, 500); // 每隔500ms显示一篇文章
-        } else {
-          // 当页面滚动到底部时显示没有更多文章
-          noMoreArticles.value = true; // 没有更多文章
-          ElMessage({
-            message: `没有更多文章了`,
-            type: "warning",
-          });
-        }
-      } catch (error) {
-        console.error("获取后续文章失败:", error);
-        noMoreArticles.value = true; // 发生错误时也设置为没有更多文章
-      }
-    }
-  }
 }, 300); // 设置为 300 毫秒触发一次
 
 // 监听滚动事件
@@ -257,9 +184,6 @@ const scrollToTop = () => {
 
   // 隐藏返回顶部按钮
   showBackToTop.value = false;
-
-  // 重置加载更多数据的索引
-  const currentPostIndex = 0;
 };
 </script>
 <template>
@@ -435,43 +359,19 @@ const scrollToTop = () => {
   </div>
 
   <el-card class="page-container">
-    <!-- 切换按钮 -->
-    <div class="button-group">
-      <el-button
-        :type="selectedTab === 'popular' ? 'primary' : 'default'"
-        class="half-width-button no-border"
-        @click="selectedTab = 'popular'"
-        :style="{
-          backgroundColor: selectedTab === 'popular' ? '#e9464d' : '',
-        }"
-      >
-        热门文章
-      </el-button>
-      <el-button
-        :type="selectedTab === 'latest' ? 'primary' : 'default'"
-        class="half-width-button no-border"
-        @click="selectedTab = 'latest'"
-        :style="{
-          backgroundColor: selectedTab === 'latest' ? '#07c160' : '',
-        }"
-      >
-        最新文章
-      </el-button>
-    </div>
-
     <!-- 主要内容区 -->
     <main class="main-content">
       <div class="posts-list">
         <!-- 帖子列表 -->
         <div
           v-for="post in sortedPosts"
-          :key="post.id"
+          :key="post.article_id"
           class="post-item"
-          @click="goToArticleDetail(post.id)"
+          @click="goToArticleDetail(post.article_id)"
         >
           <div class="cover-box">
             <img
-              :src="post.coverImg || '/src/assets/default.png'"
+              :src="post.cover_img || '/src/assets/default.png'"
               alt="封面"
               class="cover-image"
             />
@@ -486,7 +386,7 @@ const scrollToTop = () => {
             <div class="post-meta">
               <span
                 >发布时间:
-                {{ formatDate(post.createTime || post.createdAt) }}</span
+                {{ formatDate(post.create_time || post.createdAt) }}</span
               >
             </div>
           </div>
@@ -582,21 +482,11 @@ const scrollToTop = () => {
   border-radius: 20px;
 }
 
-.button-group {
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 1rem;
-}
-
 .half-width-button,
 .no-border {
   border: none;
   padding: 0;
   width: 50%;
-}
-
-.button-group .half-width-button {
-  margin: 0;
 }
 
 .main-content {
@@ -659,11 +549,6 @@ const scrollToTop = () => {
   color: #adb5bd;
   display: flex;
   gap: 1rem;
-}
-
-.sidebar-hidden,
-.disable-scroll {
-  overflow: hidden;
 }
 
 .sidebar-logo {
