@@ -9,7 +9,7 @@ import UserInfoVue from "@/views/user/UserInfo.vue";
 import UserResetEmailVue from "@/views/user/UserResetEmail.vue";
 import UserResetPasswordVue from "@/views/user/UserResetPassword.vue";
 import HomeVue from "@/views/Home.vue";
-import Search from "@/views/Search.vue";
+import Search from "@/views/SearchArticle.vue";
 import ChatVue from "@/views/tools/Chat.vue";
 import NotFound from "@/views/404/NotFound.vue";
 
