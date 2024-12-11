@@ -16,11 +16,8 @@ import {
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { searchArticleService } from "@/api/article.js";
 import { useRoute, useRouter } from "vue-router";
-
 import { throttle } from "lodash";
-
 import avatar from "@/assets/default.png";
-
 import { useTokenStore } from "@/stores/token.js";
 import { userInfoService, userLogoutService } from "@/api/user.js";
 import useUserInfoStore from "@/stores/userInfo.js";
@@ -211,8 +208,8 @@ const handleScroll = throttle(async (event) => {
         });
       }
     } catch (error) {
-      console.error("获取后续文章失败:", error);
-      noMoreArticles.value = true; // 发生错误时也设置为没有更多文章
+      console.error("获取文章异常:", error);
+      noMoreArticles.value = true;
     }
   }
 }, 300); // 设置为 300 毫秒触发一次
@@ -222,14 +219,14 @@ window.addEventListener("scroll", handleScroll);
 
 // 绑定滚动事件
 onMounted(() => {
-  window.addEventListener("wheel", handleScroll, { passive: false }); // passive: false 确保可以调用 preventDefault
-  window.addEventListener("scroll", handleScroll, { passive: true }); // 添加 scroll 事件
+  window.addEventListener("wheel", handleScroll, { passive: false });
+  window.addEventListener("scroll", handleScroll, { passive: true });
 });
 
 // 移除滚动事件
 onBeforeUnmount(() => {
   window.removeEventListener("wheel", handleScroll);
-  window.removeEventListener("scroll", handleScroll); // 移除 scroll 事件
+  window.removeEventListener("scroll", handleScroll);
 });
 
 const scrollToTop = () => {

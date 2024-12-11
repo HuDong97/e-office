@@ -227,7 +227,7 @@ const handleScroll = throttle(async (event) => {
         }
       } catch (error) {
         console.error("获取后续文章失败:", error);
-        noMoreArticles.value = true; // 发生错误时也设置为没有更多文章
+        noMoreArticles.value = true;
       }
     }
   }
