@@ -115,6 +115,15 @@ const handleSearch = async () => {
     return;
   }
 
+  if (keyword.value && page.value !== null && page.value !== 0) {
+    page.value = 0;
+    // 在新窗口打开 /search 页面并携带搜索关键词作为查询参数
+    const newUrl = `/search?keyword=${encodeURIComponent(keyword.value)}`;
+    window.open(newUrl, "_blank");
+  } else {
+    console.log("请输入搜索关键词或页面值无效");
+  }
+
   try {
     const response = await searchArticleService(keyword.value, page.value);
     if (response.data && response.data.length > 0) {
