@@ -199,7 +199,7 @@ const handleScroll = throttle(async (event) => {
       const lastArticleId = lastArticle ? lastArticle.id : null;
 
       try {
-        // 调用后续文章的接口，假设接口返回4篇文章
+        // 调用后续文章的接口，接口返回4篇文章
         const response = await getNextArticlesService(lastArticleId);
 
         if (response.data && response.data.length > 0) {
@@ -257,9 +257,6 @@ const scrollToTop = () => {
 
   // 隐藏返回顶部按钮
   showBackToTop.value = false;
-
-  // 重置加载更多数据的索引
-  const currentPostIndex = 0;
 };
 </script>
 <template>

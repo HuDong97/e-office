@@ -26,7 +26,14 @@ import { userInfoService, userLogoutService } from "@/api/user.js";
 import useUserInfoStore from "@/stores/userInfo.js";
 
 import { ElMessage, ElMessageBox } from "element-plus";
+const noMoreArticles = ref(false); // 用来标记是否已经没有更多文章
+
 const keyword = ref(""); // 用于绑定搜索框内容
+
+const page = ref(0); // 用于绑定搜索页数
+
+// 存储后续搜索文章数据
+const posts = ref([]);
 
 // 计算顶部导航栏的宽度，减去侧边栏宽度
 const headerWidth = computed(() => {
@@ -109,7 +116,7 @@ const handleSearch = async () => {
   }
 
   try {
-    const response = await searchArticleService(keyword.value);
+    const response = await searchArticleService(keyword.value, page.value);
     if (response.data && response.data.length > 0) {
       searchPosts.value = response.data;
     } else {
@@ -125,7 +132,11 @@ const handleSearch = async () => {
 const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleDateString("zh-CN"); // 使用本地日期格式
 };
-const sortedPosts = computed(() => searchPosts.value);
+
+// 返回当前展示的文章数据
+const sortedPosts = computed(() => {
+  return posts.value.length > 0 ? posts.value : searchPosts.value;
+});
 
 // 截取文章内容并加上省略号
 const truncateContent = (content, limit = 10) => {
@@ -144,6 +155,14 @@ const goToArticleDetail = (artivle_id) => {
 
 // 滚动事件控制显示弹窗和加载更多数据
 const handleScroll = throttle(async (event) => {
+  event.preventDefault(); // 阻止默认滚动行为
+
+  // 获取当前滚动位置（即：页面的垂直偏移量）
+  const scrollPosition = window.scrollY + window.innerHeight;
+
+  // 获取页面的总高度
+  const documentHeight = document.documentElement.scrollHeight;
+
   // 当滚动偏移量超出可视窗口高度时显示返回顶部按钮
   showBackToTop.value = window.scrollY > window.innerHeight;
 
@@ -158,6 +177,35 @@ const handleScroll = throttle(async (event) => {
   }
 
   if (event.deltaY <= 0) return; // 向上滚动时不执行任何操作
+
+  // 判断是否滚动到底部，给一个容差值，比如300px
+  if (documentHeight - scrollPosition <= 300 && !noMoreArticles.value) {
+    if (!keyword.value.trim()) {
+      ElMessage.warning("请输入搜索关键字");
+      return;
+    }
+    page.value += 1;
+
+    try {
+      // 调用接口返回后续文章
+      const response = await searchArticleService(keyword.value, page.value);
+
+      if (response.data && response.data.length > 0) {
+        // 将返回的文章追加到列表中
+        posts.value.push(...response.data);
+      } else {
+        // 当页面滚动到底部时显示没有更多文章
+        noMoreArticles.value = true; // 没有更多文章
+        ElMessage({
+          message: `没有更多文章了`,
+          type: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("获取后续文章失败:", error);
+      noMoreArticles.value = true; // 发生错误时也设置为没有更多文章
+    }
+  }
 }, 300); // 设置为 300 毫秒触发一次
 
 // 监听滚动事件
@@ -470,6 +518,7 @@ const scrollToTop = () => {
 }
 
 .page-container {
+  min-height: 750px;
   margin: 0 auto;
   border-radius: 20px;
   padding: 0;

@@ -79,6 +79,6 @@ export const getHotArticlesService = () => {
 };
 
 // 通过关键字查询文章
-export const searchArticleService = (keyword) => {
-  return request.get("/article/searchArticles", { params: { keyword } });
+export const searchArticleService = (keyword, page) => {
+  return request.get("/article/searchArticles", { params: { keyword, page } });
 };
