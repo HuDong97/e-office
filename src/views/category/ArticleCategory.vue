@@ -185,11 +185,7 @@ const title = ref("");
           ></el-input>
         </el-form-item>
         <el-form-item label="使用次数" prop="categoryCount">
-          <el-input
-            v-model="categoryModel.categoryCount"
-            minlength="1"
-            maxlength="15"
-          ></el-input>
+          <el-input v-model="categoryModel.categoryCount" readonly></el-input>
         </el-form-item>
       </el-form>
 
