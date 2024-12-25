@@ -49,12 +49,6 @@ const rules = {
 
 // 添加分类
 const addCategory = async () => {
-  const numberRegex = /^\d+$/;
-  if (!numberRegex.test(categoryModel.value.categoryCount)) {
-    ElMessage.error("请输入数字作为使用次数");
-    return;
-  }
-
   let result = await articleCategoryAddService(categoryModel.value);
   ElMessage.success("添加成功");
 
@@ -65,12 +59,6 @@ const addCategory = async () => {
 
 // 编辑分类
 const updateCategory = async () => {
-  const numberRegex = /^\d+$/;
-  if (!numberRegex.test(categoryModel.value.categoryCount)) {
-    ElMessage.error("请输入数字作为使用次数");
-    return;
-  }
-
   let result = await articleCategoryUpdateService(categoryModel.value);
   ElMessage.success("修改成功");
 
