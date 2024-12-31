@@ -82,12 +82,18 @@ const articleList = async () => {
   total.value = result.data.total;
   articles.value = result.data.items;
 
-  // 处理数据,扩展分类名称
+  // 处理数据，扩展分类名称和格式化创建时间
   articles.value.forEach((article) => {
+    // 获取分类名称
     const category = categorys.value.find(
       (cat) => cat.id === article.categoryId
     );
     if (category) article.categoryName = category.categoryName;
+
+    // 格式化创建时间
+    if (article.createTime) {
+      article.createTime = formatDate(article.createTime);
+    }
   });
 };
 
@@ -143,6 +149,7 @@ const updateArticle = async (clickState) => {
     id: articleModel.value.id,
     coverImg: articleModel.value.coverImg,
     state: articleModel.value.state,
+    createTime: articleModel.value.createTime.toString(), // 确保是字符串
   };
 
   const result = await articleUpdateService(dataToSend, avatarFile.value);
