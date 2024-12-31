@@ -400,7 +400,7 @@ const likeComment = async (comment) => {
                 formatCommentDate(comment.createdTime)
               }}</span>
               <div
-                style="font-size: 15px; margin-right: 15px"
+                style="font-size: 15px; margin-left: auto"
                 title="点赞"
                 @click="likeComment(comment)"
               >
@@ -408,11 +408,11 @@ const likeComment = async (comment) => {
                   :style="{
                     width: '1em',
                     height: '1em',
-                    marginRight: '2px',
+                    marginRight: '5px',
                     color: comment.isLiked === 1 ? 'red' : '',
                   }"
                 />
-                <span>{{ comment.likeCount }}</span>
+                <span style="margin-right: 0px">{{ comment.likeCount }}</span>
               </div>
               <el-button
                 v-if="comment.userId === userInfoStore.info.id"
