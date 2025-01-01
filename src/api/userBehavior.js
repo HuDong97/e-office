@@ -75,3 +75,10 @@ export const cancelCommentLikeService = (articleId, commentId) => {
     params: { articleId, commentId },
   });
 };
+
+//获取后续10条评论  articleId文章id  commentId评论id
+export const subsequentCommentsService = (articleId, commentId) => {
+  return request.get("/userBehavior/subsequentComments", {
+    params: { articleId, commentId },
+  });
+};

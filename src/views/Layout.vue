@@ -111,6 +111,13 @@ const handleCommand = (command) => {
           </el-icon>
           <span>论坛首页</span>
         </el-menu-item>
+
+        <el-menu-item index="/test">
+          <el-icon>
+            <House />
+          </el-icon>
+          <span>测试页面</span>
+        </el-menu-item>
         <template v-if="userInfoStore.info.permissions === 'admin'">
           <el-menu-item index="/category">
             <el-icon>

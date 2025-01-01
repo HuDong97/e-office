@@ -19,6 +19,7 @@ import {
   getArticleComments,
   setCommentLikeService,
   cancelCommentLikeService,
+  subsequentCommentsService,
 } from "@/api/userBehavior.js";
 import useUserInfoStore from "@/stores/userInfo.js";
 
@@ -261,6 +262,51 @@ const likeComment = async (comment) => {
     ElMessage.error("点赞操作失败");
   }
 };
+// 定义状态变量
+let hasMore = true; // 是否还有更多数据
+let isLoading = false; // 是否正在加载数据
+// 滚动事件处理器
+// 滚动事件处理器
+const handleScroll = async (event) => {
+  const target = event.target;
+  const scrollTop = target.scrollTop; // 滚动条距离顶部的高度
+  const clientHeight = target.clientHeight; // 可视区域高度
+  const scrollHeight = target.scrollHeight; // 内容总高度
+
+  // 判断是否接近底部（小于100像素）
+  if (scrollTop + clientHeight > scrollHeight - 100) {
+    // 防止重复加载
+    if (isLoading || !hasMore) return;
+
+    isLoading = true; // 设置为加载中
+
+    try {
+      const lastCommentId =
+        comments.value[comments.value.length - 1]?.id || null; // 获取最后一条评论的ID
+      console.log("参数", route.query.id, lastCommentId);
+
+      const response = await subsequentCommentsService(
+        route.query.id,
+        lastCommentId
+      );
+      console.log("response", response);
+
+      if (response.data.length > 0) {
+        comments.value.push(...response.data); // 将新评论添加到现有评论数组
+      } else {
+        if (hasMore) {
+          ElMessage.info("没有更多评论了"); // 只提示一次
+        }
+        hasMore = false; // 设置没有更多数据
+      }
+    } catch (error) {
+      console.error("加载更多评论失败：", error);
+      ElMessage.error("加载更多评论失败");
+    } finally {
+      isLoading = false; // 重置加载状态
+    }
+  }
+};
 </script>
 
 <template>
@@ -379,7 +425,7 @@ const likeComment = async (comment) => {
   >
     <div class="comments-container">
       <!-- 评论内容区域 -->
-      <div class="comments-list">
+      <div ref="commentsList" class="comments-list" @scroll="handleScroll">
         <div v-for="comment in comments" :key="comment.id" class="comment">
           <img
             :src="
@@ -564,8 +610,8 @@ const likeComment = async (comment) => {
 .article-container {
   width: 100%;
   max-width: 1200px;
-  height: 55vh;
-  min-height: 100%;
+  height: auto;
+  min-height: 700px;
   margin: 0 auto;
   padding: 2rem;
   font-family: "Arial", sans-serif;
