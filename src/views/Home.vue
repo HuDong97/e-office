@@ -194,7 +194,7 @@ const handleScroll = throttle(async (event) => {
   // 根据 Tab 类型控制加载逻辑
   if (selectedTab.value === "latest") {
     // 判断是否滚动到底部，给一个容差值，比如300px
-    if (documentHeight - scrollPosition <= 300 && !noMoreArticles.value) {
+    if (documentHeight - scrollPosition <= 400 && !noMoreArticles.value) {
       const lastArticle = posts.value[posts.value.length - 1];
       const lastArticleId = lastArticle ? lastArticle.id : null;
 
@@ -258,7 +258,18 @@ const scrollToTop = () => {
   // 隐藏返回顶部按钮
   showBackToTop.value = false;
 };
+
+const handleLogoClick = () => {
+  scrollToTop(); // 返回顶部
+  router.push("/home"); // 跳转到首页
+};
+
+const handleForumClick = () => {
+  scrollToTop(); // 返回顶部
+  router.push("/home"); // 跳转到论坛首页
+};
 </script>
+
 <template>
   <div id="topAnchor" ref="faultTree" class="wrap">
     <a
@@ -356,8 +367,8 @@ const scrollToTop = () => {
         text-color="#fff"
         router
       >
-        <a class="sidebar-logo" @click="router.push('/home')">Eoffice</a>
-        <el-menu-item index="/home">
+        <a class="sidebar-logo" @click.prevent="handleLogoClick">Eoffice</a>
+        <el-menu-item index="/home" @click.native="handleForumClick">
           <el-icon>
             <House />
           </el-icon>

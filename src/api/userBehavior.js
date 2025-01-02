@@ -56,9 +56,9 @@ export const favoritesDeleteService = (articleId) => {
 };
 
 // 评论删除
-export const commentsDeleteService = (commentId, userId) => {
+export const commentsDeleteService = (commentId, userId, articleId) => {
   return request.delete("/userBehavior/deleteComment", {
-    params: { id: commentId, userId: userId },
+    params: { id: commentId, userId: userId, articleId: articleId },
   });
 };
 

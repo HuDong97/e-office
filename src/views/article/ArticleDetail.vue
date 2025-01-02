@@ -156,7 +156,9 @@ const submitComment = async () => {
 
 const deleteComment = async (commentId, userId) => {
   try {
-    await commentsDeleteService(commentId, userId); // 发送删除评论的请求
+    // 获取文章id
+    const articleId = route.query.id;
+    await commentsDeleteService(commentId, userId, articleId); // 发送删除评论的请求
     ElMessage.success("评论删除成功");
     userBehavior.commentsCount--; // 更新评论数
     await loadComments(); // 重新加载评论列表
@@ -295,7 +297,7 @@ const handleScroll = async (event) => {
         comments.value.push(...response.data); // 将新评论添加到现有评论数组
       } else {
         if (hasMore) {
-          ElMessage.info("没有更多评论了"); // 只提示一次
+          ElMessage.warning("没有更多评论了"); // 只提示一次
         }
         hasMore = false; // 设置没有更多数据
       }
