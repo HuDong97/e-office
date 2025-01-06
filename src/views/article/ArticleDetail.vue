@@ -20,6 +20,9 @@ import {
   setCommentLikeService,
   cancelCommentLikeService,
   subsequentCommentsService,
+  getArticleCommentsReply,
+  setCommentReplyLikeService,
+  cancelCommenReplytLikeService,
 } from "@/api/userBehavior.js";
 import useUserInfoStore from "@/stores/userInfo.js";
 
@@ -128,11 +131,36 @@ const toggleComments = async () => {
 
 const loadComments = async () => {
   try {
-    const response = await getArticleComments(route.query.id); // 调用获取评论的方法
-    comments.value = response.data; // 将获取到的评论数据赋值给 comments 数组
+    const response = await getArticleComments(route.query.id);
+    response.data.forEach((comment) => {
+      comment.showReplies = false;
+      comment.replies = [];
+    });
+    comments.value = response.data;
   } catch (error) {
     console.error("获取评论失败：", error);
   }
+};
+const loadReplies = async (comment) => {
+  if (comment.replyCount > 0 && comment.replies.length === 0) {
+    comment.loadingReplies = true;
+
+    try {
+      const response = await getArticleCommentsReply(
+        route.query.id,
+        comment.id
+      );
+      comment.replies = response.data;
+    } catch (error) {
+      ElMessage.error("加载回复失败");
+    }
+    comment.loadingReplies = false;
+  }
+  comment.showReplies = true;
+};
+
+const hideReplies = (comment) => {
+  comment.showReplies = false;
 };
 
 const submitComment = async () => {
@@ -259,6 +287,33 @@ const likeComment = async (comment) => {
       await setCommentLikeService(route.query.id, comment.id);
       comment.isLiked = 1; // 更新本地数据为已点赞
       comment.likeCount++; // 点赞数加一
+    }
+  } catch (error) {
+    ElMessage.error("点赞操作失败");
+  }
+};
+
+const likeCommentReply = async (reply) => {
+  try {
+    // 如果当前评论回复已经点赞
+    if (reply.isLiked === 1) {
+      // 取消评论回复点赞
+      await cancelCommenReplytLikeService(
+        route.query.id,
+        reply.commentId,
+        reply.id
+      );
+      reply.isLiked = 0; // 更新本地数据为未点赞
+      reply.likeCount--; // 点赞数减一
+    } else {
+      // 点赞评论回复
+      await setCommentReplyLikeService(
+        reply.id,
+        route.query.id,
+        reply.commentId
+      );
+      reply.isLiked = 1; // 更新本地数据为已点赞
+      reply.likeCount++; // 点赞数加一
     }
   } catch (error) {
     ElMessage.error("点赞操作失败");
@@ -472,6 +527,89 @@ const handleScroll = async (event) => {
               </el-button>
             </span>
           </div>
+
+          <!-- 展示回复按钮 -->
+          <div v-if="comment.replyCount > 0" class="reply-button">
+            <el-button @click="loadReplies(comment)" size="small">
+              —— 展示{{ comment.replyCount }}条回复 V
+            </el-button>
+          </div>
+          <!-- 收起回复按钮 -->
+          <div
+            v-if="comment.replyCount > 0 && comment.showReplies"
+            class="reply-button"
+          >
+            <el-button @click="hideReplies(comment)" size="small">
+              —— 收起 ^
+            </el-button>
+          </div>
+          <!-- 回复列表 -->
+          <div v-if="comment.showReplies" class="replies-list">
+            <!-- 加载回复数据 -->
+            <div v-if="comment.replies.length === 0 && !comment.loadingReplies">
+              暂无回复
+            </div>
+
+            <div v-else-if="comment.replies.length > 0">
+              <div
+                v-for="reply in comment.replies"
+                :key="reply.id"
+                class="reply"
+              >
+                <!-- 当前用户的头像 -->
+                <img
+                  :src="
+                    reply.avatar && reply.avatar !== ''
+                      ? reply.avatar
+                      : '/src/assets/default.png'
+                  "
+                  class="reply-avatar"
+                  alt="用户头像"
+                />
+                <span>{{ reply.nickname }}</span>
+
+                <!-- 父级用户的信息 -->
+                <template v-if="reply.parentNickname">
+                  >
+                  <img
+                    :src="
+                      reply.parentAvatar && reply.parentAvatar !== ''
+                        ? reply.parentAvatar
+                        : '/src/assets/default.png'
+                    "
+                    class="reply-avatar"
+                    alt="父级用户头像"
+                  />
+                  <span>{{ reply.parentNickname }}</span>
+                </template>
+
+                <!-- 回复的其他内容 -->
+
+                <span>{{ reply.content }}</span>
+                <div
+                  style="font-size: 15px; margin-left: auto"
+                  title="点赞"
+                  @click="likeCommentReply(reply)"
+                >
+                  <Sugar
+                    :style="{
+                      width: '1em',
+                      height: '1em',
+                      marginRight: '5px',
+                      color: reply.isLiked === 1 ? 'red' : '',
+                    }"
+                  />
+                  <span style="margin-right: 0px">{{ reply.likeCount }}</span>
+                </div>
+
+                <span>{{ formatCommentDate(reply.createdTime) }}</span>
+              </div>
+            </div>
+            <div v-else>
+              <!-- 加载中... -->
+              <el-skeleton :rows="3" animated />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -499,6 +637,22 @@ const handleScroll = async (event) => {
 </template>
 
 <style lang="scss" scoped>
+.reply-button {
+  margin-top: 5px;
+}
+
+.replies-list {
+  margin-left: 20px;
+  border-left: 1px solid #ebebeb;
+  padding-left: 10px;
+  margin-top: 5px;
+}
+
+.reply {
+  margin-bottom: 5px;
+  font-size: 0.9em;
+  color: #666;
+}
 .comment {
   display: flex;
   align-items: flex-start;
@@ -512,6 +666,13 @@ const handleScroll = async (event) => {
 .comment-avatar {
   width: 50px;
   height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.reply-avatar {
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   margin-right: 10px;
 }

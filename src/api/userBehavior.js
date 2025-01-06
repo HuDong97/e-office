@@ -82,3 +82,28 @@ export const subsequentCommentsService = (articleId, commentId) => {
     params: { articleId, commentId },
   });
 };
+
+//评论回复显示
+export const getArticleCommentsReply = (articleId, commentId) => {
+  return request.get("/userBehavior/replyDetail", {
+    params: { articleId, commentId },
+  });
+};
+
+// 评论回复点赞
+export const setCommentReplyLikeService = (replyId, articleId, commentId) => {
+  return request.post("/userBehavior/setCommentReplyLike", null, {
+    params: { replyId, articleId, commentId },
+  });
+};
+
+// 取消回复评论点赞
+export const cancelCommenReplytLikeService = (
+  articleId,
+  commentId,
+  replyId
+) => {
+  return request.delete("/userBehavior/cancelCommentReplyLike", {
+    params: { articleId, commentId, replyId },
+  });
+};
