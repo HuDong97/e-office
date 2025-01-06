@@ -107,3 +107,13 @@ export const cancelCommenReplytLikeService = (
     params: { articleId, commentId, replyId },
   });
 };
+// 评论回复删除
+export const commentReplyDeleteService = (articleId, commentId, replyId) => {
+  return request.delete("/userBehavior/deleteCommentReply", {
+    params: {
+      articleId: articleId,
+      commentId: commentId,
+      replyId: replyId,
+    },
+  });
+};

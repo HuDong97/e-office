@@ -31,6 +31,7 @@ import {
   getArticleCommentsReply,
   setCommentReplyLikeService,
   cancelCommenReplytLikeService,
+  commentReplyDeleteService,
 } from "@/api/userBehavior.js";
 import useUserInfoStore from "@/stores/userInfo.js";
 
@@ -206,6 +207,16 @@ const deleteComment = async (commentId, userId) => {
   }
 };
 
+const deleteCommentReply = async (articleId, commentId, replyId, comment) => {
+  try {
+    await commentReplyDeleteService(articleId, commentId, replyId); // 发送删除评论回复的请求
+    ElMessage.success("评论删除回复成功");
+    await loadComments(); // 重新加载评论列表
+  } catch (error) {
+    ElMessage.error("评论删除回复失败");
+  }
+};
+
 const confirmDelete = (commentId, userId) => {
   ElMessageBox.confirm("确定删除这条评论吗?", "提示", {
     confirmButtonText: "确定",
@@ -217,6 +228,19 @@ const confirmDelete = (commentId, userId) => {
     })
     .catch(() => {
       ElMessage.info("取消删除");
+    });
+};
+const confirmDeleteReply = (articleId, commentId, replyId, comment) => {
+  ElMessageBox.confirm("确定删除这条评论回复吗?", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(() => {
+      deleteCommentReply(articleId, commentId, replyId, comment);
+    })
+    .catch(() => {
+      ElMessage.info("取消删除评论回复");
     });
 };
 
@@ -513,21 +537,32 @@ const handleScroll = async (event) => {
               <span class="comment-timestamp">{{
                 formatCommentDate(comment.createdTime)
               }}</span>
-              <div
-                style="font-size: 15px; margin-left: auto"
-                title="点赞"
-                @click="likeComment(comment)"
+              <el-tooltip content="点赞" popper-class="custom-tooltip">
+                <div
+                  style="font-size: 15px; margin-left: auto"
+                  title="点赞"
+                  @click="likeComment(comment)"
+                  class="icon-heartbeat"
+                >
+                  <Sugar
+                    :style="{
+                      width: '1em',
+                      height: '1em',
+                      marginRight: '5px',
+                      color: comment.isLiked === 1 ? 'red' : '',
+                    }"
+                  />
+                  <span style="margin-right: 0px">{{ comment.likeCount }}</span>
+                </div>
+              </el-tooltip>
+              <el-button
+                v-if="comment.userId === userInfoStore.info.id"
+                type="text"
+                @click="confirmDelete(comment.id, comment.userId)"
+                style="color: inherit; font-size: inherit; margin-left: 10px"
               >
-                <Sugar
-                  :style="{
-                    width: '1em',
-                    height: '1em',
-                    marginRight: '5px',
-                    color: comment.isLiked === 1 ? 'red' : '',
-                  }"
-                />
-                <span style="margin-right: 0px">{{ comment.likeCount }}</span>
-              </div>
+                回复
+              </el-button>
               <el-button
                 v-if="comment.userId === userInfoStore.info.id"
                 type="text"
@@ -537,8 +572,8 @@ const handleScroll = async (event) => {
                 删除
               </el-button>
             </span>
-            <div class="reply-content">
-              <!-- 展示回复按钮 -->
+            <div>
+              <!-- 展开回复按钮 -->
               <div v-if="comment.replyCount > 0" class="reply-button">
                 <el-button
                   v-if="comment.showLoadRepliesButton"
@@ -546,7 +581,7 @@ const handleScroll = async (event) => {
                   size="small"
                   style="border: none"
                 >
-                  —— 展示{{ comment.replyCount }}条回复<el-icon
+                  —— 展开{{ comment.replyCount }}条回复<el-icon
                     ><ArrowDown
                   /></el-icon>
                 </el-button>
@@ -565,57 +600,101 @@ const handleScroll = async (event) => {
                   <div
                     v-for="reply in comment.replies"
                     :key="reply.id"
-                    class="reply"
+                    class="reply-container"
                   >
-                    <!-- 当前用户的头像 -->
-                    <img
-                      :src="
-                        reply.avatar && reply.avatar !== ''
-                          ? reply.avatar
-                          : '/src/assets/default.png'
-                      "
-                      class="reply-avatar"
-                      alt="用户头像"
-                    />
-                    <span>{{ reply.nickname }}</span>
-
-                    <!-- 父级用户的信息 -->
-                    <template v-if="reply.parentNickname">
-                      >
+                    <div class="reply-header">
+                      <!-- 第一行：头像、昵称、父级用户信息 -->
                       <img
                         :src="
-                          reply.parentAvatar && reply.parentAvatar !== ''
-                            ? reply.parentAvatar
+                          reply.avatar && reply.avatar !== ''
+                            ? reply.avatar
                             : '/src/assets/default.png'
                         "
                         class="reply-avatar"
-                        alt="父级用户头像"
+                        alt="用户头像"
                       />
-                      <span>{{ reply.parentNickname }}</span>
-                    </template>
+                      <span>{{ reply.nickname }}</span>
 
-                    <!-- 回复的其他内容 -->
-
-                    <span>{{ reply.content }}</span>
-                    <div
-                      style="font-size: 15px; margin-left: auto"
-                      title="点赞"
-                      @click="likeCommentReply(reply)"
-                    >
-                      <Sugar
-                        :style="{
-                          width: '1em',
-                          height: '1em',
-                          marginRight: '5px',
-                          color: reply.isLiked === 1 ? 'red' : '',
-                        }"
-                      />
-                      <span style="margin-right: 0px">{{
-                        reply.likeCount
-                      }}</span>
+                      <!-- 父级用户的信息 -->
+                      <template v-if="reply.parentNickname">
+                        ——>
+                        <img
+                          :src="
+                            reply.parentAvatar && reply.parentAvatar !== ''
+                              ? reply.parentAvatar
+                              : '/src/assets/default.png'
+                          "
+                          class="reply-avatar"
+                          alt="父级用户头像"
+                        />
+                        <span>{{ reply.parentNickname }}</span>
+                      </template>
                     </div>
+                    <!-- 第二行：回复内容 -->
+                    <div class="reply-content">
+                      <span class="reply-text">{{ reply.content }}</span>
+                    </div>
+                    <!-- 第三行：点赞图标、点赞数量、创建时间、回复、删除 -->
+                    <div class="reply-actions">
+                      <span>{{ formatCommentDate(reply.createdTime) }}</span>
+                      <div style="font-size: 15px; margin-left: auto">
+                        <el-tooltip
+                          content="点赞"
+                          popper-class="custom-tooltip"
+                        >
+                          <div
+                            class="icon-heartbeat"
+                            title="点赞"
+                            @click="likeCommentReply(reply)"
+                          >
+                            <Sugar
+                              :style="{
+                                width: '0.9em',
+                                height: '0.9em',
+                                marginRight: '5px',
+                                marginLeft: '15px',
+                                color: reply.isLiked === 1 ? 'red' : '',
+                              }"
+                            />
+                          </div>
+                        </el-tooltip>
+                        <span style="margin-right: 0px">{{
+                          reply.likeCount
+                        }}</span>
+                        <el-button
+                          v-if="comment.userId === userInfoStore.info.id"
+                          type="text"
+                          @click="confirmDelete(comment.id, comment.userId)"
+                          style="
+                            color: #999999;
+                            font-size: 11px;
+                            margin-left: 10px;
+                          "
+                        >
+                          回复
+                        </el-button>
 
-                    <span>{{ formatCommentDate(reply.createdTime) }}</span>
+                        <el-button
+                          v-if="reply.userId === userInfoStore.info.id"
+                          type="text"
+                          @click="
+                            confirmDeleteReply(
+                              reply.articleId,
+                              reply.commentId,
+                              reply.id,
+                              comment
+                            )
+                          "
+                          style="
+                            color: #999999;
+                            font-size: 11px;
+                            margin-left: 10px;
+                          "
+                        >
+                          删除
+                        </el-button>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div v-else>
@@ -665,9 +744,42 @@ const handleScroll = async (event) => {
 </template>
 
 <style lang="scss" scoped>
+.reply-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.reply-header {
+  display: flex;
+  align-items: center;
+}
+
 .reply-content {
-  margin-top: 10px; /* 增加与评论内容的间距 */
-  padding-left: 10px; /* 与评论对齐 */
+  display: flex;
+  margin-top: 5px; /* 上边距设置为10px */
+  margin-bottom: 5px; /* 下边距设置为10px */
+  padding-top: 8px; /* 上内边距设置为5px */
+  padding-bottom: 8px; /* 下内边距设置为5px */
+  padding-left: 15px; /* 左内边距设置为10px */
+  background-color: #e6f7ff;
+  border-radius: 10px;
+}
+.reply-text {
+  font-size: 13px;
+}
+
+.reply-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.reply-avatar {
+  width: 30px; /* 根据需要调整大小 */
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 5px;
 }
 
 .reply-button {
@@ -742,11 +854,9 @@ const handleScroll = async (event) => {
 
 .comment-body {
   margin: 0;
-  padding: 5;
   font-size: 0.85em;
   line-height: 1.4;
   color: #333;
-  margin-bottom: 5px;
   word-wrap: break-word;
 }
 
