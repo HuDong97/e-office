@@ -1,5 +1,13 @@
 <script setup>
-import { Star, View, Sugar, ChatDotRound, Back } from "@element-plus/icons-vue";
+import {
+  Star,
+  View,
+  Sugar,
+  ChatDotRound,
+  Back,
+  ArrowUp,
+  ArrowDown,
+} from "@element-plus/icons-vue";
 
 import { ref, onMounted, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -135,6 +143,7 @@ const loadComments = async () => {
     response.data.forEach((comment) => {
       comment.showReplies = false;
       comment.replies = [];
+      comment.showLoadRepliesButton = true; // 初始化为true
     });
     comments.value = response.data;
   } catch (error) {
@@ -142,9 +151,9 @@ const loadComments = async () => {
   }
 };
 const loadReplies = async (comment) => {
+  comment.showLoadRepliesButton = false;
+  comment.loadingReplies = true;
   if (comment.replyCount > 0 && comment.replies.length === 0) {
-    comment.loadingReplies = true;
-
     try {
       const response = await getArticleCommentsReply(
         route.query.id,
@@ -153,14 +162,16 @@ const loadReplies = async (comment) => {
       comment.replies = response.data;
     } catch (error) {
       ElMessage.error("加载回复失败");
+      comment.showLoadRepliesButton = true; // 加载失败时重新显示按钮
     }
-    comment.loadingReplies = false;
   }
+  comment.loadingReplies = false;
   comment.showReplies = true;
 };
 
 const hideReplies = (comment) => {
   comment.showReplies = false;
+  comment.showLoadRepliesButton = true;
 };
 
 const submitComment = async () => {
@@ -526,88 +537,105 @@ const handleScroll = async (event) => {
                 删除
               </el-button>
             </span>
-          </div>
-
-          <!-- 展示回复按钮 -->
-          <div v-if="comment.replyCount > 0" class="reply-button">
-            <el-button @click="loadReplies(comment)" size="small">
-              —— 展示{{ comment.replyCount }}条回复 V
-            </el-button>
-          </div>
-          <!-- 收起回复按钮 -->
-          <div
-            v-if="comment.replyCount > 0 && comment.showReplies"
-            class="reply-button"
-          >
-            <el-button @click="hideReplies(comment)" size="small">
-              —— 收起 ^
-            </el-button>
-          </div>
-          <!-- 回复列表 -->
-          <div v-if="comment.showReplies" class="replies-list">
-            <!-- 加载回复数据 -->
-            <div v-if="comment.replies.length === 0 && !comment.loadingReplies">
-              暂无回复
-            </div>
-
-            <div v-else-if="comment.replies.length > 0">
-              <div
-                v-for="reply in comment.replies"
-                :key="reply.id"
-                class="reply"
-              >
-                <!-- 当前用户的头像 -->
-                <img
-                  :src="
-                    reply.avatar && reply.avatar !== ''
-                      ? reply.avatar
-                      : '/src/assets/default.png'
-                  "
-                  class="reply-avatar"
-                  alt="用户头像"
-                />
-                <span>{{ reply.nickname }}</span>
-
-                <!-- 父级用户的信息 -->
-                <template v-if="reply.parentNickname">
-                  >
-                  <img
-                    :src="
-                      reply.parentAvatar && reply.parentAvatar !== ''
-                        ? reply.parentAvatar
-                        : '/src/assets/default.png'
-                    "
-                    class="reply-avatar"
-                    alt="父级用户头像"
-                  />
-                  <span>{{ reply.parentNickname }}</span>
-                </template>
-
-                <!-- 回复的其他内容 -->
-
-                <span>{{ reply.content }}</span>
-                <div
-                  style="font-size: 15px; margin-left: auto"
-                  title="点赞"
-                  @click="likeCommentReply(reply)"
+            <div class="reply-content">
+              <!-- 展示回复按钮 -->
+              <div v-if="comment.replyCount > 0" class="reply-button">
+                <el-button
+                  v-if="comment.showLoadRepliesButton"
+                  @click="loadReplies(comment)"
+                  size="small"
+                  style="border: none"
                 >
-                  <Sugar
-                    :style="{
-                      width: '1em',
-                      height: '1em',
-                      marginRight: '5px',
-                      color: reply.isLiked === 1 ? 'red' : '',
-                    }"
-                  />
-                  <span style="margin-right: 0px">{{ reply.likeCount }}</span>
+                  —— 展示{{ comment.replyCount }}条回复<el-icon
+                    ><ArrowDown
+                  /></el-icon>
+                </el-button>
+              </div>
+
+              <!-- 回复列表 -->
+              <div v-if="comment.showReplies" class="replies-list">
+                <!-- 加载回复数据 -->
+                <div
+                  v-if="comment.replies.length === 0 && !comment.loadingReplies"
+                >
+                  加载中...
                 </div>
 
-                <span>{{ formatCommentDate(reply.createdTime) }}</span>
+                <div v-else-if="comment.replies.length > 0">
+                  <div
+                    v-for="reply in comment.replies"
+                    :key="reply.id"
+                    class="reply"
+                  >
+                    <!-- 当前用户的头像 -->
+                    <img
+                      :src="
+                        reply.avatar && reply.avatar !== ''
+                          ? reply.avatar
+                          : '/src/assets/default.png'
+                      "
+                      class="reply-avatar"
+                      alt="用户头像"
+                    />
+                    <span>{{ reply.nickname }}</span>
+
+                    <!-- 父级用户的信息 -->
+                    <template v-if="reply.parentNickname">
+                      >
+                      <img
+                        :src="
+                          reply.parentAvatar && reply.parentAvatar !== ''
+                            ? reply.parentAvatar
+                            : '/src/assets/default.png'
+                        "
+                        class="reply-avatar"
+                        alt="父级用户头像"
+                      />
+                      <span>{{ reply.parentNickname }}</span>
+                    </template>
+
+                    <!-- 回复的其他内容 -->
+
+                    <span>{{ reply.content }}</span>
+                    <div
+                      style="font-size: 15px; margin-left: auto"
+                      title="点赞"
+                      @click="likeCommentReply(reply)"
+                    >
+                      <Sugar
+                        :style="{
+                          width: '1em',
+                          height: '1em',
+                          marginRight: '5px',
+                          color: reply.isLiked === 1 ? 'red' : '',
+                        }"
+                      />
+                      <span style="margin-right: 0px">{{
+                        reply.likeCount
+                      }}</span>
+                    </div>
+
+                    <span>{{ formatCommentDate(reply.createdTime) }}</span>
+                  </div>
+                </div>
+                <div v-else>
+                  <!-- 加载中... -->
+                  <el-skeleton :rows="3" animated />
+                </div>
+                <!-- 收起回复按钮 -->
+                <div
+                  v-if="comment.replyCount > 0 && comment.showReplies"
+                  class="reply-button"
+                >
+                  <el-button
+                    @click="hideReplies(comment)"
+                    size="small"
+                    style="border: none"
+                  >
+                    —— 收起 <el-icon> <ArrowUp /> </el-icon>
+                  </el-button>
+                </div>
               </div>
-            </div>
-            <div v-else>
-              <!-- 加载中... -->
-              <el-skeleton :rows="3" animated />
             </div>
           </div>
         </div>
@@ -637,6 +665,29 @@ const handleScroll = async (event) => {
 </template>
 
 <style lang="scss" scoped>
+.reply-content {
+  margin-top: 10px; /* 增加与评论内容的间距 */
+  padding-left: 10px; /* 与评论对齐 */
+}
+
+.reply-button {
+  margin-top: 5px;
+  border: none;
+}
+
+.replies-list {
+  margin-top: 5px;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.reply {
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
 .reply-button {
   margin-top: 5px;
 }

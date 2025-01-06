@@ -293,7 +293,7 @@ const handleForumClick = () => {
       </div>
 
       <!-- 搜索框和按钮 -->
-      <div class="search-container">
+      <div>
         <el-input
           v-model="keyword"
           placeholder="搜索文章"
