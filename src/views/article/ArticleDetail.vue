@@ -32,6 +32,7 @@ import {
   setCommentReplyLikeService,
   cancelCommenReplytLikeService,
   commentReplyDeleteService,
+  commentReplyAddService,
 } from "@/api/userBehavior.js";
 import useUserInfoStore from "@/stores/userInfo.js";
 
@@ -176,21 +177,50 @@ const hideReplies = (comment) => {
 };
 
 const submitComment = async () => {
-  if (newComment.value.trim()) {
-    try {
-      await commentsAddService({
-        articleId: route.query.id,
-        content: newComment.value,
-      });
-      userBehavior.commentsCount++;
-      newComment.value = "";
-      ElMessage.success("评论成功");
-      await loadComments(); // 添加评论成功后重新加载评论数据
-    } catch (error) {
-      ElMessage.error("评论失败");
-    }
-  } else {
+  const content = newComment.value.trim();
+  if (!content) {
     ElMessage.warning("评论内容不能为空");
+    return;
+  }
+
+  try {
+    if (replyTarget.value) {
+      // 判断参数数量
+      const paramCount = Object.keys(replyTarget.value).length;
+      const commentId =
+        paramCount > 10 && replyTarget.value.commentId
+          ? replyTarget.value.commentId
+          : replyTarget.value.id || "未知";
+
+      // 回复逻辑
+      await commentReplyAddService(
+        route.query.id, // 文章ID
+        commentId, // 根据参数数量调整的评论ID
+        replyTarget.value.userId, // 评论用户ID
+        content // 回复内容
+      );
+
+      ElMessage.success("回复成功");
+    } else {
+      // 评论逻辑
+      console.log("新评论内容:", content);
+
+      await commentsAddService({
+        articleId: route.query.id, // 文章ID
+        content: content, // 评论内容
+      });
+
+      ElMessage.success("评论成功");
+    }
+
+    // 更新评论数和输入框状态
+    userBehavior.commentsCount++;
+    newComment.value = "";
+    replyTarget.value = null;
+    await loadComments();
+  } catch (error) {
+    ElMessage.error(replyTarget.value ? "回复失败" : "评论失败");
+    console.error(error);
   }
 };
 
@@ -207,7 +237,7 @@ const deleteComment = async (commentId, userId) => {
   }
 };
 
-const deleteCommentReply = async (articleId, commentId, replyId, comment) => {
+const deleteCommentReply = async (articleId, commentId, replyId) => {
   try {
     await commentReplyDeleteService(articleId, commentId, replyId); // 发送删除评论回复的请求
     ElMessage.success("评论删除回复成功");
@@ -227,17 +257,17 @@ const confirmDelete = (commentId, userId) => {
       deleteComment(commentId, userId);
     })
     .catch(() => {
-      ElMessage.info("取消删除");
+      ElMessage.info("取消删除评论");
     });
 };
-const confirmDeleteReply = (articleId, commentId, replyId, comment) => {
+const confirmDeleteReply = (articleId, commentId, replyId) => {
   ElMessageBox.confirm("确定删除这条评论回复吗?", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
   })
     .then(() => {
-      deleteCommentReply(articleId, commentId, replyId, comment);
+      deleteCommentReply(articleId, commentId, replyId);
     })
     .catch(() => {
       ElMessage.info("取消删除评论回复");
@@ -399,6 +429,11 @@ const handleScroll = async (event) => {
     }
   }
 };
+const replyTarget = ref(null); // 记录当前回复目标，可以是评论或回复
+const setReplyTarget = (target) => {
+  replyTarget.value = target;
+  commentsVisible.value = true; // 确保评论区抽屉打开
+};
 </script>
 
 <template>
@@ -556,9 +591,8 @@ const handleScroll = async (event) => {
                 </div>
               </el-tooltip>
               <el-button
-                v-if="comment.userId === userInfoStore.info.id"
                 type="text"
-                @click="confirmDelete(comment.id, comment.userId)"
+                @click="setReplyTarget(comment)"
                 style="color: inherit; font-size: inherit; margin-left: 10px"
               >
                 回复
@@ -661,10 +695,10 @@ const handleScroll = async (event) => {
                         <span style="margin-right: 0px">{{
                           reply.likeCount
                         }}</span>
+
                         <el-button
-                          v-if="comment.userId === userInfoStore.info.id"
                           type="text"
-                          @click="confirmDelete(comment.id, comment.userId)"
+                          @click="setReplyTarget(reply)"
                           style="
                             color: #999999;
                             font-size: 11px;
@@ -681,8 +715,7 @@ const handleScroll = async (event) => {
                             confirmDeleteReply(
                               reply.articleId,
                               reply.commentId,
-                              reply.id,
-                              comment
+                              reply.id
                             )
                           "
                           style="
@@ -722,11 +755,18 @@ const handleScroll = async (event) => {
 
       <!-- 评论输入框 -->
       <div class="comment-input" style="margin-top: auto">
+        <div v-if="replyTarget" class="reply-info">
+          回复 @{{ replyTarget.nickname + " : " + replyTarget.content }}
+        </div>
         <div class="input-container">
           <el-input
             type="textarea"
             v-model="newComment"
-            placeholder="请输入你的评论"
+            :placeholder="
+              replyTarget
+                ? '回复 @' + replyTarget.nickname + ' : '
+                : '请输入你的评论'
+            "
             rows="1"
             :autosize="{ minRows: 1, maxRows: 6 }"
             class="input"

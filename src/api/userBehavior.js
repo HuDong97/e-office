@@ -117,3 +117,19 @@ export const commentReplyDeleteService = (articleId, commentId, replyId) => {
     },
   });
 };
+
+// 评论回复添加
+export const commentReplyAddService = (
+  articleId,
+  commentId,
+  parentId,
+  content
+) => {
+  const formData = new URLSearchParams();
+  formData.append("articleId", articleId);
+  formData.append("commentId", commentId);
+  formData.append("parentId", parentId);
+  formData.append("content", content);
+
+  return request.post("/userBehavior/addCommentReply", formData);
+};
