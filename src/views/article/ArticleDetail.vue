@@ -7,6 +7,7 @@ import {
   Back,
   ArrowUp,
   ArrowDown,
+  Close,
 } from "@element-plus/icons-vue";
 
 import { ref, onMounted, reactive } from "vue";
@@ -203,8 +204,6 @@ const submitComment = async () => {
       ElMessage.success("回复成功");
     } else {
       // 评论逻辑
-      console.log("新评论内容:", content);
-
       await commentsAddService({
         articleId: route.query.id, // 文章ID
         content: content, // 评论内容
@@ -433,6 +432,12 @@ const replyTarget = ref(null); // 记录当前回复目标，可以是评论或�
 const setReplyTarget = (target) => {
   replyTarget.value = target;
   commentsVisible.value = true; // 确保评论区抽屉打开
+};
+
+// 清空回复对象
+const clearReplyTarget = () => {
+  newComment.value = "";
+  replyTarget.value = null;
 };
 </script>
 
@@ -757,6 +762,16 @@ const setReplyTarget = (target) => {
       <div class="comment-input" style="margin-top: auto">
         <div v-if="replyTarget" class="reply-info">
           回复 @{{ replyTarget.nickname + " : " + replyTarget.content }}
+
+          <!-- 清空回复对象按钮 -->
+          <el-button
+            class="replyClean-button"
+            type="text"
+            circle
+            @click="clearReplyTarget"
+          >
+            <el-icon><Close /></el-icon>
+          </el-button>
         </div>
         <div class="input-container">
           <el-input
@@ -784,6 +799,43 @@ const setReplyTarget = (target) => {
 </template>
 
 <style lang="scss" scoped>
+.reply-info {
+  margin-top: 5px;
+  font-size: 0.9em;
+  color: #666;
+  display: flex;
+  align-items: center;
+  max-width: 440px;
+  padding: 10px; /* 内边距 */
+  border: 1px solid #dcdcdc; /* 外边框颜色 */
+  border-radius: 8px; /* 边框圆角 */
+
+  margin-bottom: 10px; /* 与下方元素的间距 */
+  margin: 0;
+}
+.replyClean-button {
+  margin-left: 20px;
+  padding: 0;
+  width: 15px;
+  height: 15px;
+  line-height: 24px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid #dcdcdc;
+  color: #909399;
+  background: #f9f9f9;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+.replyClean-button:hover {
+  background: #ebebeb;
+  border-color: #bcbcbc;
+  color: #444;
+}
+
 .reply-container {
   display: flex;
   flex-direction: column;
