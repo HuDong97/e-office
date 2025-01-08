@@ -164,8 +164,9 @@ const loadReplies = async (comment) => {
         comment.id
       );
       comment.replies = response.data;
-      // 存储最后一条回复的内容
       comment.lastReply = response.data[response.data.length - 1];
+      // 初始化 hasMoreReplies
+      comment.hasMoreReplies = response.data.length < comment.replyCount;
     } catch (error) {
       ElMessage.error("加载回复失败");
       comment.showLoadRepliesButton = true; // 加载失败时重新显示按钮
@@ -453,11 +454,13 @@ const loadMoreReplies = async (comment) => {
 
     if (response && response.data) {
       if (response.data.length > 0) {
-        // 处理返回的数据
+        // 将新回复添加到回复列表中
         comment.replies.push(...response.data);
         comment.lastReply = response.data[response.data.length - 1];
       } else {
-        ElMessage.warning("没有更多评论回复了"); // 只提示一次
+        // 没有更多回复，隐藏按钮
+        comment.hasMoreReplies = false;
+        ElMessage.warning("没有更多评论回复了");
       }
     }
   } catch (error) {
@@ -770,7 +773,9 @@ const loadMoreReplies = async (comment) => {
                   v-if="comment.replyCount > 0 && comment.showReplies"
                   class="reply-button"
                 >
+                  <!-- 只有当 hasMoreReplies 为 true 时才显示“展示更多”按钮 -->
                   <el-button
+                    v-if="comment.hasMoreReplies"
                     size="small"
                     style="border: none"
                     @click="loadMoreReplies(comment)"
