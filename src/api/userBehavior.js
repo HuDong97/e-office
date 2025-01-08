@@ -140,3 +140,10 @@ export const getNextCommentsReply = (articleId, commentId, replyId) => {
     params: { articleId, commentId, replyId },
   });
 };
+
+// 获取热门评论详情
+export const hotCommentDetailService = (articleId) => {
+  return request.get("/userBehavior/hotCommentDetail", {
+    params: { articleId }, // 传递文章ID
+  });
+};

@@ -35,10 +35,12 @@ import {
   commentReplyDeleteService,
   commentReplyAddService,
   getNextCommentsReply,
+  hotCommentDetailService,
 } from "@/api/userBehavior.js";
 import useUserInfoStore from "@/stores/userInfo.js";
 
 const userInfoStore = useUserInfoStore();
+const hotComments = ref([]);
 
 const formatTimeUnit = (unit) => (unit < 10 ? `0${unit}` : unit);
 
@@ -144,12 +146,24 @@ const toggleComments = async () => {
 const loadComments = async () => {
   try {
     const response = await getArticleComments(route.query.id);
+    const hotResponse = await hotCommentDetailService(route.query.id);
+    // 处理普通评论
     response.data.forEach((comment) => {
       comment.showReplies = false;
       comment.replies = [];
       comment.showLoadRepliesButton = true; // 初始化为true
     });
     comments.value = response.data;
+
+    // 处理热评
+    hotResponse.data.forEach((comment) => {
+      comment.showReplies = false;
+      comment.replies = [];
+      comment.showLoadRepliesButton = true;
+      comment.isHot = true; // 可选：标记热评
+    });
+    // 合并热评和普通评论
+    comments.value = [...hotResponse.data, ...response.data];
   } catch (error) {
     console.error("获取评论失败：", error);
   }
@@ -408,8 +422,6 @@ const handleScroll = async (event) => {
     try {
       const lastCommentId =
         comments.value[comments.value.length - 1]?.id || null; // 获取最后一条评论的ID
-      console.log("参数", route.query.id, lastCommentId);
-
       const response = await subsequentCommentsService(
         route.query.id,
         lastCommentId
@@ -586,6 +598,7 @@ const loadMoreReplies = async (comment) => {
   >
     <div class="comments-container">
       <!-- 评论内容区域 -->
+
       <div ref="commentsList" class="comments-list" @scroll="handleScroll">
         <div v-for="comment in comments" :key="comment.id" class="comment">
           <img
