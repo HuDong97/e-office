@@ -34,6 +34,7 @@ import {
   cancelCommenReplytLikeService,
   commentReplyDeleteService,
   commentReplyAddService,
+  getNextCommentsReply,
 } from "@/api/userBehavior.js";
 import useUserInfoStore from "@/stores/userInfo.js";
 
@@ -163,6 +164,8 @@ const loadReplies = async (comment) => {
         comment.id
       );
       comment.replies = response.data;
+      // 存储最后一条回复的内容
+      comment.lastReply = response.data[response.data.length - 1];
     } catch (error) {
       ElMessage.error("加载回复失败");
       comment.showLoadRepliesButton = true; // 加载失败时重新显示按钮
@@ -438,6 +441,29 @@ const setReplyTarget = (target) => {
 const clearReplyTarget = () => {
   newComment.value = "";
   replyTarget.value = null;
+};
+// 展开更多回复
+const loadMoreReplies = async (comment) => {
+  try {
+    const response = await getNextCommentsReply(
+      comment.articleId,
+      comment.id,
+      comment.lastReply.id
+    );
+
+    if (response && response.data) {
+      if (response.data.length > 0) {
+        // 处理返回的数据
+        comment.replies.push(...response.data);
+        comment.lastReply = response.data[response.data.length - 1];
+      } else {
+        ElMessage.warning("没有更多评论回复了"); // 只提示一次
+      }
+    }
+  } catch (error) {
+    console.error("获取更多回复失败:", error);
+    alert("加载回复失败，请稍后重试");
+  }
 };
 </script>
 
@@ -745,11 +771,18 @@ const clearReplyTarget = () => {
                   class="reply-button"
                 >
                   <el-button
+                    size="small"
+                    style="border: none"
+                    @click="loadMoreReplies(comment)"
+                  >
+                    —— 展开更多<el-icon><ArrowDown /></el-icon>
+                  </el-button>
+                  <el-button
                     @click="hideReplies(comment)"
                     size="small"
                     style="border: none"
                   >
-                    —— 收起 <el-icon> <ArrowUp /> </el-icon>
+                    收起 <el-icon> <ArrowUp /> </el-icon>
                   </el-button>
                 </div>
               </div>

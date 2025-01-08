@@ -133,3 +133,10 @@ export const commentReplyAddService = (
 
   return request.post("/userBehavior/addCommentReply", formData);
 };
+
+// 后续评论回复添加
+export const getNextCommentsReply = (articleId, commentId, replyId) => {
+  return request.get("/userBehavior/nextReplyDetail", {
+    params: { articleId, commentId, replyId },
+  });
+};
