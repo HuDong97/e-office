@@ -110,17 +110,21 @@ const handleKeydown = (event) => {
               : 'system-message',
           ]"
         >
+          <!-- GPT-3.5 的消息显示在内容前面 -->
+          <span class="sender" v-if="message.sender === 'GPT-3.5'">{{
+            message.sender
+          }}</span>
           <div class="message-content">
             <span class="message-text">{{ message.text }}</span>
             <span class="timestamp">{{ message.timestamp }}</span>
           </div>
+          <!-- 用户头像显示在内容后面 -->
           <img
             :src="message.sender"
             v-if="message.sender === userInfoStore.info.userPic"
             class="avatar"
             alt="Avatar"
           />
-          <span class="sender" v-else>{{ message.sender }}</span>
         </div>
       </transition-group>
     </div>
@@ -160,54 +164,6 @@ const handleKeydown = (event) => {
 </template>
 
 <style lang="scss" scoped>
-.loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(255, 255, 255, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-}
-
-.dot-container {
-  display: flex;
-  justify-content: space-between;
-  width: 50px;
-}
-
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: #409eff;
-  animation: bounce 0.6s infinite alternate;
-}
-
-.dot:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.dot:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.dot:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes bounce {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(-10px);
-  }
-}
-
 .page-container {
   min-height: 100%;
   width: 100%;
@@ -227,70 +183,148 @@ const handleKeydown = (event) => {
   border-radius: 5px;
   scrollbar-width: thin;
   scrollbar-color: #c1c1c1 #ebeef5;
-}
 
-.chat-window::-webkit-scrollbar {
-  width: 8px;
-}
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
 
-.chat-window::-webkit-scrollbar-track {
-  background: #ebeef5;
-  border-radius: 10px;
-}
+  &::-webkit-scrollbar-track {
+    background: #ebeef5;
+    border-radius: 10px;
+  }
 
-.chat-window::-webkit-scrollbar-thumb {
-  background-color: #c1c1c1;
-  border-radius: 10px;
-  border: 2px solid #ebeef5;
+  &::-webkit-scrollbar-thumb {
+    background-color: #c1c1c1;
+    border-radius: 10px;
+    border: 2px solid #ebeef5;
+  }
 }
 
 .chat-message {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+
+  &.user-message {
+    justify-content: flex-end;
+
+    .message-content {
+      background-color: #e6f7ff;
+      padding: 5px 10px;
+      border-radius: 10px;
+      margin-right: 10px;
+    }
+  }
+
+  &.system-message {
+    justify-content: flex-start;
+
+    .message-content {
+      background-color: #f5f5f5;
+      padding: 5px 10px;
+      border-radius: 10px;
+      margin-left: 10px;
+    }
+  }
+
+  .message-content {
+    display: flex;
+    flex-direction: column;
+    max-width: 70%;
+  }
+
+  .message-text {
+    word-wrap: break-word;
+  }
+
+  .timestamp {
+    font-size: 0.7em;
+    color: #999;
+    margin-top: 2px;
+  }
+
+  .sender {
+    font-size: 0.9em;
+    color: #555;
+    margin-right: 10px;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
 }
 
-.message-content {
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
   display: flex;
-  flex-direction: column;
-  max-width: 70%;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+
+  .dot-container {
+    display: flex;
+    justify-content: space-between;
+    width: 50px;
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #409eff;
+      animation: bounce 0.6s infinite alternate;
+
+      &:nth-child(1) {
+        animation-delay: 0s;
+      }
+
+      &:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      &:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+    }
+  }
 }
 
-.sender {
-  font-size: 0.9em;
-  color: #555;
-  margin-left: 10px;
+@keyframes bounce {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-10px);
+  }
 }
 
-.message-text {
-  word-wrap: break-word;
+.error-message {
+  color: red;
+  margin-top: 10px;
 }
 
-.timestamp {
-  font-size: 0.7em;
-  color: #999;
-  margin-top: 2px;
-}
-
-.user-message {
-  justify-content: flex-end;
-}
-
-.user-message .message-content {
-  background-color: #e6f7ff;
-  padding: 5px 10px;
-  border-radius: 10px;
-}
-
-.system-message {
+.input-container {
+  display: flex;
+  width: 100%;
+  align-items: center;
   justify-content: flex-start;
-}
 
-.system-message .message-content {
-  background-color: #f5f5f5;
-  padding: 5px 10px;
-  border-radius: 10px;
+  .input {
+    flex-grow: 1;
+    margin-right: 10px;
+  }
+
+  .send-button {
+    margin-left: 10px;
+    height: auto;
+    border-radius: 50px;
+  }
 }
 
 .message-fade-enter-active,
@@ -301,34 +335,5 @@ const handleKeydown = (event) => {
 .message-fade-enter,
 .message-fade-leave-to {
   opacity: 0;
-}
-
-.error-message {
-  color: red;
-  margin-top: 10px;
-}
-
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-}
-
-.input-container {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.input {
-  flex-grow: 1;
-  margin-right: 10px;
-}
-
-.send-button {
-  margin-left: 10px;
-  height: auto;
-  border-radius: 50px;
 }
 </style>
