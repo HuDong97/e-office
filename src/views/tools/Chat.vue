@@ -9,6 +9,7 @@ const chatMessages = ref([]);
 const newMessage = ref("");
 const sending = ref(false);
 const error = ref(null);
+const loading = ref(false);
 
 const sendMessage = async () => {
   if (newMessage.value.trim() !== "" && !sending.value) {
@@ -22,15 +23,14 @@ const sendMessage = async () => {
     const userMessage = createUserMessage();
     addMessage(userMessage);
 
-    // 显示加载动画
     loading.value = true;
 
     try {
       const gptMessage = await fetchGptResponse(userMessage.text);
       addMessage(gptMessage);
     } catch (err) {
+      console.error("发送消息失败：", err);
     } finally {
-      // 隐藏加载动画
       loading.value = false;
     }
 
@@ -64,7 +64,7 @@ const fetchGptResponse = async (text) => {
     return {
       id: Date.now() + 1,
       sender: "GPT-3.5",
-      text: response.data, // 直接取 data 字段内容
+      text: response.data,
       timestamp: new Date().toLocaleTimeString(),
     };
   } catch (error) {
@@ -82,16 +82,12 @@ const scrollToBottom = () => {
 
 const handleKeydown = (event) => {
   if (event.key === "Enter" && event.shiftKey) {
-    // Shift + Enter 换行
     return;
   } else if (event.key === "Enter" && !event.shiftKey) {
-    // Enter 发送消息
     sendMessage();
-    event.preventDefault(); // 防止换行
+    event.preventDefault();
   }
 };
-
-const loading = ref(false);
 </script>
 
 <template>
@@ -102,71 +98,64 @@ const loading = ref(false);
       </div>
     </template>
 
-    <el-row>
-      <el-col :span="24">
-        <div class="chat-card">
-          <div class="chat-window">
-            <transition-group name="message-fade" tag="div">
-              <div
-                v-for="message in chatMessages"
-                :key="message.id"
-                :class="[
-                  'chat-message',
-                  message.sender === userInfoStore.info.userPic
-                    ? 'user-message'
-                    : 'system-message',
-                ]"
-              >
-                <div class="message-content">
-                  <span class="message-text">{{ message.text }}</span>
-                  <span class="timestamp">{{ message.timestamp }}</span>
-                </div>
-                <img
-                  :src="message.sender"
-                  v-if="message.sender === userInfoStore.info.userPic"
-                  class="avatar"
-                  alt="Avatar"
-                />
-                <span class="sender" v-else>{{ message.sender }}</span>
-              </div>
-            </transition-group>
+    <div class="chat-window">
+      <transition-group name="message-fade" tag="div">
+        <div
+          v-for="message in chatMessages"
+          :key="message.id"
+          :class="[
+            'chat-message',
+            message.sender === userInfoStore.info.userPic
+              ? 'user-message'
+              : 'system-message',
+          ]"
+        >
+          <div class="message-content">
+            <span class="message-text">{{ message.text }}</span>
+            <span class="timestamp">{{ message.timestamp }}</span>
           </div>
-
-          <!-- 显示加载动画 -->
-          <div v-if="loading" class="loading-overlay">
-            <div class="dot-container">
-              <div class="dot"></div>
-              <div class="dot"></div>
-              <div class="dot"></div>
-            </div>
-          </div>
-
-          <div class="input-area">
-            <div class="input-container">
-              <el-input
-                type="textarea"
-                v-model="newMessage"
-                placeholder="输入你的消息"
-                rows="1"
-                :autosize="{ minRows: 1, maxRows: 6 }"
-                class="input"
-                @keydown="handleKeydown"
-                style="max-height: 80px; overflow-y: auto"
-              ></el-input>
-              <el-button
-                type="primary"
-                @click="sendMessage"
-                :disabled="sending"
-                class="send-button"
-              >
-                发送
-              </el-button>
-            </div>
-          </div>
-          <div v-if="error" class="error-message">{{ error }}</div>
+          <img
+            :src="message.sender"
+            v-if="message.sender === userInfoStore.info.userPic"
+            class="avatar"
+            alt="Avatar"
+          />
+          <span class="sender" v-else>{{ message.sender }}</span>
         </div>
-      </el-col>
-    </el-row>
+      </transition-group>
+    </div>
+
+    <div v-if="loading" class="loading-overlay">
+      <div class="dot-container">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-container">
+        <el-input
+          type="textarea"
+          v-model="newMessage"
+          placeholder="输入你的消息"
+          rows="1"
+          :autosize="{ minRows: 1, maxRows: 6 }"
+          class="input"
+          @keydown="handleKeydown"
+          style="max-height: 80px; overflow-y: auto"
+        ></el-input>
+        <el-button
+          type="primary"
+          @click="sendMessage"
+          :disabled="sending"
+          class="send-button"
+        >
+          发送
+        </el-button>
+      </div>
+    </div>
+    <div v-if="error" class="error-message">{{ error }}</div>
   </el-card>
 </template>
 
@@ -175,8 +164,8 @@ const loading = ref(false);
   position: absolute;
   top: 0;
   left: 0;
-  width: 110%;
-  height: 110%;
+  width: 100%;
+  height: 100%;
   background-color: rgba(255, 255, 255, 0.8);
   display: flex;
   justify-content: center;
@@ -229,18 +218,8 @@ const loading = ref(false);
   box-sizing: border-box;
 }
 
-.chat-card {
-  background-color: #ffffff;
-  padding: 20px;
-  border-radius: 25px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
 .chat-window {
-  height: 46vh;
+  min-height: 500px;
   overflow-y: auto;
   margin-bottom: 20px;
   border: 1px solid #ebeef5;
