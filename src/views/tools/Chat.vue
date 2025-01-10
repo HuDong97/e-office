@@ -63,7 +63,7 @@ const fetchGptResponse = async (text) => {
 
     return {
       id: Date.now() + 1,
-      sender: "GPT-3.5",
+      sender: "GPT-4",
       text: response.data,
       timestamp: new Date().toLocaleTimeString(),
     };
@@ -98,7 +98,7 @@ const handleKeydown = (event) => {
       </div>
     </template>
 
-    <div class="chat-window">
+    <div class="chat-window" style="border-radius: 20px">
       <transition-group name="message-fade" tag="div">
         <div
           v-for="message in chatMessages"
@@ -110,8 +110,8 @@ const handleKeydown = (event) => {
               : 'system-message',
           ]"
         >
-          <!-- GPT-3.5 的消息显示在内容前面 -->
-          <span class="sender" v-if="message.sender === 'GPT-3.5'">{{
+          <!-- GPT-4 的消息显示在内容前面 -->
+          <span class="sender" v-if="message.sender === 'GPT-4'">{{
             message.sender
           }}</span>
           <div class="message-content">
@@ -148,11 +148,12 @@ const handleKeydown = (event) => {
           class="input"
           @keydown="handleKeydown"
           style="max-height: 80px; overflow-y: auto"
+          :disabled="loading"
         ></el-input>
         <el-button
           type="primary"
           @click="sendMessage"
-          :disabled="sending"
+          :disabled="sending || loading"
           class="send-button"
         >
           发送
@@ -257,16 +258,11 @@ const handleKeydown = (event) => {
 }
 
 .loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(255, 255, 255, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
 
   .dot-container {
     display: flex;

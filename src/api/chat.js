@@ -2,7 +2,7 @@ import request from "@/utils/request.js";
 
 export const invokeChatService = async (message) => {
   try {
-    const response = await request.get(`/chat/invokeChat3`, {
+    const response = await request.get(`/chat/invokeChat`, {
       params: { msg: message }, // 使用 params 传递查询参数
     });
 
