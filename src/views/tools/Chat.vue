@@ -9,14 +9,18 @@ import {
 } from "@/api/chat.js";
 
 const userInfoStore = useUserInfoStore();
-
+const inputArea = ref(null);
 const chatMessages = ref([]);
 const newMessage = ref("");
 const sending = ref(false);
 const error = ref(null);
 const loading = ref(false);
 const selectedModel = ref("deepseek"); // 默认选择deepseek
-
+const scrollToInput = () => {
+  if (inputArea.value) {
+    inputArea.value.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+};
 // 发送消息
 const sendMessage = async () => {
   if (newMessage.value.trim() !== "" && !sending.value) {
@@ -45,10 +49,11 @@ const sendMessage = async () => {
       error.value = "发送消息失败，请稍后重试。";
     } finally {
       loading.value = false;
+
+      scrollToInput(); // 新增
     }
 
     sending.value = false;
-    scrollToBottom();
   }
 };
 
@@ -239,7 +244,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div class="input-area">
+    <div ref="inputArea" class="input-area">
       <div class="input-container">
         <el-input
           type="textarea"
