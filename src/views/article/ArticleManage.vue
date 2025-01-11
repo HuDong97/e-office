@@ -386,10 +386,6 @@ const resetAndSearch = () => {
                   [{ list: 'ordered' }, { list: 'bullet' }],
                   [{ script: 'sub' }, { script: 'super' }],
                   [{ color: [] }, { background: [] }],
-                  [{ align: [] }, { direction: 'rtl' }],
-                  ['blockquote', 'code-block'],
-                  [{ indent: '-1' }, { indent: '+1' }],
-                  [{ size: ['small', false, 'large', 'huge'] }],
                 ]"
                 :style="{ height: '260px' }"
               >

@@ -1,5 +1,7 @@
 <script setup>
 import { ref, watch, onMounted, nextTick } from "vue";
+import MarkdownIt from "markdown-it";
+import DOMPurify from "dompurify";
 import useUserInfoStore from "@/stores/userInfo.js";
 import {
   invokeChatService,
@@ -7,7 +9,7 @@ import {
   getChatGptDetail,
   getDeepSeekChatDetail,
 } from "@/api/chat.js";
-
+const md = new MarkdownIt();
 const userInfoStore = useUserInfoStore();
 const inputArea = ref(null);
 const chatMessages = ref([]);
@@ -52,7 +54,7 @@ const sendMessage = async () => {
     } finally {
       loading.value = false;
 
-      scrollToInput(); // 新增
+      scrollToInput();
     }
 
     sending.value = false;
@@ -109,14 +111,6 @@ const handleResponse = (response, sender) => {
     text: response.data,
     timestamp: new Date().toLocaleTimeString(),
   };
-};
-
-// 滚动到底部
-const scrollToBottom = () => {
-  nextTick(() => {
-    const chatWindow = document.querySelector(".chat-window");
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-  });
 };
 
 // 处理键盘事件
@@ -193,6 +187,11 @@ onMounted(async () => {
     scrollToInput();
   }
 });
+
+const parseMarkdown = (text) => {
+  const html = md.render(text);
+  return DOMPurify.sanitize(html);
+};
 </script>
 
 <template>
@@ -230,7 +229,10 @@ onMounted(async () => {
             >{{ message.sender }}</span
           >
           <div class="message-content">
-            <span class="message-text">{{ message.text }}</span>
+            <span
+              class="message-text"
+              v-html="parseMarkdown(message.text)"
+            ></span>
             <span class="timestamp">{{ message.timestamp }}</span>
           </div>
           <!-- 用户头像显示在内容后面 -->
