@@ -469,10 +469,15 @@ const loadMoreReplies = async (comment) => {
         // 将新回复添加到回复列表中
         comment.replies.push(...response.data);
         comment.lastReply = response.data[response.data.length - 1];
+
+        // 如果返回的数据长度大于0且小于5，隐藏按钮
+        if (response.data.length > 0 && response.data.length < 5) {
+          comment.hasMoreReplies = false;
+        }
       } else {
-        // 没有更多回复，隐藏按钮
+        // 没有更多回复，隐藏按钮并提示
         comment.hasMoreReplies = false;
-        ElMessage.warning("没有更多评论回复了");
+        ElMessage.warning("没有更多数据了");
       }
     }
   } catch (error) {
