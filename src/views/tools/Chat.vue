@@ -1,7 +1,7 @@
 <script setup>
 import { ref, nextTick } from "vue";
 import useUserInfoStore from "@/stores/userInfo.js";
-import { invokeChatService } from "@/api/chat.js";
+import { invokeChatService, invokeDeepSeekChat } from "@/api/chat.js";
 
 const userInfoStore = useUserInfoStore();
 
@@ -10,6 +10,8 @@ const newMessage = ref("");
 const sending = ref(false);
 const error = ref(null);
 const loading = ref(false);
+
+const selectedModel = ref("deepseek"); // 默认选择deepseek
 
 const sendMessage = async () => {
   if (newMessage.value.trim() !== "" && !sending.value) {
@@ -26,10 +28,18 @@ const sendMessage = async () => {
     loading.value = true;
 
     try {
-      const gptMessage = await fetchGptResponse(userMessage.text);
+      let gptMessage;
+      if (selectedModel.value === "gpt-4") {
+        // 调用 GPT-4 接口
+        gptMessage = await fetchGptResponse(userMessage.text);
+      } else if (selectedModel.value === "deepseek") {
+        // 调用 DeepSeek 接口
+        gptMessage = await fetchDeepSeekResponse(userMessage.text);
+      }
       addMessage(gptMessage);
     } catch (err) {
       console.error("发送消息失败：", err);
+      error.value = "发送消息失败，请稍后重试。";
     } finally {
       loading.value = false;
     }
@@ -72,6 +82,26 @@ const fetchGptResponse = async (text) => {
     throw new Error(`获取 GPT 响应失败：${error.message}`);
   }
 };
+const fetchDeepSeekResponse = async (text) => {
+  try {
+    const response = await invokeDeepSeekChat(text);
+    console.log(response);
+
+    if (!response || !response.data) {
+      throw new Error("后端响应格式错误：数据为空或缺少 data 字段");
+    }
+
+    return {
+      id: Date.now() + 1,
+      sender: "DeepSeek",
+      text: response.data,
+      timestamp: new Date().toLocaleTimeString(),
+    };
+  } catch (error) {
+    console.error("获取 DeepSeek 响应失败：", error);
+    throw new Error(`获取 DeepSeek 响应失败：${error.message}`);
+  }
+};
 
 const scrollToBottom = () => {
   nextTick(() => {
@@ -95,6 +125,14 @@ const handleKeydown = (event) => {
     <template #header>
       <div class="header">
         <span>AI助手</span>
+        <el-select
+          v-model="selectedModel"
+          placeholder="选择模型"
+          style="margin-left: 20px; width: 150px"
+        >
+          <el-option label="GPT-4" value="gpt-4" />
+          <el-option label="DeepSeek" value="deepseek" />
+        </el-select>
       </div>
     </template>
 
@@ -110,10 +148,12 @@ const handleKeydown = (event) => {
               : 'system-message',
           ]"
         >
-          <!-- GPT-4 的消息显示在内容前面 -->
-          <span class="sender" v-if="message.sender === 'GPT-4'">{{
-            message.sender
-          }}</span>
+          <!-- 消息昵称显示在内容前面 -->
+          <span
+            class="sender"
+            v-if="message.sender === 'GPT-4' || message.sender === 'DeepSeek'"
+            >{{ message.sender }}</span
+          >
           <div class="message-content">
             <span class="message-text">{{ message.text }}</span>
             <span class="timestamp">{{ message.timestamp }}</span>
@@ -165,6 +205,16 @@ const handleKeydown = (event) => {
 </template>
 
 <style lang="scss" scoped>
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  span {
+    font-size: 18px;
+    font-weight: bold;
+  }
+}
 .page-container {
   min-height: 100%;
   width: 100%;
