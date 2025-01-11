@@ -1,7 +1,12 @@
 <script setup>
-import { ref, nextTick } from "vue";
+import { ref, watch, onMounted, nextTick } from "vue";
 import useUserInfoStore from "@/stores/userInfo.js";
-import { invokeChatService, invokeDeepSeekChat } from "@/api/chat.js";
+import {
+  invokeChatService,
+  invokeDeepSeekChat,
+  getChatGptDetail,
+  getDeepSeekChatDetail,
+} from "@/api/chat.js";
 
 const userInfoStore = useUserInfoStore();
 
@@ -10,9 +15,9 @@ const newMessage = ref("");
 const sending = ref(false);
 const error = ref(null);
 const loading = ref(false);
-
 const selectedModel = ref("deepseek"); // 默认选择deepseek
 
+// 发送消息
 const sendMessage = async () => {
   if (newMessage.value.trim() !== "" && !sending.value) {
     if (newMessage.value.length > 200) {
@@ -30,10 +35,8 @@ const sendMessage = async () => {
     try {
       let gptMessage;
       if (selectedModel.value === "gpt-4") {
-        // 调用 GPT-4 接口
         gptMessage = await fetchGptResponse(userMessage.text);
       } else if (selectedModel.value === "deepseek") {
-        // 调用 DeepSeek 接口
         gptMessage = await fetchDeepSeekResponse(userMessage.text);
       }
       addMessage(gptMessage);
@@ -49,6 +52,7 @@ const sendMessage = async () => {
   }
 };
 
+// 创建用户消息
 const createUserMessage = () => {
   return {
     id: Date.now(),
@@ -58,51 +62,49 @@ const createUserMessage = () => {
   };
 };
 
+// 添加消息到聊天记录
 const addMessage = (message) => {
   chatMessages.value.push(message);
   newMessage.value = "";
 };
 
+// 处理 GPT 响应
 const fetchGptResponse = async (text) => {
   try {
     const response = await invokeChatService(text);
-
-    if (!response || !response.data) {
-      throw new Error("后端响应格式错误：数据为空或缺少 data 字段");
-    }
-
-    return {
-      id: Date.now() + 1,
-      sender: "GPT-4",
-      text: response.data,
-      timestamp: new Date().toLocaleTimeString(),
-    };
+    return handleResponse(response, "GPT-4");
   } catch (error) {
     console.error("获取 GPT 响应失败：", error);
     throw new Error(`获取 GPT 响应失败：${error.message}`);
   }
 };
+
+// 处理 DeepSeek 响应
 const fetchDeepSeekResponse = async (text) => {
   try {
     const response = await invokeDeepSeekChat(text);
-    console.log(response);
-
-    if (!response || !response.data) {
-      throw new Error("后端响应格式错误：数据为空或缺少 data 字段");
-    }
-
-    return {
-      id: Date.now() + 1,
-      sender: "DeepSeek",
-      text: response.data,
-      timestamp: new Date().toLocaleTimeString(),
-    };
+    return handleResponse(response, "DeepSeek");
   } catch (error) {
     console.error("获取 DeepSeek 响应失败：", error);
     throw new Error(`获取 DeepSeek 响应失败：${error.message}`);
   }
 };
 
+// 统一处理响应
+const handleResponse = (response, sender) => {
+  if (!response || !response.data) {
+    throw new Error("后端响应格式错误：数据为空或缺少 data 字段");
+  }
+
+  return {
+    id: Date.now() + 1,
+    sender,
+    text: response.data,
+    timestamp: new Date().toLocaleTimeString(),
+  };
+};
+
+// 滚动到底部
 const scrollToBottom = () => {
   nextTick(() => {
     const chatWindow = document.querySelector(".chat-window");
@@ -110,6 +112,7 @@ const scrollToBottom = () => {
   });
 };
 
+// 处理键盘事件
 const handleKeydown = (event) => {
   if (event.key === "Enter" && event.shiftKey) {
     return;
@@ -118,6 +121,65 @@ const handleKeydown = (event) => {
     event.preventDefault();
   }
 };
+
+// 监听模型切换
+watch(selectedModel, async (newModel) => {
+  chatMessages.value = [];
+  try {
+    const response =
+      newModel === "gpt-4"
+        ? await getChatGptDetail()
+        : await getDeepSeekChatDetail();
+    if (response && response.data) {
+      response.data.forEach((message) => {
+        addMessage({
+          id: message.id,
+          sender: userInfoStore.info.userPic,
+          text: message.question,
+          timestamp: message.questionTime,
+        });
+        addMessage({
+          id: message.id + 1,
+          sender: newModel === "gpt-4" ? "GPT-4" : "DeepSeek",
+          text: message.answer,
+          timestamp: message.answerTime,
+        });
+      });
+    }
+  } catch (error) {
+    console.error("获取聊天记录失败：", error);
+    error.value = "获取聊天记录失败，请稍后重试。";
+  }
+});
+
+// 组件加载时获取聊天记录
+onMounted(async () => {
+  try {
+    const response =
+      selectedModel.value === "gpt-4"
+        ? await getChatGptDetail()
+        : await getDeepSeekChatDetail();
+    if (response && response.data) {
+      response.data.forEach((message) => {
+        addMessage({
+          id: message.id,
+          sender: userInfoStore.info.userPic,
+          text: message.question,
+          timestamp: message.questionTime,
+        });
+        addMessage({
+          id: message.id + 1,
+          sender: selectedModel.value === "gpt-4" ? "GPT-4" : "DeepSeek",
+          text: message.answer,
+          timestamp: message.answerTime,
+        });
+      });
+    }
+  } catch (error) {
+    console.error("获取聊天记录失败：", error);
+    error.value = "获取聊天记录失败，请稍后重试。";
+  }
+});
 </script>
 
 <template>
