@@ -17,9 +17,11 @@ const error = ref(null);
 const loading = ref(false);
 const selectedModel = ref("deepseek"); // 默认选择deepseek
 const scrollToInput = () => {
-  if (inputArea.value) {
-    inputArea.value.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  nextTick(() => {
+    if (inputArea.value) {
+      inputArea.value.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
 };
 // 发送消息
 const sendMessage = async () => {
@@ -154,6 +156,9 @@ watch(selectedModel, async (newModel) => {
   } catch (error) {
     console.error("获取聊天记录失败：", error);
     error.value = "获取聊天记录失败，请稍后重试。";
+  } finally {
+    // 模型切换后滚动到输入框
+    scrollToInput();
   }
 });
 
@@ -183,6 +188,9 @@ onMounted(async () => {
   } catch (error) {
     console.error("获取聊天记录失败：", error);
     error.value = "获取聊天记录失败，请稍后重试。";
+  } finally {
+    // 滚动到输入框
+    scrollToInput();
   }
 });
 </script>
