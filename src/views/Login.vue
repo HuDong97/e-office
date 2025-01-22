@@ -201,22 +201,6 @@ const clearRegisterData = () => {
           ></el-input>
         </el-form-item>
 
-        <!-- 添加验证码框和获取验证码按钮 -->
-        <el-form-item prop="captcha" class="captcha-container">
-          <el-input
-            class="captcha-input"
-            placeholder="请输入验证码"
-            v-model="registerData.captcha"
-          ></el-input>
-          <el-button
-            class="captcha-button"
-            :disabled="isButtonDisabled"
-            @click="getCaptcha"
-          >
-            {{ isButtonDisabled ? `${timer}s 后重试` : "获取验证码" }}
-          </el-button>
-        </el-form-item>
-
         <!-- 添加新密码输入框 -->
         <el-form-item prop="password">
           <el-input
@@ -235,6 +219,21 @@ const clearRegisterData = () => {
             placeholder="请确认新密码"
             v-model="registerData.rePassword"
           ></el-input>
+        </el-form-item>
+        <!-- 添加验证码框和获取验证码按钮 -->
+        <el-form-item prop="captcha" class="captcha-container">
+          <el-input
+            class="captcha-input"
+            placeholder="请输入验证码"
+            v-model="registerData.captcha"
+          ></el-input>
+          <el-button
+            class="captcha-button"
+            :disabled="isButtonDisabled"
+            @click="getCaptcha"
+          >
+            {{ isButtonDisabled ? `${timer}s 后重试` : "获取验证码" }}
+          </el-button>
         </el-form-item>
 
         <!-- 提交重置密码请求按钮 -->
@@ -290,21 +289,6 @@ const clearRegisterData = () => {
           ></el-input>
         </el-form-item>
 
-        <el-form-item prop="captcha" class="captcha-container">
-          <el-input
-            class="captcha-input"
-            placeholder="请输入验证码"
-            v-model="registerData.captcha"
-          ></el-input>
-          <el-button
-            class="captcha-button"
-            :disabled="isButtonDisabled"
-            @click="getCaptcha"
-          >
-            {{ isButtonDisabled ? `${timer}s 后重试` : "获取验证码" }}
-          </el-button>
-        </el-form-item>
-
         <el-form-item prop="password">
           <el-input
             :prefix-icon="Lock"
@@ -320,6 +304,21 @@ const clearRegisterData = () => {
             placeholder="请输入再次密码"
             v-model="registerData.rePassword"
           ></el-input>
+        </el-form-item>
+
+        <el-form-item prop="captcha" class="captcha-container">
+          <el-input
+            class="captcha-input"
+            placeholder="请输入验证码"
+            v-model="registerData.captcha"
+          ></el-input>
+          <el-button
+            class="captcha-button"
+            :disabled="isButtonDisabled"
+            @click="getCaptcha"
+          >
+            {{ isButtonDisabled ? `${timer}s 后重试` : "获取验证码" }}
+          </el-button>
         </el-form-item>
         <el-form-item>
           <el-button
@@ -338,7 +337,7 @@ const clearRegisterData = () => {
               isRegister = false;
               clearRegisterData();
             "
-            >← 返回</el-link
+            >← 返回登录</el-link
           >
         </el-form-item>
       </el-form>
