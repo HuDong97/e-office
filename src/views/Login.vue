@@ -124,6 +124,8 @@ const register = async () => {
       code: registerData.value.captcha,
     });
     ElMessage.success("注册成功");
+    isRegister.value = false; // 注册成功后跳转到登录表单
+    clearRegisterData(); // 清空注册表单数据
   } catch (error) {
     ElMessage.error(result.message ? result.message : "注册失败");
   }
