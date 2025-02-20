@@ -66,6 +66,7 @@ const onCurrentChange = (num) => {
 
 // 获取文章分类列表
 const articleCategoryList = async () => {
+  articleList();
   let result = await articleCategoryListService();
   categorys.value = result.data;
 };
