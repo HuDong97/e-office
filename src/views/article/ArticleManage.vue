@@ -285,30 +285,35 @@ const resetAndSearch = () => {
         <el-table-column label="状态" prop="state"></el-table-column>
         <el-table-column label="操作" width="150">
           <template #default="{ row }">
-            <el-button
-              :icon="Reading"
-              circle
-              plain
-              type="success"
-              @click="viewArticleDetails(row)"
-              title="查看文章"
-            ></el-button>
-            <el-button
-              :icon="Edit"
-              circle
-              plain
-              type="primary"
-              @click="showDrewer(row)"
-              title="修改文章"
-            ></el-button>
-            <el-button
-              :icon="Delete"
-              circle
-              plain
-              type="danger"
-              @click="deleteArticle(row)"
-              title="删除文章"
-            ></el-button>
+            <el-tooltip content="查看文章" popper-class="custom-tooltip">
+              <el-button
+                :icon="Reading"
+                circle
+                plain
+                type="success"
+                @click="viewArticleDetails(row)"
+              ></el-button>
+            </el-tooltip>
+
+            <el-tooltip content="修改文章" popper-class="custom-tooltip">
+              <el-button
+                :icon="Edit"
+                circle
+                plain
+                type="primary"
+                @click="showDrewer(row)"
+              ></el-button>
+            </el-tooltip>
+
+            <el-tooltip content="删除文章" popper-class="custom-tooltip">
+              <el-button
+                :icon="Delete"
+                circle
+                plain
+                type="danger"
+                @click="deleteArticle(row)"
+              ></el-button>
+            </el-tooltip>
           </template>
         </el-table-column>
 
