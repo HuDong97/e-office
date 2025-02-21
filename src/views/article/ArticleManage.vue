@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import { onMounted } from "vue";
 import { Edit, Delete, Reading, Plus } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { QuillEditor } from "@vueup/vue-quill";
@@ -66,9 +67,14 @@ const onCurrentChange = (num) => {
 
 // 获取文章分类列表
 const articleCategoryList = async () => {
-  let result = await articleCategoryListService();
-  categorys.value = result.data;
-  articleList();
+  try {
+    let result = await articleCategoryListService();
+    categorys.value = result.data;
+    articleList();
+  } catch (error) {
+    ElMessage.error("获取分类列表失败，请稍后重试");
+    console.error(error);
+  }
 };
 
 // 获取文章列表数据
@@ -212,7 +218,9 @@ const formatDate = (timestamp) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
-articleCategoryList();
+onMounted(() => {
+  articleCategoryList();
+});
 articleList();
 
 const resetAndSearch = () => {
